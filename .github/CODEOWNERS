@@ -1,0 +1,7 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+# Order is important; the last matching pattern takes the most
+# precedence.
+
+# This is owned by global-eagle-admins
+* @noaa-epic/global-eagle-admins
