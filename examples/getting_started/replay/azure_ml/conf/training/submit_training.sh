@@ -22,5 +22,5 @@ anemoi-training train --config-name=config.yaml
 cp -R /workdir/training_output/* $OUTPUT_DIR
 echo "Model output saved to: $OUTPUT_DIR"
 
-# TODO: This should formally log within azureml somehow. 
+# TODO: This should formally log within azureml.
 # As of right now, we are just saving everything to blob storage and loading it from there later.

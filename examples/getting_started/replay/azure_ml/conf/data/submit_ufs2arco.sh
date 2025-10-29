@@ -9,9 +9,4 @@ echo "Output zarr: $OUTPUT_ZARR"
 mkdir -p $OUTPUT_PATH
 ln -s $OUTPUT_BLOB "$OUTPUT_PATH/$OUTPUT_ZARR"
 
-export OMPI_COMM_WORLD_SIZE=8
-export OMPI_COMM_WORLD_RANK=0
-export RANK=0
-export WORLD_SIZE=8
-
-mpirun -np 8 ufs2arco replay.yaml
+mpirun --allow-run-as-root -np 8 ufs2arco replay.yaml
