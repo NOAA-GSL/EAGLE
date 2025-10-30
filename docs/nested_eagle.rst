@@ -7,11 +7,12 @@ with High Resolution Rapid Refresh (HRRR) data over the Contiguous United States
 This builds on previous work from Met Norway (Nipen et al., 2024, arXiv:2409.02891) by creating a 
 nested model with lower resolution global data and high resolution over an area of interest.
 
+TODO - Insert image of nested domain here.
+
+Nested-eagle configurations were created by Tim Smith at NOAA Physical Sciences Laboratory.
 
 Training Data
 ------------------
-
-TODO - Insert image of nested domain here.
 
 Datasets:
 

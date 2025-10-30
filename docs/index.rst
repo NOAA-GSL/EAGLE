@@ -12,6 +12,7 @@ Table of Contents
    :maxdepth: 1
    :caption: Full Pipeline
 
+   pipeline_overview
    data_creation
    train_a_model
    inference

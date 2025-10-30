@@ -2,7 +2,7 @@
 Overview of Full Pipeline
 =================
 
-You will learn how to complete a full machine learning pipeline for weather prediction!
+An end-to-end machine learning pipeline for weather prediction.
 
 The steps of this pipeline include:
 

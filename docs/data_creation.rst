@@ -1,5 +1,5 @@
 =================
-Create Training Data
+Dataset Creation
 =================
 
 We use ufs2arco to generate training, validation, and test datasets. The ufs2arco library helps preprocess weather data and makes it ready to be used to train a machine learning model.
@@ -67,6 +67,8 @@ ufs2arco recipe.yaml
 ```
 
 For further information see the ufs2arco `github <https://ufs2arco.readthedocs.io/en/latest/>`_ or `documentation <https://ufs2arco.readthedocs.io/en/latest/>`_
+
+ufs2arco was created by Tim Smith at NOAA Physical Sciences Laboratory.
 
 Helpful quick tips for ufs2arco
 ------------------

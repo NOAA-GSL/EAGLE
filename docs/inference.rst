@@ -1,5 +1,5 @@
 =================
-Inference
+Create a Forecast
 =================
 
 We use the anemoi-inference package to create a forecast.
