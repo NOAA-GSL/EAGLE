@@ -22,7 +22,7 @@ jobs:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
      - name: Submit Initial Grids
        run: |
-         cd nested_eagle/scientific_workflow/ursa/data
+         cd nested_eagle/ursa/scientific_workflow/data
 
          JOB_ID=$(sbatch submit_grids.sh | awk '{print $4}')
             echo "Submitted Slurm job with ID: $JOB_ID"
@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Generate GFS & HRRR Forecasts
         run: |
-         cd nested_eagle/scientific_workflow/ursa/data
+         cd nested_eagle/ursa/scientific_workflow/data
          echo "Slurm jobs to generate the GFS & HRRR forecasts have completed."
          
          JOB_ID1=$(sbatch submit_gfs.sh | awk '{print $4}')
@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Run Training Against the Generated Forecasts
         run: |
-         cd nested_eagle/scientific_workflow/ursa/training
+         cd nested_eagle/ursa/scientific_workflow/training
          
          JOB_ID=$(sbatch submit_training.sh | awk '{print $4}')
          CHECKPOINT="$PWD/outputs/checkpoint"
@@ -87,7 +87,7 @@ jobs:
     steps:
       - name: Run Inference against the training data
         run: |
-          cd nested_eagle/scientific_workflow/ursa/inference
+          cd nested_eagle/ursa/scientific_workflow/inference
 
           JOB_ID=$(sbatch submit_inference.sh | awk '{print $4}')
         
@@ -108,7 +108,7 @@ jobs:
     steps:
       - name: Perform validation against the results
         run: |
-          cd nested_eagle/scientific_workflow/ursa/validation
+          cd nested_eagle/ursa/scientific_workflow/validation
 
           JOB_ID=$(sbatch submit_validation.sh | awk '{print $4}')
         
