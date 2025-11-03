@@ -41,20 +41,20 @@ jobs:
     steps:
       - name: Generate GFS & HRRR Forecasts
         run: |
-          cd nested_eagle/ursa/scientific_workflow/data
-          echo "Slurm jobs to generate the GFS & HRRR forecasts have completed."
-
-          JOB_ID1=$(sbatch submit_gfs.sh | awk '{print $4}')
-          JOB_ID2=$(sbatch submit_hrrr.sh | awk '{print $4}')
-
-             echo "Submitted Slurm job with ID: $JOB_ID1"
-             echo "Submitted Slurm job with ID: $JOB_ID2"
-             while squeue -h -j ${JOB_ID1},${JOB_ID2} | grep -q "${JOB_ID1}\|${JOB_ID2}"; do
-                squeue -u $USER
-                sleep 30  # Wait for 30 seconds before checking again.
-             done
-             
-             echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to generate the GFS & HRRR forecasts have completed."
+         cd nested_eagle/ursa/scientific_workflow/data
+         echo "Slurm jobs to generate the GFS & HRRR forecasts have completed."
+         
+         JOB_ID1=$(sbatch submit_gfs.sh | awk '{print $4}')
+         JOB_ID2=$(sbatch submit_hrrr.sh | awk '{print $4}')
+         
+            echo "Submitted Slurm job with ID: $JOB_ID1"
+            echo "Submitted Slurm job with ID: $JOB_ID2"
+            while squeue -h -j ${JOB_ID1},${JOB_ID2} | grep -q "${JOB_ID1}\|${JOB_ID2}"; do
+               squeue -j ${JOB_ID1},${JOB_ID2}
+               sleep 30  # Wait for 30 seconds before checking again.
+            done
+            
+            echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to generate the GFS & HRRR forecasts have completed."
   Run_Training:
     # The type of runner that the job will run on
     runs-on: ursa
@@ -63,20 +63,20 @@ jobs:
     steps:
       - name: Run Training Against the Generated Forecasts
         run: |
-          cd nested_eagle/ursa/scientific_workflow/training
+         cd nested_eagle/ursa/scientific_workflow/training
+         
+         JOB_ID=$(sbatch submit_training.sh | awk '{print $4}')
+         CHECKPOINT="$PWD/outputs/checkpoint"
 
-          JOB_ID=$(sbatch submit_training.sh | awk '{print $4}')
-          CHECKPOINT="$PWD/outputs/checkpoint"
-
-          echo "Submitted Slurm job with ID: $JOB_ID"
-           while [ ! -d "$CHECKPOINT" ]; do
-             echo "Directory '$CHECKPOINT' doesn't exist yet."
-             squeue -u $USER
-             sleep 30  # Wait for 30 seconds before checking again.
-           done
-             scancel $JOB_ID
-             
-           echo "Slurm job to train the data has been completed."
+         echo "Submitted Slurm job with ID: $JOB_ID"
+          while [ ! -d "$CHECKPOINT" ]; do
+            echo "Directory '$CHECKPOINT' doesn't exist yet."
+            if [[ -n $JOB_ID ]]; then squeue -j $JOB_ID; fi
+            sleep 30  # Wait for 30 seconds before checking again.
+          done
+            scancel $JOB_ID
+            
+          echo "Slurm job to train the data has been completed."  
 
   Run_Inference:
     # The type of runner that the job will run on
@@ -93,7 +93,7 @@ jobs:
             echo "Submitted Inference Slurm job with ID: $JOB_ID"
            
             while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
-               squeue -u $USER
+               squeue -j $JOB_ID
                sleep 30  # Wait for 30 seconds before checking again.
             done
 
@@ -116,7 +116,7 @@ jobs:
             echo "Submitted Validation Slurm job with ID: $JOB_ID"
            
             while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
-               squeue -u $USER
+               squeue -j $JOB_ID
                sleep 30  # Wait for 30 seconds before checking again.
             done
              
