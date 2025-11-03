@@ -109,6 +109,8 @@ jobs:
       - name: Perform inference postprocessing 
         run: |
           cd nested_eagle/ursa/scientific_workflow/validation
+
+          mkdir -p postprocessed_files/lam
               
           JOB_ID=$(sbatch submit_postprocessing.sh | awk '{print $4}')
             
