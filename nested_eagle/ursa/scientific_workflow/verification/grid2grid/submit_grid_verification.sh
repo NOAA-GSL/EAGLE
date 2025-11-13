@@ -7,7 +7,7 @@
 #SBATCH --mem=128g
 #SBATCH -t 01:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
+#SBATCH --ntasks=4
 
 # shellcheck disable=SC1091
 source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
@@ -19,5 +19,5 @@ export WORKDIR_BASE_PATH=$PWD
 sed -i "/^.*workdir:.*$/c\  workdir: $WORKDIR_BASE_PATH\/wxvx_workdir\/lam" wxvx_lam.yaml
 sed -i "/^.*workdir:.*$/c\  workdir: $WORKDIR_BASE_PATH\/wxvx_workdir\/global" wxvx_global.yaml
 
-wxvx -c wxvx_lam.yaml -t plots
-wxvx -c wxvx_global.yaml -t plots
+srun wxvx -c wxvx_lam.yaml -t plots -n 4
+srun wxvx -c wxvx_global.yaml -t plots -n 4
