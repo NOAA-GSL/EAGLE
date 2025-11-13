@@ -19,5 +19,5 @@ export WORKDIR_BASE_PATH=$PWD
 sed -i "/^.*workdir:.*$/c\  workdir: $WORKDIR_BASE_PATH\/wxvx_workdir\/lam" wxvx_lam.yaml
 sed -i "/^.*workdir:.*$/c\  workdir: $WORKDIR_BASE_PATH\/wxvx_workdir\/global" wxvx_global.yaml
 
-srun wxvx -c wxvx_lam.yaml -t plots -n 4
-srun wxvx -c wxvx_global.yaml -t plots -n 4
+srun wxvx -c wxvx_lam.yaml -t plots
+srun wxvx -c wxvx_global.yaml -t plots
