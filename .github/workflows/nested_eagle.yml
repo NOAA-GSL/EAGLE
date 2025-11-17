@@ -179,7 +179,6 @@ jobs:
           echo "Inference stage completed."
 
   Perform_Inference_Postprocessing:
-     cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/inference"# The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
     needs: Run_Inference
@@ -187,7 +186,7 @@ jobs:
       - name: Perform inference postprocessing
         run: |
           set -euo pipefail
-          cd nested_eagle/ursa/scientific_workflow/verification/prewxvx
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/prewxvx" 
 
           mkdir -p postprocessed_files/lam
           mkdir -p postprocessed_files/global
