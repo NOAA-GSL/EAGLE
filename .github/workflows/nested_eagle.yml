@@ -66,7 +66,18 @@ jobs:
             sbatch "$script" | awk '{print $4}'
           }
 
-          # Now takes two args: <job_id> <label>
+          # Print a best-effort current state for a job (PENDING/RUNNING/...)
+          job_state() {
+            local id="$1"
+            # Prefer squeue (live queue view); fall back to sacct if not listed
+            local st
+            st=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+            if [ -z "$st" ]; then
+              st=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+            fi
+            echo "${st:-UNKNOWN}"
+          }
+
           wait_terminal() {
             local id="$1"
             local label="$2"
@@ -85,14 +96,16 @@ jobs:
 
           JOB_ID1=$(submit_job submit_gfs.sh)
           JOB_ID2=$(submit_job submit_hrrr.sh)
-          echo "Submitted GFS: $JOB_ID1"
-          echo "Submitted HRRR: $JOB_ID2"
+
+          STATUS1=$(job_state "$JOB_ID1")
+          STATUS2=$(job_state "$JOB_ID2")
+          echo "Submitted GFS:  $JOB_ID1 (status: ${STATUS1})"
+          echo "Submitted HRRR: $JOB_ID2 (status: ${STATUS2})"
 
           wait_terminal "$JOB_ID1" "GFS"
           wait_terminal "$JOB_ID2" "HRRR"
 
           echo "GFS & HRRR training data preparation completed."
-
 
   Run_Training:
     # The type of runner that the job will run on
@@ -227,16 +240,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2obs"
-          JOB_ID1=$(sbatch submit_obs_verification.sh | awk '{print $4}')
+          # Live-state helper: prefer squeue; fallback to sacct
+          job_state() {
+            local id="$1"
+            local st
+            st=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+            if [ -z "$st" ]; then
+              st=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+            fi
+            echo "${st:-UNKNOWN}"
+          }
 
-          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2grid"
-          JOB_ID2=$(sbatch submit_grid_verification.sh | awk '{print $4}')
-
-          echo "Submitted grid2obs: $JOB_ID1"
-          echo "Submitted grid2grid: $JOB_ID2"
-
-          # Now takes two args: <job_id> <label>
+          # Terminal-state wait with label
           wait_terminal() {
             local id="$1"
             local label="$2"
@@ -252,6 +267,17 @@ jobs:
               sleep 20
             done
           }
+
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2obs"
+          JOB_ID1=$(sbatch submit_obs_verification.sh | awk '{print $4}')
+
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2grid"
+          JOB_ID2=$(sbatch submit_grid_verification.sh | awk '{print $4}')
+
+          STATUS1=$(job_state "$JOB_ID1")
+          STATUS2=$(job_state "$JOB_ID2")
+          echo "Submitted grid2obs:  $JOB_ID1 (status: ${STATUS1})"
+          echo "Submitted grid2grid: $JOB_ID2 (status: ${STATUS2})"
 
           wait_terminal "$JOB_ID1" "Grid2Obs"
           wait_terminal "$JOB_ID2" "Grid2Grid"
