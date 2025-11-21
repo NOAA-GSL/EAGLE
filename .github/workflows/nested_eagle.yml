@@ -112,8 +112,8 @@ jobs:
 
           # Wait for either a checkpoint to appear, or terminal state
           while true; do
-            if [ -d "$CHECKPOINT_DIR" ] && [ -n "$(ls -A "$CHECKPOINT_DIR" 2>/dev/null || true)" ]; then
-              echo "Checkpoint detected at $CHECKPOINT_DIR — stopping training."
+            if [ -d "$CHECKPOINT_DIR" ]; then
+              echo "Checkpoint directory detected at $CHECKPOINT_DIR — stopping training."
               scancel "$JOB_ID" || true
               sleep 10
               break
