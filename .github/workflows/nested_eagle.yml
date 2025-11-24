@@ -66,10 +66,9 @@ jobs:
             sbatch "$script" | awk '{print $4}'
           }
 
-          # Print a best-effort current state for a job (PENDING/RUNNING/...)
+          # Best-effort current state right after submission
           job_state() {
             local id="$1"
-            # Prefer squeue (live queue view); fall back to sacct if not listed
             local st
             st=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
             if [ -z "$st" ]; then
@@ -78,18 +77,32 @@ jobs:
             echo "${st:-UNKNOWN}"
           }
 
+          # Verbose wait: log PENDING/RUNNING transitions, then terminal state
           wait_terminal() {
             local id="$1"
             local label="$2"
+            local prev=""
             while true; do
-              STATE=$(sacct -j "$id" --format=State --noheader | head -n1 | awk '{print $1}')
-              case "${STATE:-}" in
+              local live state
+              live=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+              if [ -n "$live" ]; then
+                state="$live"
+              else
+                state=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+                state="${state:-UNKNOWN}"
+              fi
+
+              if [ "$state" != "$prev" ]; then
+                echo "${label} (${id}) state: ${state}"
+                prev="$state"
+              fi
+
+              case "$state" in
                 COMPLETED) echo "${label} (${id}) COMPLETED"; break ;;
                 FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
-                  echo "${label} (${id}) terminal failure: ${STATE}"; exit 1 ;;
-                ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
-                *) echo "${label} (${id}) state: ${STATE}" ;;
+                  echo "${label} (${id}) terminal failure: ${state}"; exit 1 ;;
               esac
+
               sleep 20
             done
           }
@@ -240,7 +253,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Live-state helper: prefer squeue; fallback to sacct
+          # Best-effort current state right after submission
           job_state() {
             local id="$1"
             local st
@@ -251,19 +264,32 @@ jobs:
             echo "${st:-UNKNOWN}"
           }
 
-          # Terminal-state wait with label
+          # Verbose wait: log PENDING/RUNNING transitions, then terminal state
           wait_terminal() {
             local id="$1"
             local label="$2"
+            local prev=""
             while true; do
-              STATE=$(sacct -j "$id" --format=State --noheader | head -n1 | awk '{print $1}')
-              case "${STATE:-}" in
+              local live state
+              live=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+              if [ -n "$live" ]; then
+                state="$live"
+              else
+                state=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+                state="${state:-UNKNOWN}"
+              fi
+
+              if [ "$state" != "$prev" ]; then
+                echo "${label} (${id}) state: ${state}"
+                prev="$state"
+              fi
+
+              case "$state" in
                 COMPLETED) echo "${label} (${id}) COMPLETED"; break ;;
                 FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
-                  echo "${label} (${id}) terminal failure: ${STATE}"; exit 1 ;;
-                ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
-                *) echo "${label} (${id}) state: ${STATE}" ;;
+                  echo "${label} (${id}) terminal failure: ${state}"; exit 1 ;;
               esac
+
               sleep 20
             done
           }
@@ -291,6 +317,7 @@ jobs:
           find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; }
           find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; }
           echo "Grid2grid verification completed."
+
 
       - name: Remove label from pull request
         if: always()
