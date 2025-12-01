@@ -2,10 +2,10 @@
 
 # EAGLE Runtime Build
 
-To build the EAGLE runtime in the current directory:
+To build the EAGLE runtime, `cd` to the appropriate directory, then execute the `build` script accompanying this document:
 
 ``` bash
-./build
+/path/to/build
 ```
 
 When the build completes successfully, activate the virtual environment:
