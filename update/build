@@ -24,14 +24,6 @@ packages=(
 
 runtime=$PWD/runtime
 
-# Load CUDA.
-
-cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
-test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
-echo Loading $cudamod
-cudacmd="module load $cudamod"
-$cudacmd
-
 # Install uv.
 
 curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
@@ -40,29 +32,37 @@ curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runti
 
 $runtime/bin/uv python install $python --install-dir $runtime/opt --no-bin --no-cache
 
-# Create, activate, and update virtual environment.
+# Create empty virtual environment.
 
 $(find $runtime/opt -type f -name python$python) -m venv $runtime/env
+
+# Create extra-setup shell fragment and arrange for activation to execute it.
+
+cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
+test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
 activate=$runtime/env/bin/activate
 extra=$activate.extra
 cat <<EOF >$extra
-$cudacmd
+module load $cudamod
 export XDG_CACHE_HOME=\$(readlink -f \$(dirname \${BASH_SOURCE[0]})/../../)/var/cache
 EOF
 extracmd="source $(basename $extra)"
 grep -q "$extracmd" $activate || echo $extracmd >>$activate
+
+# Activate the virtual environment.
+
 source $activate
+
+# Install or upgrade core packages in the virtual environment.
+
 python -m pip install pip --upgrade
+python -m pip install ${packages[*]}
 
-# Install core packages.
-
-python -m pip install ${packages[@]}
-
-# Install uwtools from git.
+# Install uwtools (via git) in virtual environment.
 
 python -m pip install "git+https://github.com/ufs-community/uwtools@v$uwtools#subdirectory=src"
 
-# Install flash-attention.
+# Install flash-attention in the virtual environment.
 
 cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
 py=$(python --version | sed -E 's/Python ([0-9]+)\.([0-9]+)\..*/\1\2/')
