@@ -23,15 +23,15 @@ python -m pip install pip --upgrade
 # Install core packages.
 
 packages=(
-  'earthkit-data<0.14.0'
-  'numpy<2.3'
+#   'earthkit-data<0.14.0'
+#   'numpy<2.3'
   anemoi-datasets==0.5.25
   anemoi-graphs==0.6.2
   anemoi-inference==0.6.3
   anemoi-models==0.8.1
   anemoi-training==0.5.1
-  mpi4py
-  trimesh
+#   mpi4py
+#   trimesh
 )
 python -m pip install ${packages[@]}
 
@@ -41,5 +41,5 @@ python -m pip install "git+https://github.com/ufs-community/uwtools@v2.12.0#subd
 
 # Install flash-attention:
 
-module load cuda/12.8.1
-python -m pip install flash-attn --no-build-isolation
+# module load cuda/12.8.1
+# python -m pip install flash-attn --no-build-isolation
