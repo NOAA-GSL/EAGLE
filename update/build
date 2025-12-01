@@ -2,11 +2,10 @@
 
 set -eu
 
-# Define variables:
+# Define tool and package versions:
 
 flash_attn=2.8.3
 python=3.12
-runtime=$PWD/runtime
 torch=2.8
 uv=0.9.13
 uwtools=2.12.0
@@ -26,21 +25,23 @@ packages=(
 cudamod=$(module --terse spider cuda | sort -n | tail -n1)
 test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
 echo Loading $cudamod
-module load $cudamod
+cudacmd="module load $cudamod"
+$cudacmd
 
 # Install uv.
 
-curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
+curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=runtime/bin sh
 
 # Install Python.
 
-$runtime/bin/uv python install $python --install-dir $runtime/opt --no-bin --no-cache
+runtime/bin/uv python install $python --install-dir runtime/opt --no-bin --no-cache
 
 # Create, activate, and update virtual environment.
 
-$(find $runtime/opt -type f -name python$python) -m venv $runtime/env
-source $runtime/env/bin/activate
-export XDG_CACHE_HOME=$runtime/var/cache
+$(find runtime/opt -type f -name python$python) -m venv runtime/env
+echo $cudacmd >>runtime/env/bin/activate
+source runtime/env/bin/activate
+export XDG_CACHE_HOME=runtime/var/cache
 python -m pip install pip --upgrade
 
 # Install core packages.
