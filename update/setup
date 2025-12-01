@@ -6,48 +6,65 @@ fail() { echo $1 && exit 1; }
 
 install() {
 
-  local cudamod packages pyrelease runtime
+  # Define variables:
 
-  cudamod=$(module --terse spider cuda | sort -n | tail -n1)
+  local flash_attn=2.8.3
+  local python=3.12
+  local runtime=$PWD/runtime
+  local torch=2.8
+  local uv=0.9.13
+  local uwtools=2.12.0
+
+  local packages=(
+    anemoi-datasets==0.5.*
+    anemoi-graphs==0.6.*
+    anemoi-inference==0.6.*
+    anemoi-models==0.8.*
+    anemoi-training==0.5.*
+    torch==$torch.*
+    ufs2arco==0.17.*
+  )
+
+  # Load CUDA:
+
+  local cuda_module=$(module --terse spider cuda | sort -n | tail -n1)
   test -z "${codamod:-}" && fail "Found no CUDA module to load"
-  pyrelease=3.12
-  runtime=$PWD/runtime
+  echo Loading $cuda_module
+  module load $cuda_module
 
-  # Install uv.
+  # Install uv:
 
-  curl -LsSf https://astral.sh/uv/0.9.13/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
+  curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
 
-  # Install Python via uv.
+  # Install Python:
 
-  $runtime/bin/uv python install $pyrelease --install-dir $runtime/opt --no-bin --no-cache
+  $runtime/bin/uv python install $python --install-dir $runtime/opt --no-bin --no-cache
 
   # Create, activate, and update virtual environment.
 
-  $(find $runtime/opt -type f -name python$pyrelease) -m venv $runtime/env
+  $(find $runtime/opt -type f -name python$python) -m venv $runtime/env
   source $runtime/env/bin/activate
   export XDG_CACHE_HOME=$runtime/var/cache
   python -m pip install pip --upgrade
 
   # Install core packages.
 
-  packages=(
-    anemoi-datasets==0.5.*
-    anemoi-graphs==0.6.*
-    anemoi-inference==0.6.*
-    anemoi-models==0.8.*
-    anemoi-training==0.5.*
-    ufs2arco==0.17.*
-  )
   python -m pip install ${packages[@]}
 
   # Install uwtools from git.
 
-  python -m pip install "git+https://github.com/ufs-community/uwtools@v2.12.0#subdirectory=src"
+  python -m pip install "git+https://github.com/ufs-community/uwtools@v$uwtools#subdirectory=src"
 
   # Install flash-attention:
 
-  echo Loading $cudamod
-  python -m pip install flash-attn --no-build-isolation
+  local proc=$(uname -p)
+  local cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
+  local py=$(python --version | sed -E 's/Python ([0-9]+)\.([0-9]+)\..*/\1\2/')
+  local fn=flash_attn-${flash_attn}+cu${cu}torch${torch}cxx11abiTRUE-cp${py}-cp${py}-linux_${proc}.whl
+  local url=https://github.com/Dao-AILab/flash-attention/releases/download/v${flash_attn}/$fn
+  set -x
+  python -m pip install $url
+  # python -m pip install flash-attn --no-build-isolation
 }
 
 install
