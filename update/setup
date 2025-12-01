@@ -2,65 +2,60 @@
 
 set -eu
 
-install() {
+# Define variables:
 
-  # Define variables:
+flash_attn=2.8.3
+python=3.12
+runtime=$PWD/runtime
+torch=2.8
+uv=0.9.13
+uwtools=2.12.0
 
-  local flash_attn=2.8.3
-  local python=3.12
-  local runtime=$PWD/runtime
-  local torch=2.8
-  local uv=0.9.13
-  local uwtools=2.12.0
+packages=(
+  anemoi-datasets==0.5.*
+  anemoi-graphs==0.6.*
+  anemoi-inference==0.6.*
+  anemoi-models==0.8.*
+  anemoi-training==0.5.*
+  torch==$torch.*
+  ufs2arco==0.17.*
+)
 
-  local packages=(
-    anemoi-datasets==0.5.*
-    anemoi-graphs==0.6.*
-    anemoi-inference==0.6.*
-    anemoi-models==0.8.*
-    anemoi-training==0.5.*
-    torch==$torch.*
-    ufs2arco==0.17.*
-  )
+# Load CUDA:
 
-  # Load CUDA:
+cudamod=$(module --terse spider cuda | sort -n | tail -n1)
+test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
+echo Loading $cudamod
+module load $cudamod
 
-  local cudamod=$(module --terse spider cuda | sort -n | tail -n1)
-  test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
-  echo Loading $cudamod
-  module load $cudamod
+# Install uv:
 
-  # Install uv:
+curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
 
-  curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
+# Install Python:
 
-  # Install Python:
+$runtime/bin/uv python install $python --install-dir $runtime/opt --no-bin --no-cache
 
-  $runtime/bin/uv python install $python --install-dir $runtime/opt --no-bin --no-cache
+# Create, activate, and update virtual environment.
 
-  # Create, activate, and update virtual environment.
+$(find $runtime/opt -type f -name python$python) -m venv $runtime/env
+source $runtime/env/bin/activate
+export XDG_CACHE_HOME=$runtime/var/cache
+python -m pip install pip --upgrade
 
-  $(find $runtime/opt -type f -name python$python) -m venv $runtime/env
-  source $runtime/env/bin/activate
-  export XDG_CACHE_HOME=$runtime/var/cache
-  python -m pip install pip --upgrade
+# Install core packages.
 
-  # Install core packages.
+python -m pip install ${packages[@]}
 
-  python -m pip install ${packages[@]}
+# Install uwtools from git.
 
-  # Install uwtools from git.
+python -m pip install "git+https://github.com/ufs-community/uwtools@v$uwtools#subdirectory=src"
 
-  python -m pip install "git+https://github.com/ufs-community/uwtools@v$uwtools#subdirectory=src"
+# Install flash-attention:
 
-  # Install flash-attention:
-
-  local proc=$(uname -p)
-  local cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
-  local py=$(python --version | sed -E 's/Python ([0-9]+)\.([0-9]+)\..*/\1\2/')
-  local fn=flash_attn-${flash_attn}+cu${cu}torch${torch}cxx11abiTRUE-cp${py}-cp${py}-linux_${proc}.whl
-  local url=https://github.com/Dao-AILab/flash-attention/releases/download/v${flash_attn}/$fn
-  python -m pip install $url
-}
-
-install
+proc=$(uname -p)
+cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
+py=$(python --version | sed -E 's/Python ([0-9]+)\.([0-9]+)\..*/\1\2/')
+fn=flash_attn-${flash_attn}+cu${cu}torch${torch}cxx11abiTRUE-cp${py}-cp${py}-linux_${proc}.whl
+url=https://github.com/Dao-AILab/flash-attention/releases/download/v${flash_attn}/$fn
+python -m pip install $url
