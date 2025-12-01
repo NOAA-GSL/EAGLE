@@ -22,7 +22,7 @@ packages=(
 
 # Load CUDA.
 
-cudamod=$(module --terse spider cuda | sort -n | tail -n1)
+cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
 test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
 echo Loading $cudamod
 cudacmd="module load $cudamod"
