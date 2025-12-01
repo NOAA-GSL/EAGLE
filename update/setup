@@ -29,13 +29,14 @@ install() {
   packages=(
     #   'earthkit-data<0.14.0'
     #   'numpy<2.3'
-    anemoi-datasets==0.5.25
-    anemoi-graphs==0.6.2
-    anemoi-inference==0.6.3
-    anemoi-models==0.8.1
-    anemoi-training==0.5.1
     #   mpi4py
     #   trimesh
+    anemoi-datasets==0.5.*
+    anemoi-graphs==0.6.*
+    anemoi-inference==0.6.*
+    anemoi-models==0.8.*
+    anemoi-training==0.5.*
+    ufs2arco==0.17.*
   )
   python -m pip install ${packages[@]}
 
