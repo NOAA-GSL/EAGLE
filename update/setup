@@ -21,18 +21,18 @@ packages=(
   ufs2arco==0.17.*
 )
 
-# Load CUDA:
+# Load CUDA.
 
 cudamod=$(module --terse spider cuda | sort -n | tail -n1)
 test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
 echo Loading $cudamod
 module load $cudamod
 
-# Install uv:
+# Install uv.
 
 curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
 
-# Install Python:
+# Install Python.
 
 $runtime/bin/uv python install $python --install-dir $runtime/opt --no-bin --no-cache
 
@@ -51,7 +51,7 @@ python -m pip install ${packages[@]}
 
 python -m pip install "git+https://github.com/ufs-community/uwtools@v$uwtools#subdirectory=src"
 
-# Install flash-attention:
+# Install flash-attention.
 
 proc=$(uname -p)
 cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
