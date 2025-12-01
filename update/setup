@@ -2,12 +2,16 @@
 
 set -eu
 
+fail() { echo $1 && exit 1; }
+
 install() {
 
-  local packages pyrelease runtime
+  local cudamod packages pyrelease runtime
 
-  runtime=$PWD/runtime
+  cudamod=$(module --terse spider cuda | sort -n | tail -n1)
+  test -z "${codamod:-}" && fail "Found no CUDA module to load"
   pyrelease=3.12
+  runtime=$PWD/runtime
 
   # Install uv.
 
@@ -27,10 +31,6 @@ install() {
   # Install core packages.
 
   packages=(
-    #   'earthkit-data<0.14.0'
-    #   'numpy<2.3'
-    #   mpi4py
-    #   trimesh
     anemoi-datasets==0.5.*
     anemoi-graphs==0.6.*
     anemoi-inference==0.6.*
@@ -46,8 +46,8 @@ install() {
 
   # Install flash-attention:
 
-  # module load cuda/12.8.1
-  # python -m pip install flash-attn --no-build-isolation
+  echo Loading $cudamod
+  python -m pip install flash-attn --no-build-isolation
 }
 
 install
