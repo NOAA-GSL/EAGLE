@@ -2,9 +2,11 @@
 
 set -aeu
 
+INSTALLDIR=$PWD/eagle
+
 conda_activate() {
   local env=$1
-  source conda/etc/profile.d/conda.sh
+  source $INSTALLDIR/etc/profile.d/conda.sh
   conda activate $env
 }
 
@@ -95,7 +97,7 @@ conda_install() {
   local installer=Miniforge3-$ver-Linux-$(uname -p).sh
   local url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
   wget -nv $url
-  bash $installer -bfp conda
+  bash $installer -bfp $INSTALLDIR
   rm -v $installer
 }
 
