@@ -9,8 +9,30 @@ conda_activate() {
 }
 
 conda_create() {
+  local name=$1
   conda_activate base
   conda create -y -q -n $*
+  (
+    conda_activate $name
+    adir=$CONDA_PREFIX/etc/conda/activate.d
+    mkdir -pv $adir
+    cat <<EOF >$adir/eagle.sh
+if [[ -n "\$XDG_CACHE_HOME" ]]; then
+  export XDG_CACHE_HOME_OLD=\$XDG_CACHE_HOME
+fi
+export XDG_CACHE_HOME=\$CONDA_PREFIX/cache
+EOF
+    ddir=$CONDA_PREFIX/etc/conda/deactivate.d
+    mkdir -pv $ddir
+    cat <<EOF >$ddir/eagle.sh
+if [[ -n "\$XDG_CACHE_HOME_OLD" ]]; then
+  export XDG_CACHE_HOME=\$XDG_CACHE_HOME_OLD
+  unset XDG_CACHE_HOME_OLD
+else
+  unset XDG_CACHE_HOME
+fi
+EOF
+  )
 }
 
 conda_create_anemoi() {
@@ -30,7 +52,7 @@ conda_create_anemoi() {
       anemoi-models==0.8.*
       anemoi-training==0.5.*
     )
-    XDG_CACHE_HOME=$CONDA_PREFIX/cache pip install ${packages[*]}
+    pip install ${packages[*]}
   )
 }
 
