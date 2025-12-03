@@ -48,8 +48,6 @@ conda_create_anemoi() {
     CONDA_OVERRIDE_CUDA=$cu conda_create $name flash-attn=2.8.* python=3.12
     conda_activate $name
     packages=(
-      anemoi-datasets==0.5.*
-      anemoi-graphs==0.6.*
       anemoi-inference==0.6.*
       anemoi-models==0.8.*
       anemoi-training==0.5.*
@@ -77,6 +75,7 @@ conda_create_data() {
   local name=data
   msg Creating environment: $name
   conda_create $name ufs2arco=0.17.*
+  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
 }
 
 conda_create_vx() {
