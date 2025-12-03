@@ -2,20 +2,17 @@
 
 # EAGLE Runtime Build
 
-To build the EAGLE runtime, `cd` to the appropriate directory, then execute the `build` script accompanying this document:
+To build the EAGLE runtime environment, `cd` to an appropriate directory and execute the `build` script accompanying this document to create an `eagle/` directory:
 
 ``` bash
 /path/to/build
 ```
 
-When the build completes successfully, activate the virtual environment:
+After the build completes successfully, activate the workflow virtual environment:
 
 ``` bash
-source runtime/env/bin/activate
+source eagle/etc/profile.d/conda.sh
+conda activate workflow
 ```
 
-When finished running EAGLE tasks, deactivate the environment:
-
-``` bash
-deactivate
-```
+Other virtual environments created by the build will be activated as necessary by workflow tasks.

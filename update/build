@@ -1,71 +1,119 @@
 #!/usr/bin/env bash
 
-set -eu
+set -aeu
 
-# Set tool and package versions.
+INSTALLDIR=$PWD/eagle
 
-flash_attn=2.8.3
-python=3.12
-torch=2.8
-uv=0.9.13
-uwtools=2.12.0
+conda_activate() {
+  local env=$1
+  source $INSTALLDIR/etc/profile.d/conda.sh
+  conda activate $env
+}
 
-packages=(
-  anemoi-datasets==0.5.*
-  anemoi-graphs==0.6.*
-  anemoi-inference==0.6.*
-  anemoi-models==0.8.*
-  anemoi-training==0.5.*
-  torch==$torch.*
-  ufs2arco==0.17.*
-)
-
-# Define runtime location.
-
-runtime=$PWD/runtime
-
-# Install uv.
-
-curl -LsSf https://astral.sh/uv/$uv/install.sh | env UV_UNMANAGED_INSTALL=$runtime/bin sh
-
-# Install Python.
-
-$runtime/bin/uv python install $python --install-dir $runtime/opt --no-bin --no-cache
-
-# Create empty virtual environment.
-
-$(find $runtime/opt -type f -name python$python) -m venv $runtime/env
-
-# Create extra-setup shell fragment and arrange for activation to execute it.
-
-cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
-test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
-activate=$runtime/env/bin/activate
-extra=$activate.extra
-cat <<EOF >$extra
-module load $cudamod
-export XDG_CACHE_HOME=\$(readlink -f \$(dirname \${BASH_SOURCE[0]})/../../)/var/cache
+conda_create() {
+  local name=$1
+  conda_activate base
+  conda create -y -q -n $*
+  (
+    conda_activate $name
+    dir_activate=$CONDA_PREFIX/etc/conda/activate.d
+    mkdir -pv $dir_activate
+    cat <<EOF >$dir_activate/eagle.sh
+if [[ -v XDG_CACHE_HOME ]]; then
+  export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
+fi
+export XDG_CACHE_HOME=\$CONDA_PREFIX/cache
 EOF
-extracmd="source $(basename $extra)"
-grep -q "$extracmd" $activate || echo $extracmd >>$activate
+    dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
+    mkdir -pv $dir_deactivate
+    cat <<EOF >$dir_deactivate/eagle.sh
+if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
+  export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
+  unset EAGLE_OLD_XDG_CACHE_HOME
+else
+  unset XDG_CACHE_HOME
+fi
+EOF
+  )
+}
 
-# Activate the virtual environment.
+conda_create_anemoi() {
+  local name=anemoi
+  msg Creating environment: $name
+  (
+    cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
+    test -z "${cudamod:-}" && echo "No CUDA module found" && exit 1
+    module load $cudamod
+    cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
+    CONDA_OVERRIDE_CUDA=$cu conda_create $name flash-attn=2.8.* python=3.12
+    conda_activate $name
+    packages=(
+      anemoi-datasets==0.5.*
+      anemoi-graphs==0.6.*
+      anemoi-inference==0.6.*
+      anemoi-models==0.8.*
+      anemoi-training==0.5.*
+    )
+    pip install ${packages[*]}
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+modules="\$(module --terse list | grep -v 'No modules loaded' | tr '\n' ' ')"
+if [[ -n "\$modules" ]]; then
+  export EAGLE_OLD_MODULES="\$modules"
+fi
+module purge
+module load $cudamod
+EOF
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+module purge
+if [[ -v EAGLE_OLD_MODULES ]]; then
+  module load \$EAGLE_OLD_MODULES
+  unset EAGLE_OLD_MODULES
+fi
+EOF
+  )
+}
 
-source $activate
+conda_create_data() {
+  local name=data
+  msg Creating environment: $name
+  conda_create $name ufs2arco=0.17.*
+}
 
-# Install or upgrade core packages in the virtual environment.
+conda_create_vx() {
+  local name=vx
+  msg Creating environment: $name
+  conda_create $name -c ufs-community -c paul.madden python=3.13 wxvx=0.3.*
+}
 
-python -m pip install pip --upgrade
-python -m pip install ${packages[*]}
+conda_create_workflow() {
+  local name=workflow
+  msg Creating environment: $name
+  conda_create $name -c ufs-community uwtools=2.12.*
+}
 
-# Install uwtools (via git) in virtual environment.
+conda_install() {
+  msg Installing conda
+  local ver=25.9.1-0
+  local installer=Miniforge3-$ver-Linux-$(uname -p).sh
+  local url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
+  wget -nv $url
+  bash $installer -bfp $INSTALLDIR
+  rm -v $installer
+}
 
-python -m pip install "git+https://github.com/ufs-community/uwtools@v$uwtools#subdirectory=src"
+conda_run_in_env() {
+  local env=$1
+  shift
+}
 
-# Install flash-attention in the virtual environment.
+msg() {
+  echo -e "\n=> $*\n"
+}
 
-cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
-py=$(python --version | sed -E 's/Python ([0-9]+)\.([0-9]+)\..*/\1\2/')
-fn=flash_attn-${flash_attn}+cu${cu}torch${torch}cxx11abiTRUE-cp${py}-cp${py}-linux_$(uname -p).whl
-url=https://github.com/Dao-AILab/flash-attention/releases/download/v${flash_attn}/$fn
-python -m pip install $url
+conda_install
+conda_create_anemoi
+conda_create_data
+conda_create_vx
+conda_create_workflow
+
+msg Done
