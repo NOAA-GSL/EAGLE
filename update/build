@@ -101,11 +101,6 @@ conda_install() {
   rm -v $installer
 }
 
-conda_run_in_env() {
-  local env=$1
-  shift
-}
-
 msg() {
   echo -e "\n=> $*\n"
 }
