@@ -17,17 +17,17 @@ conda_create() {
     adir=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $adir
     cat <<EOF >$adir/eagle.sh
-if [[ -n "\$XDG_CACHE_HOME" ]]; then
-  export XDG_CACHE_HOME_OLD=\$XDG_CACHE_HOME
+if [[ -v XDG_CACHE_HOME ]]; then
+  export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
 fi
 export XDG_CACHE_HOME=\$CONDA_PREFIX/cache
 EOF
     ddir=$CONDA_PREFIX/etc/conda/deactivate.d
     mkdir -pv $ddir
     cat <<EOF >$ddir/eagle.sh
-if [[ -n "\$XDG_CACHE_HOME_OLD" ]]; then
-  export XDG_CACHE_HOME=\$XDG_CACHE_HOME_OLD
-  unset XDG_CACHE_HOME_OLD
+if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
+  export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
+  unset EAGLE_OLD_XDG_CACHE_HOME
 else
   unset XDG_CACHE_HOME
 fi
@@ -53,6 +53,21 @@ conda_create_anemoi() {
       anemoi-training==0.5.*
     )
     pip install ${packages[*]}
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+modules="\$(module --terse list | grep -v 'No modules loaded' | tr '\n' ' ')"
+if [[ -n "\$modules" ]]; then
+  export EAGLE_OLD_MODULES="\$modules"
+fi
+module purge
+module load $cudamod
+EOF
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+module purge
+if [[ -v EAGLE_OLD_MODULES ]]; then
+  module load \$EAGLE_OLD_MODULES
+  unset EAGLE_OLD_MODULES
+fi
+EOF
   )
 }
 
@@ -99,24 +114,3 @@ conda_create_data
 conda_create_vx
 conda_create_workflow
 msg Done
-
-# Create extra-setup shell fragment and arrange for activation to execute it.
-
-# cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
-# test -z "${cudamod:-}" && echo "Found no CUDA module to load" && exit 1
-# activate=$runtime/env/bin/activate
-# extra=$activate.extra
-# cat <<EOF >$extra
-# module load $cudamod
-# export XDG_CACHE_HOME=\$(readlink -f \$(dirname \${BASH_SOURCE[0]})/../../)/var/cache
-# EOF
-# extracmd="source $(basename $extra)"
-# grep -q "$extracmd" $activate || echo $extracmd >>$activate
-
-# Install flash-attention in the virtual environment.
-
-# cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
-# py=$(python --version | sed -E 's/Python ([0-9]+)\.([0-9]+)\..*/\1\2/')
-# fn=flash_attn-${flash_attn}+cu${cu}torch${torch}cxx11abiTRUE-cp${py}-cp${py}-linux_$(uname -p).whl
-# url=https://github.com/Dao-AILab/flash-attention/releases/download/v${flash_attn}/$fn
-# python -m pip install $url
