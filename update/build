@@ -105,6 +105,15 @@ msg() {
   echo -e "\n=> $*\n"
 }
 
+pip_install() {
+  local name=$1
+  shift
+  (
+    conda_activate $name
+    pip install $@
+  )
+}
+
 conda_install
 conda_create_anemoi
 conda_create_data
