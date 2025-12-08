@@ -25,6 +25,9 @@ line-length = 100
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+  "COM812",  # missing-trailing-comma
+  "D203",    # incorrect-blank-line-before-class
+  "D212",    # multi-line-summary-first-line
 #  "ANN002",  # missing-type-args
 #  "ANN003",  # missing-type-kwargs
 #  "ANN201",  # missing-return-type-class-method
@@ -36,7 +39,6 @@ ignore = [
 #  "B010",    # set-attr-with-constant
 #  "C408",    # unnecessary-collection-call
 #  "C901",    # complex-structure
-#  "COM812",  # missing-trailing-comma
 #  "D100",    # undocumented-public-module
 #  "D101",    # undocumented-public-class
 #  "D102",    # undocumented-public-method
@@ -46,9 +48,7 @@ ignore = [
 #  "D107",    # undocumented-public-init
 #  "D200",    # unnecessary-multiline-docstring
 #  "D202",    # blank-line-after-function
-#  "D203",    # incorrect-blank-line-before-class
 #  "D205",    # missing-blank-line-after-summary
-#  "D212",    # multi-line-summary-first-line
 #  "D400",    # missing-trailing-period
 #  "D401",    # non-imperative-mood
 #  "D404",    # docstring-starts-with-this
