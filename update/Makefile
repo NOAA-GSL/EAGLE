@@ -1,5 +1,5 @@
 ACTIVATE = . conda/etc/profile.d/conda.sh && conda activate
-TARGETS  = build devenv format lint test typecheck unittest
+TARGETS  = build dev format lint test typecheck unittest
 
 .PHONY: $(TARGETS)
 
@@ -9,7 +9,7 @@ all:
 build:
 	./build
 
-dev: env
+dev: build
 	$(ACTIVATE) && mamba install -y -n base $(shell cat devpkgs)
 
 format:
