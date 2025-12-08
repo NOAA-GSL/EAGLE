@@ -12,6 +12,7 @@ conda_activate() {
 
 conda_create() {
   local name=$1
+  msg Creating environment: $name
   conda_activate base
   conda create -y -q -n $*
   (
@@ -39,7 +40,6 @@ EOF
 
 conda_create_anemoi() {
   local name=anemoi
-  msg Creating environment: $name
   (
     cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
     test -z "${cudamod:-}" && echo "No CUDA module found" && exit 1
@@ -68,21 +68,27 @@ EOF
 
 conda_create_data() {
   local name=data
-  msg Creating environment: $name
   conda_create $name ufs2arco=0.17.*
   pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
 }
 
 conda_create_vx() {
   local name=vx
-  msg Creating environment: $name
   conda_create $name -c ufs-community -c paul.madden python=3.13 wxvx=0.3.*
 }
 
 conda_create_workflow() {
   local name=workflow
-  msg Creating environment: $name
   conda_create $name -c ufs-community uwtools=2.12.*
+}
+
+conda_install() {
+  name=$1
+  shift
+  (
+    conda_activate $name
+    conda install -y -q ${[@]}
+  )
 }
 
 conda_install_devpkgs() {
@@ -108,11 +114,11 @@ install_conda() {
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
   rm -v $installer
-  conda install -y -q -n base jq
+  conda_install jq
 }
 
 msg() {
-  echo -e "\n=> $*\n"
+  echo -e "=> $*"
 }
 
 pip_install() {
@@ -124,12 +130,8 @@ pip_install() {
   )
 }
 
-environments=(
-  anemoi
-  data
-  vx
-  workflow
-)
+# environments=( anemoi data vx workflow )
+environments=( data )
 
 install_conda
 for environment in ${environments[*]}; do
