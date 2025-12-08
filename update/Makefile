@@ -7,7 +7,7 @@ all:
 	$(error Valid targets are: $(TARGETS))
 
 env:
-	./build
+	./env
 
 dev: build
 	@echo -e "=> Installing dev packages\n"
