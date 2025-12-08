@@ -26,14 +26,7 @@ To install the development code-quality tools:
 make env
 ```
 
-This will create the runtime environment if it does not already exist, then install the code-quality packages into the `base` environment. In a fresh shell, run
-
-``` bash
-source runtime/etc/profile.d/conda.sh
-conda activate
-```
-
-The following commands are now available:
+This will create the runtime environment if it does not already exist, then install the code-quality packages into the `workflow` environment, after which the following commands will be available:
 
 ``` bash
 make format   # format Python code

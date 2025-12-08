@@ -11,7 +11,7 @@ build:
 
 dev: build
 	@echo -e "=> Installing dev packages\n"
-	$(ACTIVATE) && conda install -y -q -n base $(shell cat devpkgs)
+	$(ACTIVATE) && conda install -y -q -n workflow $(shell cat devpkgs)
 
 format:
 	@./format
