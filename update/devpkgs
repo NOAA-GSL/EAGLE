@@ -1,0 +1,5 @@
+make
+mypy
+pytest-cov
+pytest
+ruff

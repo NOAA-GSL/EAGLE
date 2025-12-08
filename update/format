@@ -1,0 +1,7 @@
+#!/bin/bash -eu
+
+echo "=> Formatting code"
+ruff format .
+
+echo "=> Sorting imports"
+ruff check --select I --fix .
