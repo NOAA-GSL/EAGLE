@@ -2,7 +2,7 @@
 
 set -aeu
 
-INSTALLDIR=$PWD/runtime
+INSTALLDIR=$PWD/conda
 
 conda_activate() {
   local env=$1
@@ -85,7 +85,22 @@ conda_create_workflow() {
   conda_create $name -c ufs-community uwtools=2.12.*
 }
 
-conda_install() {
+conda_install_devpkgs() {
+  local devpkgs=(
+    make==4.4.*
+    mypy==1.19.*
+    pytest-cov==7.0.*
+    pytest==9.0.*
+    ruff==0.14.*
+  )
+  conda install -y -q ${devpkgs[@]}
+}
+
+install_conda() {
+  if [[ -d $INSTALLDIR ]]; then
+    msg Runtime directory exists: $INSTALLDIR
+    return
+  fi
   msg Installing conda
   local ver=25.9.1-0
   local installer=Miniforge3-$ver-Linux-$(uname -p).sh
@@ -93,6 +108,7 @@ conda_install() {
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
   rm -v $installer
+  conda install -y -q -n base jq
 }
 
 msg() {
@@ -108,13 +124,15 @@ pip_install() {
   )
 }
 
-if [[ -d $INSTALLDIR ]]; then
-  msg Runtime directory exists: $INSTALLDIR
-else
-  conda_install
-  conda_create_anemoi
-  conda_create_data
-  conda_create_vx
-  conda_create_workflow
-  msg Done
-fi
+environments=(
+  anemoi
+  data
+  vx
+  workflow
+)
+
+install_conda
+for environment in ${environments[*]}; do
+  conda_create_$environment
+done
+msg Done

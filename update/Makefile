@@ -1,12 +1,12 @@
-ACTIVATE = . runtime/etc/profile.d/conda.sh && conda activate
-TARGETS  = build dev format lint test typecheck unittest
+ACTIVATE = . conda/etc/profile.d/conda.sh && conda activate
+TARGETS  = env dev format lint test typecheck unittest
 
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
 
-build:
+env:
 	./build
 
 dev: build
