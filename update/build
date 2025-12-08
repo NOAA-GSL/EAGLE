@@ -2,7 +2,7 @@
 
 set -aeu
 
-INSTALLDIR=$PWD/eagle
+INSTALLDIR=$PWD/runtime
 
 conda_activate() {
   local env=$1
@@ -108,10 +108,13 @@ pip_install() {
   )
 }
 
-conda_install
-conda_create_anemoi
-conda_create_data
-conda_create_vx
-conda_create_workflow
-
-msg Done
+if [[ -d $INSTALLDIR ]]; then
+  msg Runtime directory exists: $INSTALLDIR
+else
+  conda_install
+  conda_create_anemoi
+  conda_create_data
+  conda_create_vx
+  conda_create_workflow
+  msg Done
+fi
