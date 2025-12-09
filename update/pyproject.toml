@@ -1,14 +1,3 @@
-[tool.coverage.report]
-exclude_also = [
-  "if TYPE_CHECKING:"
-]
-fail_under = 100
-show_missing = true
-skip_covered = true
-
-[tool.coverage.run]
-branch = true
-
 [tool.mypy]
 check_untyped_defs = true
 pretty = true

@@ -1,6 +1,5 @@
-ACTIVATE = . conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
-TARGETS  = data devenv env format lint test typecheck unittest
+TARGETS  = data devenv env format lint test typecheck
 
 .PHONY: $(TARGETS)
 
@@ -25,10 +24,7 @@ format:
 lint:
 	ruff check $(SRCDIRS)
 
-test: lint typecheck # unittest
+test: lint typecheck
 
 typecheck:
 	mypy $(SRCDIRS)
-
-unittest:
-	pytest --cov $(SRCDIRS)

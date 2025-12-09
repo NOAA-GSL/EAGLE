@@ -107,8 +107,6 @@ conda_install_devpkgs() {
   local devpkgs=(
     make==4.4.*
     mypy==1.19.*
-    pytest-cov==7.0.*
-    pytest==9.0.*
     ruff==0.14.*
   )
   msg Installing dev packages into environment: $name
