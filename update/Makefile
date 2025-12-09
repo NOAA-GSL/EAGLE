@@ -1,17 +1,17 @@
 ACTIVATE = . conda/etc/profile.d/conda.sh && conda activate
-SRCDIRS = eagle
-TARGETS = env dev format lint test typecheck unittest
+SRCDIRS  = eagle
+TARGETS  = devenv env format lint test typecheck unittest
 
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
 
+devenv:
+	EAGLE_DEV=1 ./env
+
 env:
 	./env
-
-dev:
-	EAGLE_DEV=1 ./env
 
 format:
 	@echo "=> Formatting code"
