@@ -1,5 +1,5 @@
 ACTIVATE = . conda/etc/profile.d/conda.sh && conda activate
-SRCDIRS = drivers
+SRCDIRS = eagle
 TARGETS = env dev format lint test typecheck unittest
 
 .PHONY: $(TARGETS)

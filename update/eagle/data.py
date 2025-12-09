@@ -1,16 +1,16 @@
 from pathlib import Path
+
 import cf_xarray as cfxr
 import numpy as np
 import xesmf
 from anemoi.datasets.grids import cutout_mask
 from anemoi.graphs.generate.utils import get_coordinates_ordering
-from ufs2arco import sources
 from iotaa import Asset, collection, task
+from ufs2arco import sources
 from uwtools.api.driver import AssetsTimeInvariant
 
 
 class EAGLEData(AssetsTimeInvariant):
-
     # Tasks
 
     @task
@@ -22,11 +22,7 @@ class EAGLEData(AssetsTimeInvariant):
         gmesh = _global_latent_grid()
         cmesh = _conus_latent_grid(xds=cds)
         coords = _combined_global_and_conus_meshes(gmesh, cmesh)
-        np.savez(
-            path,
-            lon=coords["lon"],
-            lat=coords["lat"]
-        )
+        np.savez(path, lon=coords["lon"], lat=coords["lat"])
 
     @task
     def conus_data_grid(self):
@@ -37,12 +33,12 @@ class EAGLEData(AssetsTimeInvariant):
         hrrr = sources.AWSHRRRArchive(
             t0={"start": "2015-01-15T00", "end": "2015-01-15T06", "freq": "6h"},
             fhr={"start": 0, "end": 0, "step": 6},
-            variables=["orog"]
+            variables=["orog"],
         )
         hds = hrrr.open_sample_dataset(
             dims={"t0": hrrr.t0[0], "fhr": hrrr.fhr[0]},
             open_static_vars=True,
-            cache_dir=rundir / ".cache"
+            cache_dir=rundir / ".cache",
         )
         hds = hds.rename({"latitude": "lat", "longitude": "lon"})
         # Get bounds as vertices.
@@ -80,9 +76,9 @@ class EAGLEData(AssetsTimeInvariant):
         yield None
         ds = xesmf.util.grid_global(1, 1, cf=True, lon1=360)
         ds = ds.drop_vars("latitude_longitude")
-        ds = ds.sortby("lat", ascending=False) # GFS goes north -> south
+        ds = ds.sortby("lat", ascending=False)  # GFS goes north -> south
         ds.to_netcdf(path)
-        
+
     # @property
     # def output(self) -> dict[str, list[Path]]:
     #     """
@@ -100,7 +96,7 @@ class EAGLEData(AssetsTimeInvariant):
         yield [
             self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),
-            self.global_data_grid()
+            self.global_data_grid(),
         ]
 
     # Public methods
