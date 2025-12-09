@@ -8,14 +8,14 @@ To build the EAGLE runtime virtual environments:
 make env # alternatively: ./env
 ```
 
-After the build completes successfully, activate the conda installation and the `workflow` environment:
+After the build completes successfully, activate the conda installation and the `base` environment:
 
 ``` bash
 source conda/etc/profile.d/conda.sh
-conda activate workflow
+conda activate
 ```
 
-Other virtual environments will be activated as necessary by workflow tasks.
+Other virtual environments will be activated as necessary by pipeline steps.
 
 ## Development environment
 
