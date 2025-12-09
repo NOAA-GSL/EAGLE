@@ -1,5 +1,5 @@
 SRCDIRS  = eagle
-TARGETS  = devenv env format grids_and_meshes lint test typecheck
+TARGETS  = devenv env format grids-and-meshes lint test typecheck
 
 .PHONY: $(TARGETS)
 
