@@ -12,8 +12,8 @@ conda_activate() {
 
 conda_create() {
   local name=$1
-  msg Creating environment: $name
   conda_activate base
+  msg Creating environment: $name
   conda create -y -q -n $*
   (
     conda_activate $name
@@ -68,6 +68,7 @@ EOF
 
 conda_create_data() {
   local name=data
+  conda_env_exists $name && return || true
   conda_create $name ufs2arco=0.17.*
   pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
 }
@@ -82,12 +83,22 @@ conda_create_workflow() {
   conda_create $name -c ufs-community uwtools=2.12.*
 }
 
+conda_env_exists() {
+  name=$1
+  conda_activate base
+  if conda env list --json | jq -r .envs_details[].name | grep -q "^$name$"; then
+    msg Found existing conda environment: $name
+    return
+  fi
+  return 1
+}
+
 conda_install() {
   name=$1
   shift
   (
     conda_activate $name
-    conda install -y -q ${[@]}
+    conda install -y -q $@
   )
 }
 
@@ -104,17 +115,17 @@ conda_install_devpkgs() {
 
 install_conda() {
   if [[ -d $INSTALLDIR ]]; then
-    msg Runtime directory exists: $INSTALLDIR
+    msg Found existing conda installation: $INSTALLDIR
     return
   fi
-  msg Installing conda
   local ver=25.9.1-0
   local installer=Miniforge3-$ver-Linux-$(uname -p).sh
   local url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
+  msg Installing conda
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
   rm -v $installer
-  conda_install jq
+  conda_install base jq
 }
 
 msg() {
