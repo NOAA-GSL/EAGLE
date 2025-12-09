@@ -131,15 +131,13 @@ class EAGLEData(AssetsTimeInvariant):
             x_b=slice(None, -4, None),
             y_b=slice(None, -4, None),
         )
-        cds = hds.isel(
+        cds: Dataset = hds.isel(
             x=slice(2, None, 5),
             y=slice(2, None, 5),
             x_b=slice(0, None, 5),
             y_b=slice(0, None, 5),
         )
-        cds = cds.drop_vars("orog")
-        breakpoint()
-        return cds
+        return cds.drop_vars("orog")
 
     def _conus_latent_grid(self, cds: Dataset, trim: int = 10, coarsen: int = 2) -> Dataset:
         mesh = cds[["lat_b", "lon_b"]].isel(
@@ -160,6 +158,5 @@ class EAGLEData(AssetsTimeInvariant):
         For the high-res version, this will process the original grid. However, since the data grid
         is on an xESMF generated grid, it works out just fine to generate another xESMF grid here.
         """
-        mesh = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
-        breakpoint()
+        mesh: Dataset = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
         return mesh.drop_vars("latitude_longitude")

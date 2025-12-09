@@ -25,7 +25,7 @@ lint:
 test: lint typecheck unittest
 
 typecheck:
-	mypy --install-types --non-interactive $(SRCDIRS)
+	mypy --non-interactive $(SRCDIRS)
 
 unittest:
 	pytest --cov $(SRCDIRS)
