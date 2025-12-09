@@ -7,7 +7,10 @@
 from uwtools.api.driver import AssetsTimeInvariant
 
 
-class EAGLEData(AssetsTimeInvariant): ...
+class EAGLEData(AssetsTimeInvariant):
+
+    def driver_name(self) -> str:
+        return "EAGLE Data"
 
 
 # def get_global_data_grid():
