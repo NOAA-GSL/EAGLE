@@ -12,8 +12,6 @@ from xarray import Dataset
 
 
 class EAGLEData(AssetsTimeInvariant):
-    # Tasks
-
     @task
     def combined_global_and_conus_meshes(self):
         path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
@@ -78,7 +76,7 @@ class EAGLEData(AssetsTimeInvariant):
         # Combine.
         lon = np.concatenate([glon.flatten()[mask], cmesh["lon"].values.flatten()])
         lat = np.concatenate([glat.flatten()[mask], cmesh["lat"].values.flatten()])
-        # Sort, following exactly what anemoi graphs does for the dat.
+        # Sort, following exactly what anemoi-graphs does for the dat.
         coords = np.stack([lon, lat], axis=-1)
         order = get_coordinates_ordering(coords)
         lon = coords[order, 0]
