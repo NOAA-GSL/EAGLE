@@ -31,6 +31,5 @@ After successful completion, the following `make` targets will be available in e
 make format   # format Python code
 make lint     # run the linter on Python code
 make typeheck # run the typechecker on Python code
-make unittest # run the Python unit tests
 make test     # all of the above except formatting
 ```

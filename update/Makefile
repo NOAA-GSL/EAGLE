@@ -1,12 +1,15 @@
 SRCDIRS  = eagle
 TARGETS  = devenv env format grids-and-meshes lint test typecheck
 
+.ONESHELL:
+
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
 
 grids-and-meshes:
+	export FI_PSM3_UUID=eagle
 	uw execute --module eagle/grids_and_meshes.py --classname GridsAndMeshes --task grids_and_meshes --config-file config.yaml
 
 devenv:

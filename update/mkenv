@@ -3,6 +3,7 @@
 set -aeu
 
 INSTALLDIR=$PWD/conda
+MAKE="make=4.4.*"
 UWTOOLS="uwtools=2.12.*"
 
 conda_activate() {
@@ -15,7 +16,7 @@ conda_create() {
   local name=$1
   conda_activate base
   msg Creating environment: $name
-  conda create -y -q -c ufs-community -n $* $UWTOOLS
+  conda create -y -q -c ufs-community -n $* $MAKE $UWTOOLS
   (
     conda_activate $name
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
@@ -104,11 +105,7 @@ conda_install() {
 
 conda_install_devpkgs() {
   local name=$1
-  local devpkgs=(
-    make==4.4.*
-    mypy==1.19.*
-    ruff==0.14.*
-  )
+  local devpkgs=( $MAKE mypy=1.19.* ruff=0.14.* )
   msg Installing dev packages into environment: $name
   conda_install $name ${devpkgs[@]}
 }
