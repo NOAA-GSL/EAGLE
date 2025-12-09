@@ -11,7 +11,7 @@ from uwtools.api.driver import AssetsTimeInvariant
 from xarray import Dataset
 
 
-class Data(AssetsTimeInvariant):
+class GridsAndMeshes(AssetsTimeInvariant):
     @task
     def combined_global_and_conus_meshes(self):
         path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
@@ -46,8 +46,8 @@ class Data(AssetsTimeInvariant):
         ds.to_netcdf(path)
 
     @collection
-    def provisioned_rundir(self):
-        yield self.taskname("provisioned run directory")
+    def grids_and_meshes(self):
+        yield self.taskname("grids and meshes")
         yield [
             self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),

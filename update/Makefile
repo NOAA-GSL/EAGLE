@@ -1,13 +1,13 @@
 SRCDIRS  = eagle
-TARGETS  = data devenv env format lint test typecheck
+TARGETS  = devenv env format grids_and_meshes lint test typecheck
 
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
 
-data:
-	uw execute --module eagle/data.py --classname Data --task provisioned_rundir --config-file config.yaml
+grids-and-meshes:
+	uw execute --module eagle/grids_and_meshes.py --classname GridsAndMeshes --task grids_and_meshes --config-file config.yaml
 
 devenv:
 	EAGLE_DEV=1 ./mkenv
