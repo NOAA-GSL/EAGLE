@@ -1,5 +1,6 @@
 ACTIVATE = . conda/etc/profile.d/conda.sh && conda activate
-TARGETS  = env dev format lint test typecheck unittest
+SRCDIRS = drivers
+TARGETS = env dev format lint test typecheck unittest
 
 .PHONY: $(TARGETS)
 
@@ -13,15 +14,18 @@ dev:
 	EAGLE_DEV=1 ./env
 
 format:
-	@./format
+	@echo "=> Formatting code"
+	@ruff format $(SRCDIRS)
+	@echo "=> Sorting imports"
+	@ruff check --select I --fix $(SRCDIRS)
 
 lint:
-	ruff check .
+	ruff check $(SRCDIRS)
 
 test: lint typecheck unittest
 
 typecheck:
-	mypy --install-types --non-interactive .
+	mypy --install-types --non-interactive $(SRCDIRS)
 
 unittest:
-	pytest --cov .
+	pytest --cov $(SRCDIRS)

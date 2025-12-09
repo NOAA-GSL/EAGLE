@@ -26,8 +26,12 @@ line-length = 100
 select = ["ALL"]
 ignore = [
   "COM812",  # missing-trailing-comma
+  "D100",    # undocumented-public-module
+  "D104",    # undocumented-public-package
+  "D200",    # unnecessary-multiline-docstring
   "D203",    # incorrect-blank-line-before-class
   "D212",    # multi-line-summary-first-line
+  "ERA001",  # commented-out-code
 #  "ANN002",  # missing-type-args
 #  "ANN003",  # missing-type-kwargs
 #  "ANN201",  # missing-return-type-class-method
@@ -39,21 +43,17 @@ ignore = [
 #  "B010",    # set-attr-with-constant
 #  "C408",    # unnecessary-collection-call
 #  "C901",    # complex-structure
-#  "D100",    # undocumented-public-module
 #  "D101",    # undocumented-public-class
 #  "D102",    # undocumented-public-method
 #  "D103",    # undocumented-public-function
-#  "D104",    # undocumented-public-package
 #  "D105",    # undocumented-magic-method
 #  "D107",    # undocumented-public-init
-#  "D200",    # unnecessary-multiline-docstring
 #  "D202",    # blank-line-after-function
 #  "D205",    # missing-blank-line-after-summary
 #  "D400",    # missing-trailing-period
 #  "D401",    # non-imperative-mood
 #  "D404",    # docstring-starts-with-this
 #  "E731",    # lambda-assignment
-#  "ERA001",  # commented-out-code
 #  "FBT001",  # boolean-type-hint-positional-argument
 #  "FBT002",  # boolean-default-value-positional-argument
 #  "FBT003",  # boolean-positional-value-in-call
