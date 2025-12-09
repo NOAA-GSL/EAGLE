@@ -9,9 +9,8 @@ all:
 env:
 	./env
 
-dev: build
-	@echo -e "=> Installing dev packages\n"
-	$(ACTIVATE) && conda install -y -q -n workflow $(shell cat devpkgs)
+dev:
+	EAGLE_DEV=1 ./env
 
 format:
 	@./format

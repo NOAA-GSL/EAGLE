@@ -40,6 +40,7 @@ EOF
 
 conda_create_anemoi() {
   local name=anemoi
+  conda_env_exists $name && return || true
   (
     cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
     test -z "${cudamod:-}" && echo "No CUDA module found" && exit 1
@@ -75,22 +76,26 @@ conda_create_data() {
 
 conda_create_vx() {
   local name=vx
+  conda_env_exists $name && return || true
   conda_create $name -c ufs-community -c paul.madden python=3.13 wxvx=0.3.*
 }
 
 conda_create_workflow() {
   local name=workflow
+  conda_env_exists $name && return || true
   conda_create $name -c ufs-community uwtools=2.12.*
 }
 
 conda_env_exists() {
   name=$1
-  conda_activate base
-  if conda env list --json | jq -r .envs_details[].name | grep -q "^$name$"; then
-    msg Found existing conda environment: $name
-    return
-  fi
-  return 1
+  (
+    conda_activate base
+    if conda env list --json | jq -r .envs_details[].name | grep -q "^$name$"; then
+      msg Found existing conda environment: $name
+      exit 0
+    fi
+    exit 1
+  )
 }
 
 conda_install() {
@@ -103,6 +108,7 @@ conda_install() {
 }
 
 conda_install_devpkgs() {
+  local name=$1
   local devpkgs=(
     make==4.4.*
     mypy==1.19.*
@@ -110,7 +116,8 @@ conda_install_devpkgs() {
     pytest==9.0.*
     ruff==0.14.*
   )
-  conda install -y -q ${devpkgs[@]}
+  msg Installing dev packages into environment: $name
+  conda_install $name ${devpkgs[@]}
 }
 
 install_conda() {
@@ -145,7 +152,8 @@ pip_install() {
 environments=( data )
 
 install_conda
-for environment in ${environments[*]}; do
-  conda_create_$environment
+for name in ${environments[*]}; do
+  conda_create_$name
+  test -v EAGLE_DEV && conda_install_devpkgs $name
 done
 msg Done
