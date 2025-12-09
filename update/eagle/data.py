@@ -92,6 +92,7 @@ class EAGLEData(AssetsTimeInvariant):
         order = get_coordinates_ordering(coords)
         lon = coords[order, 0]
         lat = coords[order, 1]
+        breakpoint()
         return {"lon": lon, "lat": lat}
 
     @cached_property
@@ -131,6 +132,7 @@ class EAGLEData(AssetsTimeInvariant):
             x_b=slice(0, None, 5),
             y_b=slice(0, None, 5),
         )
+        breakpoint()
         return cds.drop_vars("orog")
 
     def _conus_latent_grid(self, cds, trim=10, coarsen=2):
@@ -138,6 +140,7 @@ class EAGLEData(AssetsTimeInvariant):
             x_b=slice(trim, -trim - 1, coarsen),
             y_b=slice(trim, -trim - 1, coarsen),
         )
+        breakpoint()
         return mesh.rename(
             {
                 "lat_b": "lat",
@@ -153,4 +156,5 @@ class EAGLEData(AssetsTimeInvariant):
         is on an xESMF generated grid, it works out just fine to generate another xESMF grid here.
         """
         mesh = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
+        breakpoint()
         return mesh.drop_vars("latitude_longitude")
