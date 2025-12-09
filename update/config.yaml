@@ -1,2 +1,4 @@
 data:
+  rundir: '{{ user.rundir }}'
+user:
   rundir: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update/run
