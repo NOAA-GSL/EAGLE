@@ -25,7 +25,7 @@ lint:
 test: lint typecheck unittest
 
 typecheck:
-	mypy --non-interactive $(SRCDIRS)
+	mypy $(SRCDIRS)
 
 unittest:
 	pytest --cov $(SRCDIRS)
