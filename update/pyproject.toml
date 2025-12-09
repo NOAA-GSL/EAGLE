@@ -27,6 +27,7 @@ select = ["ALL"]
 ignore = [
   "COM812",  # missing-trailing-comma
   "D100",    # undocumented-public-module
+  "D101",    # undocumented-public-class
   "D104",    # undocumented-public-package
   "D200",    # unnecessary-multiline-docstring
   "D203",    # incorrect-blank-line-before-class
@@ -43,7 +44,6 @@ ignore = [
 #  "B010",    # set-attr-with-constant
 #  "C408",    # unnecessary-collection-call
 #  "C901",    # complex-structure
-#  "D101",    # undocumented-public-class
 #  "D102",    # undocumented-public-method
 #  "D103",    # undocumented-public-function
 #  "D105",    # undocumented-magic-method

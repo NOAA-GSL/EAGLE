@@ -7,10 +7,7 @@
 from uwtools.api.driver import AssetsTimeInvariant
 
 
-class EAGLEData(AssetsTimeInvariant):
-    """
-    EAGLE pipeline task to prepare training data.
-    """
+class EAGLEData(AssetsTimeInvariant): ...
 
 
 # def get_global_data_grid():
