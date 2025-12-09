@@ -20,9 +20,7 @@ line-length = 100
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-  "ANN001",
-  "ANN201",
-  "ANN202",
+  "ANN201",  # missing-return-type-undocumented-public-function
   "COM812",  # missing-trailing-comma
   "D100",    # undocumented-public-module
   "D101",    # undocumented-public-class
