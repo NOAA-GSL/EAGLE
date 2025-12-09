@@ -1,11 +1,14 @@
 ACTIVATE = . conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
-TARGETS  = devenv env format lint test typecheck unittest
+TARGETS  = data devenv env format lint test typecheck unittest
 
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
+
+data:
+	uw execute --module eagle/data.py --classname Data --task provisioned_rundir --config-file config.yaml
 
 devenv:
 	EAGLE_DEV=1 ./mkenv

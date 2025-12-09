@@ -11,7 +11,7 @@ from uwtools.api.driver import AssetsTimeInvariant
 from xarray import Dataset
 
 
-class EAGLEData(AssetsTimeInvariant):
+class Data(AssetsTimeInvariant):
     @task
     def combined_global_and_conus_meshes(self):
         path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
