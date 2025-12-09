@@ -1,32 +1,31 @@
 # EAGLE
 
-## Runtime environment
+## Runtime Environment
 
-To build the EAGLE runtime environment:
+To build the EAGLE runtime virtual environments:
 
 ``` bash
-make build
+make env # alternatively: ./env
 ```
 
 After the build completes successfully, activate the conda installation and the `workflow` environment:
 
 ``` bash
-source runtime/etc/profile.d/conda.sh
+source conda/etc/profile.d/conda.sh
 conda activate workflow
 ```
 
-Other virtual environments created by the build will be activated as necessary by workflow tasks.
+Other virtual environments will be activated as necessary by workflow tasks.
 
 ## Development environment
 
-To install the development code-quality tools:
-
+To install the runtime virtual environments, complete with all required development packagesin each environment:
 
 ``` bash
-make env
+make dev # alternatively: EAGLE_DEV=1 ./env
 ```
 
-This will create the runtime environment if it does not already exist, then install the code-quality packages into the `workflow` environment, after which the following commands will be available:
+After successful completion, the following `make` targets will be available in each environment:
 
 ``` bash
 make format   # format Python code
