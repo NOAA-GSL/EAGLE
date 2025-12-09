@@ -2,12 +2,13 @@ from functools import cached_property
 
 import cf_xarray as cfxr
 import numpy as np
-import xesmf
-from anemoi.datasets.grids import cutout_mask
-from anemoi.graphs.generate.utils import get_coordinates_ordering
+import xesmf  # type: ignore[import-untyped]
+from anemoi.datasets.grids import cutout_mask  # type: ignore[import-untyped]
+from anemoi.graphs.generate.utils import get_coordinates_ordering  # type: ignore[import-untyped]
 from iotaa import Asset, collection, task
-from ufs2arco import sources
+from ufs2arco import sources  # type: ignore[import-untyped]
 from uwtools.api.driver import AssetsTimeInvariant
+from xarray import Dataset
 
 
 class EAGLEData(AssetsTimeInvariant):
@@ -20,9 +21,10 @@ class EAGLEData(AssetsTimeInvariant):
     @task
     def combined_global_and_conus_meshes(self):
         path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
-        yield self.taskname("combined global and CONUS meshes {path}")
+        yield self.taskname("combined global and conus meshes {path}")
         yield Asset(path, path.is_file)
         yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
         gmesh = self._global_latent_grid()
         cmesh = self._conus_latent_grid(self._conus_data_grid)
         coords = self._combined_global_and_conus_meshes(gmesh, cmesh)
@@ -31,10 +33,11 @@ class EAGLEData(AssetsTimeInvariant):
     @task
     def conus_data_grid(self):
         path = self.rundir / "hrrr_15km.nc"
-        yield self.taskname(f"CONUS data grid {path}")
+        yield self.taskname(f"conus data grid {path}")
         yield Asset(path, path.is_file)
         yield None
-        self._conus_data_grid.to_netcdf()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._conus_data_grid.to_netcdf(path)
 
     @task
     def global_data_grid(self):
@@ -42,6 +45,7 @@ class EAGLEData(AssetsTimeInvariant):
         yield self.taskname(f"global data grid {path}")
         yield Asset(path, path.is_file)
         yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
         ds = xesmf.util.grid_global(1, 1, cf=True, lon1=360)
         ds = ds.drop_vars("latitude_longitude")
         ds = ds.sortby("lat", ascending=False)  # GFS goes north -> south
@@ -71,11 +75,13 @@ class EAGLEData(AssetsTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
-        return "EAGLE Data"
+        return "data"
 
     # Private methods
 
-    def _combined_global_and_conus_meshes(self, gmesh, cmesh):
+    def _combined_global_and_conus_meshes(
+        self, gmesh: Dataset, cmesh: Dataset
+    ) -> dict[str, np.ndarray]:
         glon, glat = np.meshgrid(gmesh["lon"], gmesh["lat"])
         mask = cutout_mask(
             lats=cmesh["lat"].values.flatten(),
@@ -92,11 +98,10 @@ class EAGLEData(AssetsTimeInvariant):
         order = get_coordinates_ordering(coords)
         lon = coords[order, 0]
         lat = coords[order, 1]
-        breakpoint()
         return {"lon": lon, "lat": lat}
 
     @cached_property
-    def _conus_data_grid(self):
+    def _conus_data_grid(self) -> Dataset:
         hrrr = sources.AWSHRRRArchive(
             t0={"start": "2015-01-15T00", "end": "2015-01-15T06", "freq": "6h"},
             fhr={"start": 0, "end": 0, "step": 6},
@@ -105,7 +110,7 @@ class EAGLEData(AssetsTimeInvariant):
         hds = hrrr.open_sample_dataset(
             dims={"t0": hrrr.t0[0], "fhr": hrrr.fhr[0]},
             open_static_vars=True,
-            cache_dir=self.rundir / ".cache",
+            cache_dir=str(self.rundir),
         )
         hds = hds.rename({"latitude": "lat", "longitude": "lon"})
         # Get bounds as vertices.
@@ -132,15 +137,15 @@ class EAGLEData(AssetsTimeInvariant):
             x_b=slice(0, None, 5),
             y_b=slice(0, None, 5),
         )
+        cds = cds.drop_vars("orog")
         breakpoint()
-        return cds.drop_vars("orog")
+        return cds
 
-    def _conus_latent_grid(self, cds, trim=10, coarsen=2):
+    def _conus_latent_grid(self, cds: Dataset, trim: int = 10, coarsen: int = 2) -> Dataset:
         mesh = cds[["lat_b", "lon_b"]].isel(
             x_b=slice(trim, -trim - 1, coarsen),
             y_b=slice(trim, -trim - 1, coarsen),
         )
-        breakpoint()
         return mesh.rename(
             {
                 "lat_b": "lat",
@@ -150,7 +155,7 @@ class EAGLEData(AssetsTimeInvariant):
             }
         )
 
-    def _global_latent_grid(self):
+    def _global_latent_grid(self) -> Dataset:
         """
         For the high-res version, this will process the original grid. However, since the data grid
         is on an xESMF generated grid, it works out just fine to generate another xESMF grid here.
