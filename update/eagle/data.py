@@ -12,10 +12,6 @@ from xarray import Dataset
 
 
 class EAGLEData(AssetsTimeInvariant):
-    """
-    PM WRITEME.
-    """
-
     # Tasks
 
     @task

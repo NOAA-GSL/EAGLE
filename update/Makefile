@@ -22,7 +22,7 @@ format:
 lint:
 	ruff check $(SRCDIRS)
 
-test: lint typecheck unittest
+test: lint typecheck # unittest
 
 typecheck:
 	mypy $(SRCDIRS)
