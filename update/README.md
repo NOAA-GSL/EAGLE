@@ -5,7 +5,7 @@
 To build the EAGLE runtime virtual environments:
 
 ``` bash
-make env # alternatively: ./env
+make env # alternatively: ./mkenv
 ```
 
 After the build completes successfully, activate the conda installation and the `base` environment:
@@ -22,7 +22,7 @@ Other virtual environments will be activated as necessary by pipeline steps.
 To install the runtime virtual environments, complete with all required development packagesin each environment:
 
 ``` bash
-make dev # alternatively: EAGLE_DEV=1 ./env
+make devenv # alternatively: EAGLE_DEV=1 ./mkenv
 ```
 
 After successful completion, the following `make` targets will be available in each environment:

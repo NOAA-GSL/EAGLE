@@ -8,10 +8,10 @@ all:
 	$(error Valid targets are: $(TARGETS))
 
 devenv:
-	EAGLE_DEV=1 ./env
+	EAGLE_DEV=1 ./mkenv
 
 env:
-	./env
+	./mkenv
 
 format:
 	@echo "=> Formatting code"
