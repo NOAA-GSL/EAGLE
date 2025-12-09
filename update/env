@@ -148,8 +148,7 @@ pip_install() {
   )
 }
 
-# environments=( anemoi data vx workflow )
-environments=( data )
+environments=( anemoi data vx workflow )
 
 install_conda
 for name in ${environments[*]}; do
