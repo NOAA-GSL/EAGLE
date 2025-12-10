@@ -1,6 +1,6 @@
 ACTIVATE = source conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
-TARGETS  = devenv env format data lint test typecheck
+TARGETS  = data devenv env format lint test typecheck
 
 .ONESHELL:
 
