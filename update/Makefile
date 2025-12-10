@@ -15,10 +15,10 @@ grids_and_meshes:
 	uw execute --module eagle/grids_and_meshes.py --classname GridsAndMeshes --task grids_and_meshes --config-file config.yaml
 
 devenv:
-	EAGLE_DEV=1 ./mkenv
+	EAGLE_DEV=1 ./setup
 
 env:
-	./mkenv
+	./setup
 
 format:
 	@echo "=> Formatting code"
