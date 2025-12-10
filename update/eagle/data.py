@@ -16,6 +16,8 @@ from xarray import Dataset
 
 
 class Data(DriverTimeInvariant):
+    # Tasks
+
     @task
     def combined_global_and_conus_meshes(self):
         path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
@@ -50,8 +52,8 @@ class Data(DriverTimeInvariant):
         ds.to_netcdf(path)
 
     @collection
-    def grids_and_meshes(self):
-        yield self.taskname("grids and meshes")
+    def provisioned_rundir(self):
+        yield self.taskname("provisioned run directory")
         yield [
             self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),

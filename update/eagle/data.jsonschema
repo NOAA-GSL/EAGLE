@@ -1,6 +1,6 @@
 {
   "properties": {
-    "grids_and_meshes": {
+    "data": {
       "additionalProperties": false,
       "properties": {
         "rundir": {
@@ -14,7 +14,7 @@
     }
   },
   "required": [
-    "grids_and_meshes"
+    "data"
   ],
   "type": "object"
 }
