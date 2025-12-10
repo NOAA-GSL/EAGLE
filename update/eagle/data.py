@@ -58,6 +58,7 @@ class Data(DriverTimeInvariant):
             self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),
             self.global_data_grid(),
+            self.runscript(),
         ]
 
     # Public methods

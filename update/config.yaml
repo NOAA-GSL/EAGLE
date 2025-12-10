@@ -1,4 +1,22 @@
 data:
-  rundir: '{{ user.rundir }}'
+  execution:
+    batchargs:
+#       cores: 4
+#       memory: 128g
+      partition: "{{ user.partitions.netaccess }}"
+      rundir: "{{ user.rundir }}"
+      walltime: "02:00:00"
+    envcmds:
+      - source {{ user.conda }}/etc/profile.d/conda.sh
+      - conda activate data
+    executable: ufs2arco gfs.yaml --overwrite
+  rundir: "{{ user.rundir }}"
+platform:
+  account: wrfruc
+  scheduler: slurm
 user:
-  rundir: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update/run
+  base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
+  conda: "{{ user.base }}/conda"
+  partitions:
+    netaccess: service
+  rundir: "{{ user.base }}/run"
