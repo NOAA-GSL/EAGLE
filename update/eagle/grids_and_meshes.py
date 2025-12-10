@@ -1,4 +1,8 @@
+import logging
+from collections.abc import Iterator
+from contextlib import contextmanager
 from functools import cached_property
+from pathlib import Path
 
 import cf_xarray as cfxr
 import numpy as np
@@ -85,11 +89,12 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @cached_property
     def _conus_data_grid(self) -> Dataset:
-        hrrr = sources.AWSHRRRArchive(
-            t0={"start": "2015-01-15T00", "end": "2015-01-15T06", "freq": "6h"},
-            fhr={"start": 0, "end": 0, "step": 6},
-            variables=["orog"],
-        )
+        with logging_to_file(self.rundir / "ufs2arco.log"):
+            hrrr = sources.AWSHRRRArchive(
+                t0={"start": "2015-01-15T00", "end": "2015-01-15T06", "freq": "6h"},
+                fhr={"start": 0, "end": 0, "step": 6},
+                variables=["orog"],
+            )
         hds = hrrr.open_sample_dataset(
             dims={"t0": hrrr.t0[0], "fhr": hrrr.fhr[0]},
             open_static_vars=True,
@@ -143,3 +148,15 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         mesh: Dataset = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
         return mesh.drop_vars("latitude_longitude")
+
+
+@contextmanager
+def logging_to_file(path: Path) -> Iterator:
+    logger = logging.getLogger()
+    stream_handler = logger.handlers[0]
+    logger.removeHandler(stream_handler)
+    file_handler = logging.FileHandler(path)
+    logger.addHandler(file_handler)
+    yield
+    logger.removeHandler(file_handler)
+    logger.addHandler(stream_handler)
