@@ -71,8 +71,8 @@ EOF
   pip_install $name anemoi-inference==0.6.* anemoi-models==0.8.* anemoi-training==0.5.*
 }
 
-conda_create_data() {
-  local name=data
+conda_create_grids_and_meshes() {
+  local name=grids_and_meshes
   conda_env_exists $name && return || true
   conda_create $name impi_rt=2021.13.* "numpy<2.3" ufs2arco=0.17.*
   pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
@@ -142,7 +142,7 @@ pip_install() {
   )
 }
 
-environments=( data ) # anemoi vx
+environments=( grids_and_meshes ) # anemoi vx
 
 install_conda
 for name in ${environments[*]}; do
