@@ -1,6 +1,6 @@
 ACTIVATE = source conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
-TARGETS  = devenv env format grids_and_meshes lint test typecheck
+TARGETS  = devenv env format data lint test typecheck
 
 .ONESHELL:
 
@@ -9,10 +9,10 @@ TARGETS  = devenv env format grids_and_meshes lint test typecheck
 all:
 	$(error Valid targets are: $(TARGETS))
 
-grids_and_meshes:
-	$(ACTIVATE) grids_and_meshes
+data:
+	$(ACTIVATE) data
 	export FI_PSM3_UUID=eagle
-	uw execute --module eagle/grids_and_meshes.py --classname GridsAndMeshes --task grids_and_meshes --config-file config.yaml
+	uw execute --module eagle/data.py --classname Data --task run --config-file config.yaml
 
 devenv:
 	EAGLE_DEV=1 ./setup

@@ -11,11 +11,11 @@ from anemoi.datasets.grids import cutout_mask  # type: ignore[import-untyped]
 from anemoi.graphs.generate.utils import get_coordinates_ordering  # type: ignore[import-untyped]
 from iotaa import Asset, collection, task
 from ufs2arco import sources  # type: ignore[import-untyped]
-from uwtools.api.driver import AssetsTimeInvariant
+from uwtools.api.driver import DriverTimeInvariant
 from xarray import Dataset
 
 
-class GridsAndMeshes(AssetsTimeInvariant):
+class Data(DriverTimeInvariant):
     @task
     def combined_global_and_conus_meshes(self):
         path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
@@ -62,7 +62,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
-        return "grids_and_meshes"
+        return "data"
 
     # Private methods
 
