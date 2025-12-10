@@ -19,7 +19,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
     @task
     def combined_global_and_conus_meshes(self):
         path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
-        yield self.taskname("combined global and conus meshes {path}")
+        yield self.taskname(f"combined global and conus meshes {path}")
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
