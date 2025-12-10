@@ -8,11 +8,15 @@
         },
         "rundir": {
           "type": "string"
+        },
+        "ufs2arco": {
+          "type": "object"
         }
       },
       "required": [
         "execution",
-        "rundir"
+        "rundir",
+        "ufs2arco"
       ],
       "type": "object"
     }

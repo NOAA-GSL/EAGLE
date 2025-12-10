@@ -7,6 +7,7 @@ from pathlib import Path
 import cf_xarray as cfxr
 import numpy as np
 import xesmf  # type: ignore[import-untyped]
+import yaml
 from anemoi.datasets.grids import cutout_mask  # type: ignore[import-untyped]
 from anemoi.graphs.generate.utils import get_coordinates_ordering  # type: ignore[import-untyped]
 from iotaa import Asset, collection, task
@@ -59,7 +60,18 @@ class Data(DriverTimeInvariant):
             self.conus_data_grid(),
             self.global_data_grid(),
             self.runscript(),
+            self.ufs2arco_config("gfs"),
         ]
+
+    @task
+    def ufs2arco_config(self, name: str):
+        yield self.taskname("ufs2arco GFS config")
+        path = self.rundir / "ufs2arco-gfs.yaml"
+        yield Asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w") as f:
+            yaml.dump(self.config["ufs2arco"][name], f)
 
     # Public methods
 
