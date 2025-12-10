@@ -9,7 +9,9 @@ UWTOOLS="uwtools=2.12.*"
 conda_activate() {
   local env=$1
   source $INSTALLDIR/etc/profile.d/conda.sh
+  set +eu
   conda activate $env
+  set -eu
 }
 
 conda_create() {
@@ -99,7 +101,9 @@ conda_install() {
   shift
   (
     conda_activate $name
+    set +eu
     conda install -y -q $@
+    set -eu
   )
 }
 
