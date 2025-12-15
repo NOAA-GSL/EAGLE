@@ -10,6 +10,7 @@ data:
       - source {{ user.conda }}/etc/profile.d/conda.sh
       - conda activate data
     executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+    mpicmd: srun
   rundir: "{{ user.rundir }}"
   ufs2arco:
     gfs:
