@@ -1,8 +1,8 @@
 data:
   execution:
     batchargs:
-      # cores: 4
       # memory: 128g
+      cores: 4
       partition: "{{ user.partitions.netaccess }}"
       rundir: "{{ user.rundir }}"
       walltime: "02:00:00"
@@ -107,5 +107,5 @@ user:
   base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
   conda: "{{ user.base }}/conda"
   partitions:
-    netaccess: service
+    netaccess: u1-service
   rundir: "{{ user.base }}/run"
