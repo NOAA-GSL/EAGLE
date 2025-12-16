@@ -25,20 +25,8 @@ data:
             fhr:
               end: 0
               start: 0
-              step: 6
-            levels:
-              - 100
-              - 150
-              - 200
-              - 250
-              - 300
-              - 400
-              - 500
-              - 600
-              - 700
-              - 850
-              - 925
-              - 1000
+              step: !int '{{ (user.fcst.freq.total_seconds() / 3600) | int }}'
+            levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
             name: gfs_archive
             slices:
               sel:
@@ -72,7 +60,7 @@ data:
             fhr:
               end: 6
               start: 6
-              step: 6
+              step: !int '{{ (user.fcst.freq.total_seconds() / 3600) | int }}'
             name: gfs_archive
             slices:
               sel:
