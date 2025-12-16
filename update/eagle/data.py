@@ -20,7 +20,7 @@ from xarray import Dataset
 
 
 class Data(DriverTimeInvariant):
-    # Tasks
+    # Public tasks
 
     @task
     def combined_global_and_conus_meshes(self):
@@ -63,11 +63,13 @@ class Data(DriverTimeInvariant):
             self.conus_data_grid(),
             self.global_data_grid(),
             self.runscript(),
-            self.ufs2arco_config("gfs"),
+            self._ufs2arco_config("gfs"),
         ]
 
+    # Private tasks
+
     @task
-    def ufs2arco_config(self, name: str):
+    def _ufs2arco_config(self, name: str):
         yield self.taskname("ufs2arco GFS config")
         path = self.rundir / "ufs2arco-gfs.yaml"
         yield Asset(path, path.is_file)
