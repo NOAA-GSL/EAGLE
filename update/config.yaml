@@ -44,9 +44,9 @@ data:
               sel:
                 latitude: [89.9, -89.9]
             t0:
-              end: 2022-02-05T18
+              end: '{{ (user.fcst.end + user.fcst.freq).strftime("%Y-%m-%dT%H") }}'
               freq: '{{ (user.fcst.freq.total_seconds() / 3600) | int }}h'
-              start: 2022-02-01T06
+              start: '{{ (user.fcst.start + user.fcst.freq).strftime("%Y-%m-%dT%H") }}'
             variables:
               # 3D Prognostic
               - gh
@@ -104,8 +104,8 @@ data:
         name: anemoi
         sort_channels_by_levels: True
         statistics_period:
-          end: 2022-02-03T12
-          start: 2022-02-01T06
+          end: 2022-02-03T12 # RELATION TO FCST/ANL?
+          start: 2022-02-01T06 # RELATION TO FCST/ANL?
       transforms:
         horizontal_regrid:
           regridder_kwargs:
