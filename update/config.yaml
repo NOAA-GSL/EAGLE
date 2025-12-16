@@ -68,8 +68,7 @@ data:
               # Forcing
               - lsm
               - orog
-        # Forecast data
-        - source:
+        - source: # Forecast data
             fhr:
               end: 6
               start: 6
