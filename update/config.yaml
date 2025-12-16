@@ -45,7 +45,7 @@ data:
                 latitude: [89.9, -89.9]
             t0:
               end: 2022-02-05T18
-              freq: 6h
+              freq: '{{ (user.fcst.freq.total_seconds() / 3600) | int }}h'
               start: 2022-02-01T06
             variables:
               # 3D Prognostic
@@ -78,9 +78,9 @@ data:
               sel:
                 latitude: [89.9, -89.9]
             t0:
-              end: 2022-02-05T12
-              freq: 6h
-              start: 2022-02-01T00
+              end: '{{ user.fcst.end.strftime("%Y-%m-%dT%H") }}'
+              freq: '{{ (user.fcst.freq.total_seconds() / 3600) | int }}h'
+              start: '{{ user.fcst.start.strftime("%Y-%m-%dT%H") }}'
             variables:
               # Diagnostic
               - accum_tp
@@ -105,7 +105,7 @@ data:
         sort_channels_by_levels: True
         statistics_period:
           end: 2022-02-03T12
-          start: 2022-02-01T06 # make 2015-02-01T06 for full run
+          start: 2022-02-01T06
       transforms:
         horizontal_regrid:
           regridder_kwargs:
@@ -117,6 +117,10 @@ platform:
   account: wrfruc
   scheduler: slurm
 user:
+  fcst:
+    end: !datetime 2022-02-05T12
+    freq: !timedelta 6
+    start: !datetime 2022-02-01T00
   base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
   conda: "{{ user.base }}/conda"
   partitions:
