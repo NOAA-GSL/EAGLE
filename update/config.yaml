@@ -10,6 +10,10 @@ eagle:
     netaccess: u1-service
   rundir: "{{ eagle.base }}/run"
   ufs2arco:
+    dirs:
+      cache: cache/X
+      logs: logs/X
+      zarr: X.zarr
     mover:
       batch_size: 2
       name: datamover
@@ -104,10 +108,7 @@ data:
   rundir: "{{ eagle.rundir }}"
   ufs2arco:
     gfs:
-      directories:
-        cache: cache/gfs
-        logs: logs/gfs
-        zarr: gfs.zarr
+      directories: !dict '{{ eagle.ufs2arco.dirs | replace("X", "gfs") }}'
       mover: !dict '{{ eagle.ufs2arco.mover }}'
       multisource:
         - source: !dict '{{ dict(eagle.ufs2arco.source.anl, name="gfs_archive") }}'
