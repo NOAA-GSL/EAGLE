@@ -17,7 +17,7 @@ eagle:
     mover:
       batch_size: 2
       name: datamover
-    regridder_kwargs: &regridder-kwargs
+    regridder:
       method: conservative
       reuse_weights: True
     slices:
@@ -116,9 +116,7 @@ data:
       target: !dict '{{ eagle.ufs2arco.target }}'
       transforms:
         horizontal_regrid:
-          regridder_kwargs:
-            <<: *regridder-kwargs
-            filename: conservative_719x1440_180x360.nc
+          regridder_kwargs: !dict '{{ dict(eagle.ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
           target_grid_path: global_one_degree.nc
 platform:
   account: wrfruc
