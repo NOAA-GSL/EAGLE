@@ -120,13 +120,19 @@ data:
       directories: !dict '{{ app.ufs2arco.dirs | replace("X", "hrrr") }}'
       mover: !dict '{{ app.ufs2arco.mover }}'
       multisource:
-        - source: !dict '{{ dict(app.ufs2arco.source.anl, name="aws_hrrr_archive") }}'
+        - source: !dict '{{ dict(app.ufs2arco.source.anl, name="aws_hrrr_archive", slices=app.ufs2arco.slices) }}'
+          transforms:
+            rotate_vectors:
+              vector_pairs:
+                - ["u", "v"]
+                - ["u10", "v10"]
+                - ["u80", "v80"]
         - source: !dict '{{ dict(app.ufs2arco.source.fcst, name="aws_hrrr_archive") }}'
       target: !dict '{{ app.ufs2arco.target }}'
       transforms:
         horizontal_regrid:
-          regridder_kwargs: !dict '{{ dict(app.ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
-          target_grid_path: global_one_degree.nc
+          regridder_kwargs: !dict '{{ dict(app.ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
+          target_grid_path: hrrr_15km.nc
 platform:
   account: wrfruc
   scheduler: slurm

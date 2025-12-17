@@ -15,7 +15,6 @@ from ufs2arco import sources  # type: ignore[import-untyped]
 from uwtools.api.driver import DriverTimeInvariant
 from xarray import Dataset
 
-
 # PM _conus_data_grid might need mutex
 
 
@@ -59,25 +58,21 @@ class Data(DriverTimeInvariant):
     def provisioned_rundir(self):
         yield self.taskname("provisioned run directory")
         yield [
-            self._ufs2arco_config("gfs"),
-            self._ufs2arco_config("hrrr"),
             self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),
             self.global_data_grid(),
             self.runscript(),
+            self.ufs2arco_config_gfs(),
+            self.ufs2arco_config_hrrr(),
         ]
 
-    # Private tasks
+    @task
+    def ufs2arco_config_gfs(self):
+        return self._ufs2arco_config("gfs")
 
     @task
-    def _ufs2arco_config(self, name: str):
-        yield self.taskname("ufs2arco GFS config")
-        path = self.rundir / "ufs2arco-gfs.yaml"
-        yield Asset(path, path.is_file)
-        yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w") as f:
-            yaml.dump(self.config["ufs2arco"][name], f)
+    def ufs2arco_config_hrrr(self):
+        return self._ufs2arco_config("hrrr")
 
     # Public methods
 
@@ -169,6 +164,15 @@ class Data(DriverTimeInvariant):
         """
         mesh: Dataset = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
         return mesh.drop_vars("latitude_longitude")
+
+    def _ufs2arco_config(self, name: str) -> Iterator:
+        yield self.taskname(f"ufs2arco {name} config")
+        path = self.rundir / f"ufs2arco-{name}.yaml"
+        yield Asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w") as f:
+            yaml.dump(self.config["ufs2arco"][name], f)
 
 
 @contextmanager
