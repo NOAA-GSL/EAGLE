@@ -20,7 +20,7 @@ eagle:
       sel:
         latitude: [89.9, -89.9]
     source:
-      anl: &source-anl
+      anl:
         fhr:
           end: 0
           start: 0
@@ -32,7 +32,7 @@ eagle:
           freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
           start: '{{ (eagle.fcst.start + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
         variables: !list '{{ eagle.variables.anl }}'
-      fcst: &source-fcst
+      fcst:
         fhr:
           end: 6
           start: 6
@@ -110,12 +110,8 @@ data:
         zarr: gfs.zarr
       mover: !dict '{{ eagle.ufs2arco.mover }}'
       multisource:
-        - source:
-            <<: *source-anl
-            name: gfs_archive
-        - source:
-            <<: *source-fcst
-            name: gfs_archive
+        - source: !dict '{{ dict(eagle.ufs2arco.source.anl, name="gfs_archive") }}'
+        - source: !dict '{{ dict(eagle.ufs2arco.source.fcst, name="gfs_archive") }}'
       target: !dict '{{ eagle.ufs2arco.target }}'
       transforms:
         horizontal_regrid:
