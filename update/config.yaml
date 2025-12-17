@@ -1,14 +1,14 @@
-eagle:
+app:
   fcst:
     end: !datetime 2022-02-05T12
     freq: !timedelta 6
     start: !datetime 2022-02-01T00
   base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
-  conda: "{{ eagle.base }}/conda"
+  conda: "{{ app.base }}/conda"
   levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   partitions:
     netaccess: u1-service
-  rundir: "{{ eagle.base }}/run"
+  rundir: "{{ app.base }}/run"
   ufs2arco:
     dirs:
       cache: cache/X
@@ -28,23 +28,23 @@ eagle:
         fhr:
           end: 0
           start: 0
-          step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
-        levels: !list '{{ eagle.levels }}'
+          step: !int '{{ (app.fcst.freq.total_seconds() / 3600) | int }}'
+        levels: !list '{{ app.levels }}'
         t0:
-          end: '{{ (eagle.fcst.end + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
-          freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
-          start: '{{ (eagle.fcst.start + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
-        variables: !list '{{ eagle.variables.anl }}'
+          end: '{{ (app.fcst.end + app.fcst.freq).strftime("%Y-%m-%dT%H") }}'
+          freq: '{{ (app.fcst.freq.total_seconds() / 3600) | int }}h'
+          start: '{{ (app.fcst.start + app.fcst.freq).strftime("%Y-%m-%dT%H") }}'
+        variables: !list '{{ app.variables.anl }}'
       fcst:
         fhr:
           end: 6
           start: 6
-          step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
+          step: !int '{{ (app.fcst.freq.total_seconds() / 3600) | int }}'
         t0:
-          end: '{{ eagle.fcst.end.strftime("%Y-%m-%dT%H") }}'
-          freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
-          start: '{{ eagle.fcst.start.strftime("%Y-%m-%dT%H") }}'
-        variables: !list '{{ eagle.variables.fcst }}'
+          end: '{{ app.fcst.end.strftime("%Y-%m-%dT%H") }}'
+          freq: '{{ (app.fcst.freq.total_seconds() / 3600) | int }}h'
+          start: '{{ app.fcst.start.strftime("%Y-%m-%dT%H") }}'
+        variables: !list '{{ app.variables.fcst }}'
     target:
       chunks:
         cell: -1
@@ -96,25 +96,25 @@ data:
   execution:
     batchargs:
       cores: 4
-      partition: "{{ eagle.partitions.netaccess }}"
-      rundir: "{{ eagle.rundir }}"
+      partition: "{{ app.partitions.netaccess }}"
+      rundir: "{{ app.rundir }}"
       walltime: "02:00:00"
     envcmds:
-      - source {{ eagle.conda }}/etc/profile.d/conda.sh
+      - source {{ app.conda }}/etc/profile.d/conda.sh
       - conda activate data
     executable: ufs2arco ufs2arco-gfs.yaml --overwrite
-  rundir: "{{ eagle.rundir }}"
+  rundir: "{{ app.rundir }}"
   ufs2arco:
     gfs:
-      directories: !dict '{{ eagle.ufs2arco.dirs | replace("X", "gfs") }}'
-      mover: !dict '{{ eagle.ufs2arco.mover }}'
+      directories: !dict '{{ app.ufs2arco.dirs | replace("X", "gfs") }}'
+      mover: !dict '{{ app.ufs2arco.mover }}'
       multisource:
-        - source: !dict '{{ dict(eagle.ufs2arco.source.anl, name="gfs_archive", slices=eagle.ufs2arco.slices) }}'
-        - source: !dict '{{ dict(eagle.ufs2arco.source.fcst, name="gfs_archive", slices=eagle.ufs2arco.slices) }}'
-      target: !dict '{{ eagle.ufs2arco.target }}'
+        - source: !dict '{{ dict(app.ufs2arco.source.anl, name="gfs_archive", slices=app.ufs2arco.slices) }}'
+        - source: !dict '{{ dict(app.ufs2arco.source.fcst, name="gfs_archive", slices=app.ufs2arco.slices) }}'
+      target: !dict '{{ app.ufs2arco.target }}'
       transforms:
         horizontal_regrid:
-          regridder_kwargs: !dict '{{ dict(eagle.ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
+          regridder_kwargs: !dict '{{ dict(app.ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
           target_grid_path: global_one_degree.nc
 platform:
   account: wrfruc
