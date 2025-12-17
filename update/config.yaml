@@ -3,14 +3,14 @@ data:
     batchargs:
       # memory: 128g
       cores: 4
-      partition: "{{ user.partitions.netaccess }}"
-      rundir: "{{ user.rundir }}"
+      partition: "{{ eagle.partitions.netaccess }}"
+      rundir: "{{ eagle.rundir }}"
       walltime: "02:00:00"
     envcmds:
-      - source {{ user.conda }}/etc/profile.d/conda.sh
+      - source {{ eagle.conda }}/etc/profile.d/conda.sh
       - conda activate data
     executable: ufs2arco ufs2arco-gfs.yaml --overwrite
-  rundir: "{{ user.rundir }}"
+  rundir: "{{ eagle.rundir }}"
   ufs2arco:
     gfs:
       directories:
@@ -21,55 +21,31 @@ data:
         batch_size: 2
         name: datamover
       multisource:
-        - source: # Analysis data
+        - source: # Analysis
             fhr:
               end: 0
               start: 0
-              step: !int '{{ (user.fcst.freq.total_seconds() / 3600) | int }}'
-            levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+              step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
+            levels: !list '{{ eagle.levels }}'
             name: gfs_archive
-            slices: &slices
-              sel:
-                latitude: [89.9, -89.9]
+            slices: !dict '{{ eagle.ufs2arco.slices }}'
             t0:
-              end: '{{ (user.fcst.end + user.fcst.freq).strftime("%Y-%m-%dT%H") }}'
-              freq: '{{ (user.fcst.freq.total_seconds() / 3600) | int }}h'
-              start: '{{ (user.fcst.start + user.fcst.freq).strftime("%Y-%m-%dT%H") }}'
-            variables:
-              # 3D Prognostic
-              - gh
-              - u
-              - v
-              - w
-              - t
-              - q
-              # 2D Prognostic
-              - sp
-              - u10
-              - v10
-              - t2m
-              - t_surface
-              - sh2
-              # Diagnostic
-              - u80
-              - v80
-              # Forcing
-              - lsm
-              - orog
-        - source: # Forecast data
+              end: '{{ (eagle.fcst.end + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
+              freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
+              start: '{{ (eagle.fcst.start + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
+            variables: !list '{{ eagle.variables.anl }}'
+        - source: # Forecast
             fhr:
               end: 6
               start: 6
-              step: !int '{{ (user.fcst.freq.total_seconds() / 3600) | int }}'
+              step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
             name: gfs_archive
-            slices: *slices
+            slices: !dict '{{ eagle.ufs2arco.slices }}'
             t0:
-              end: '{{ user.fcst.end.strftime("%Y-%m-%dT%H") }}'
-              freq: '{{ (user.fcst.freq.total_seconds() / 3600) | int }}h'
-              start: '{{ user.fcst.start.strftime("%Y-%m-%dT%H") }}'
-            variables:
-              # Diagnostic
-              - accum_tp
+              end: '{{ eagle.fcst.end.strftime("%Y-%m-%dT%H") }}'
+              freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
+              start: '{{ eagle.fcst.start.strftime("%Y-%m-%dT%H") }}'
+            variables: !list '{{ eagle.variables.fcst }}'
       target:
         chunks:
           cell: -1
@@ -99,16 +75,46 @@ data:
             method: conservative
             reuse_weights: True
           target_grid_path: global_one_degree.nc
-platform:
-  account: wrfruc
-  scheduler: slurm
-user:
+eagle:
   fcst:
     end: !datetime 2022-02-05T12
     freq: !timedelta 6
     start: !datetime 2022-02-01T00
   base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
-  conda: "{{ user.base }}/conda"
+  conda: "{{ eagle.base }}/conda"
+  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   partitions:
     netaccess: u1-service
-  rundir: "{{ user.base }}/run"
+  rundir: "{{ eagle.base }}/run"
+  ufs2arco:
+    slices:
+      sel:
+        latitude: [89.9, -89.9]
+  variables:
+    anl:
+      # 3D Prognostic
+      - gh
+      - u
+      - v
+      - w
+      - t
+      - q
+      # 2D Prognostic
+      - sp
+      - u10
+      - v10
+      - t2m
+      - t_surface
+      - sh2
+      # Diagnostic
+      - u80
+      - v80
+      # Forcing
+      - lsm
+      - orog
+    fcst:
+      # Diagnostic
+      - accum_tp
+platform:
+  account: wrfruc
+  scheduler: slurm
