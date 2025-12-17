@@ -45,28 +45,7 @@ data:
               freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
               start: '{{ eagle.fcst.start.strftime("%Y-%m-%dT%H") }}'
             variables: !list '{{ eagle.variables.fcst }}'
-      target:
-        chunks:
-          cell: -1
-          ensemble: 1
-          time: 1
-          variable: -1
-        compute_temporal_residual_statistics: True
-        forcings:
-          - cos_latitude
-          - sin_latitude
-          - cos_longitude
-          - sin_longitude
-          - cos_julian_day
-          - sin_julian_day
-          - cos_local_time
-          - sin_local_time
-          - insolation
-        name: anemoi
-        sort_channels_by_levels: True
-        statistics_period:
-          end: 2022-02-03T12 # RELATION TO FCST/ANL?
-          start: 2022-02-01T06 # RELATION TO FCST/ANL?
+      target: !dict '{{ eagle.ufs2arco.target }}'
       transforms:
         horizontal_regrid:
           regridder_kwargs:
@@ -89,6 +68,28 @@ eagle:
     slices:
       sel:
         latitude: [89.9, -89.9]
+    target:
+      chunks:
+        cell: -1
+        ensemble: 1
+        time: 1
+        variable: -1
+      compute_temporal_residual_statistics: True
+      forcings:
+        - cos_latitude
+        - sin_latitude
+        - cos_longitude
+        - sin_longitude
+        - cos_julian_day
+        - sin_julian_day
+        - cos_local_time
+        - sin_local_time
+        - insolation
+      name: anemoi
+      sort_channels_by_levels: True
+      statistics_period:
+        end: 2022-02-03T12 # RELATION TO FCST/ANL?
+        start: 2022-02-01T06 # RELATION TO FCST/ANL?
   variables:
     anl:
       # 3D Prognostic
