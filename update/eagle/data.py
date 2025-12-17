@@ -59,11 +59,12 @@ class Data(DriverTimeInvariant):
     def provisioned_rundir(self):
         yield self.taskname("provisioned run directory")
         yield [
+            self._ufs2arco_config("gfs"),
+            self._ufs2arco_config("hrrr"),
             self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),
             self.global_data_grid(),
             self.runscript(),
-            self._ufs2arco_config("gfs"),
         ]
 
     # Private tasks

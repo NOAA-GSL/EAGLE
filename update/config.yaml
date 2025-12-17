@@ -30,7 +30,6 @@ eagle:
           start: 0
           step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
         levels: !list '{{ eagle.levels }}'
-        slices: !dict '{{ eagle.ufs2arco.slices }}'
         t0:
           end: '{{ (eagle.fcst.end + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
           freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
@@ -41,7 +40,6 @@ eagle:
           end: 6
           start: 6
           step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
-        slices: !dict '{{ eagle.ufs2arco.slices }}'
         t0:
           end: '{{ eagle.fcst.end.strftime("%Y-%m-%dT%H") }}'
           freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
@@ -111,8 +109,8 @@ data:
       directories: !dict '{{ eagle.ufs2arco.dirs | replace("X", "gfs") }}'
       mover: !dict '{{ eagle.ufs2arco.mover }}'
       multisource:
-        - source: !dict '{{ dict(eagle.ufs2arco.source.anl, name="gfs_archive") }}'
-        - source: !dict '{{ dict(eagle.ufs2arco.source.fcst, name="gfs_archive") }}'
+        - source: !dict '{{ dict(eagle.ufs2arco.source.anl, name="gfs_archive", slices=eagle.ufs2arco.slices) }}'
+        - source: !dict '{{ dict(eagle.ufs2arco.source.fcst, name="gfs_archive", slices=eagle.ufs2arco.slices) }}'
       target: !dict '{{ eagle.ufs2arco.target }}'
       transforms:
         horizontal_regrid:
