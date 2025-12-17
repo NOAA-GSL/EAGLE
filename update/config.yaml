@@ -1,58 +1,3 @@
-data:
-  execution:
-    batchargs:
-      cores: 4
-      partition: "{{ eagle.partitions.netaccess }}"
-      rundir: "{{ eagle.rundir }}"
-      walltime: "02:00:00"
-    envcmds:
-      - source {{ eagle.conda }}/etc/profile.d/conda.sh
-      - conda activate data
-    executable: ufs2arco ufs2arco-gfs.yaml --overwrite
-  rundir: "{{ eagle.rundir }}"
-  ufs2arco:
-    gfs:
-      directories:
-        cache: cache/gfs
-        logs: logs/gfs
-        zarr: gfs.zarr
-      mover:
-        batch_size: 2
-        name: datamover
-      multisource:
-        - source: # Analysis
-            fhr:
-              end: 0
-              start: 0
-              step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
-            levels: !list '{{ eagle.levels }}'
-            name: gfs_archive
-            slices: !dict '{{ eagle.ufs2arco.slices }}'
-            t0:
-              end: '{{ (eagle.fcst.end + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
-              freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
-              start: '{{ (eagle.fcst.start + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
-            variables: !list '{{ eagle.variables.anl }}'
-        - source: # Forecast
-            fhr:
-              end: 6
-              start: 6
-              step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
-            name: gfs_archive
-            slices: !dict '{{ eagle.ufs2arco.slices }}'
-            t0:
-              end: '{{ eagle.fcst.end.strftime("%Y-%m-%dT%H") }}'
-              freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
-              start: '{{ eagle.fcst.start.strftime("%Y-%m-%dT%H") }}'
-            variables: !list '{{ eagle.variables.fcst }}'
-      target: !dict '{{ eagle.ufs2arco.target }}'
-      transforms:
-        horizontal_regrid:
-          regridder_kwargs:
-            filename: conservative_719x1440_180x360.nc
-            method: conservative
-            reuse_weights: True
-          target_grid_path: global_one_degree.nc
 eagle:
   fcst:
     end: !datetime 2022-02-05T12
@@ -115,6 +60,61 @@ eagle:
     fcst:
       # Diagnostic
       - accum_tp
+data:
+  execution:
+    batchargs:
+      cores: 4
+      partition: "{{ eagle.partitions.netaccess }}"
+      rundir: "{{ eagle.rundir }}"
+      walltime: "02:00:00"
+    envcmds:
+      - source {{ eagle.conda }}/etc/profile.d/conda.sh
+      - conda activate data
+    executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+  rundir: "{{ eagle.rundir }}"
+  ufs2arco:
+    gfs:
+      directories:
+        cache: cache/gfs
+        logs: logs/gfs
+        zarr: gfs.zarr
+      mover:
+        batch_size: 2
+        name: datamover
+      multisource:
+        - source: # Analysis
+            fhr:
+              end: 0
+              start: 0
+              step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
+            levels: !list '{{ eagle.levels }}'
+            name: gfs_archive
+            slices: !dict '{{ eagle.ufs2arco.slices }}'
+            t0:
+              end: '{{ (eagle.fcst.end + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
+              freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
+              start: '{{ (eagle.fcst.start + eagle.fcst.freq).strftime("%Y-%m-%dT%H") }}'
+            variables: !list '{{ eagle.variables.anl }}'
+        - source: # Forecast
+            fhr:
+              end: 6
+              start: 6
+              step: !int '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}'
+            name: gfs_archive
+            slices: !dict '{{ eagle.ufs2arco.slices }}'
+            t0:
+              end: '{{ eagle.fcst.end.strftime("%Y-%m-%dT%H") }}'
+              freq: '{{ (eagle.fcst.freq.total_seconds() / 3600) | int }}h'
+              start: '{{ eagle.fcst.start.strftime("%Y-%m-%dT%H") }}'
+            variables: !list '{{ eagle.variables.fcst }}'
+      target: !dict '{{ eagle.ufs2arco.target }}'
+      transforms:
+        horizontal_regrid:
+          regridder_kwargs:
+            filename: conservative_719x1440_180x360.nc
+            method: conservative
+            reuse_weights: True
+          target_grid_path: global_one_degree.nc
 platform:
   account: wrfruc
   scheduler: slurm
