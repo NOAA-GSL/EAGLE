@@ -11,8 +11,7 @@ on:
 jobs:
   mypy:
     name: Run mypy type checker
-    runs-on:
-      labels: ubuntu-20.04-16core
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
