@@ -1,7 +1,6 @@
 data:
   execution:
     batchargs:
-      # memory: 128g
       cores: 4
       partition: "{{ eagle.partitions.netaccess }}"
       rundir: "{{ eagle.rundir }}"
