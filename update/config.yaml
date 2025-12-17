@@ -116,6 +116,17 @@ data:
         horizontal_regrid:
           regridder_kwargs: !dict '{{ dict(app.ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
           target_grid_path: global_one_degree.nc
+    hrrr:
+      directories: !dict '{{ app.ufs2arco.dirs | replace("X", "hrrr") }}'
+      mover: !dict '{{ app.ufs2arco.mover }}'
+      multisource:
+        - source: !dict '{{ dict(app.ufs2arco.source.anl, name="aws_hrrr_archive") }}'
+        - source: !dict '{{ dict(app.ufs2arco.source.fcst, name="aws_hrrr_archive") }}'
+      target: !dict '{{ app.ufs2arco.target }}'
+      transforms:
+        horizontal_regrid:
+          regridder_kwargs: !dict '{{ dict(app.ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
+          target_grid_path: global_one_degree.nc
 platform:
   account: wrfruc
   scheduler: slurm
