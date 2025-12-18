@@ -9,64 +9,6 @@ app:
     start: !datetime 2022-02-01T00
     step: !timedelta 6
     stop: !datetime 2022-02-05T12
-  ufs2arco:
-    dirs:
-      cache: cache/X
-      logs: logs/X
-      zarr: X.zarr
-    mover:
-      batch_size: 2
-      name: datamover
-    regridder:
-      method: conservative
-      reuse_weights: True
-    slices:
-      sel:
-        latitude: [89.9, -89.9]
-    source:
-      anl:
-        fhr:
-          end: 0
-          start: 0
-          step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
-        levels: !list '{{ app.levels }}'
-        t0:
-          end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
-          freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
-          start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
-        variables: !list '{{ app.variables.anl }}'
-      fcst:
-        fhr:
-          end: 6
-          start: 6
-          step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
-        t0:
-          end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
-          freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
-          start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
-        variables: !list '{{ app.variables.fcst }}'
-    target:
-      chunks:
-        cell: -1
-        ensemble: 1
-        time: 1
-        variable: -1
-      compute_temporal_residual_statistics: True
-      forcings:
-        - cos_latitude
-        - sin_latitude
-        - cos_longitude
-        - sin_longitude
-        - cos_julian_day
-        - sin_julian_day
-        - cos_local_time
-        - sin_local_time
-        - insolation
-      name: anemoi
-      sort_channels_by_levels: True
-      statistics_period:
-        end: 2022-02-03T12 # RELATION TO FCST/ANL?
-        start: 2022-02-01T06 # RELATION TO FCST/ANL?
   variables:
     anl:
       # 3D Prognostic
@@ -106,33 +48,95 @@ data:
   rundir: "{{ app.rundir }}"
   ufs2arco:
     gfs:
-      directories: !dict '{{ app.ufs2arco.dirs | replace("X", "gfs") }}'
-      mover: !dict '{{ app.ufs2arco.mover }}'
+      directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
+      mover: !dict '{{ ufs2arco.mover }}'
       multisource:
-        - source: !dict '{{ dict(app.ufs2arco.source.anl, name="gfs_archive", slices=app.ufs2arco.slices) }}'
-        - source: !dict '{{ dict(app.ufs2arco.source.fcst, name="gfs_archive", slices=app.ufs2arco.slices) }}'
-      target: !dict '{{ app.ufs2arco.target }}'
+        # Analysis
+        - source: !dict '{{ dict(ufs2arco.source.anl, name="gfs_archive", slices=ufs2arco.slices) }}'
+        # Forecast
+        - source: !dict '{{ dict(ufs2arco.source.fcst, name="gfs_archive", slices=ufs2arco.slices) }}'
+      target: !dict '{{ ufs2arco.target }}'
       transforms:
         horizontal_regrid:
-          regridder_kwargs: !dict '{{ dict(app.ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
+          regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
           target_grid_path: global_one_degree.nc
     hrrr:
-      directories: !dict '{{ app.ufs2arco.dirs | replace("X", "hrrr") }}'
-      mover: !dict '{{ app.ufs2arco.mover }}'
+      directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
+      mover: !dict '{{ ufs2arco.mover }}'
       multisource:
-        - source: !dict '{{ dict(app.ufs2arco.source.anl, name="aws_hrrr_archive", slices=app.ufs2arco.slices) }}'
+        # Analysis
+        - source: !dict '{{ dict(ufs2arco.source.anl, name="aws_hrrr_archive") }}'
           transforms:
             rotate_vectors:
               vector_pairs:
                 - ["u", "v"]
                 - ["u10", "v10"]
                 - ["u80", "v80"]
-        - source: !dict '{{ dict(app.ufs2arco.source.fcst, name="aws_hrrr_archive") }}'
-      target: !dict '{{ app.ufs2arco.target }}'
+        # Forecast
+        - source: !dict '{{ dict(ufs2arco.source.fcst, name="aws_hrrr_archive") }}'
+      target: !dict '{{ ufs2arco.target }}'
       transforms:
         horizontal_regrid:
-          regridder_kwargs: !dict '{{ dict(app.ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
+          regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
           target_grid_path: hrrr_15km.nc
 platform:
   account: wrfruc
   scheduler: slurm
+ufs2arco:
+  dirs:
+    cache: cache/X
+    logs: logs/X
+    zarr: X.zarr
+  mover:
+    batch_size: 2
+    name: datamover
+  regridder:
+    method: conservative
+    reuse_weights: True
+  slices:
+    sel:
+      latitude: [89.9, -89.9]
+  source:
+    anl:
+      fhr:
+        end: 0
+        start: 0
+        step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+      levels: !list '{{ app.levels }}'
+      t0:
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ app.variables.anl }}'
+    fcst:
+      fhr:
+        end: 6
+        start: 6
+        step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+      t0:
+        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ app.variables.fcst }}'
+  target:
+    chunks:
+      cell: -1
+      ensemble: 1
+      time: 1
+      variable: -1
+    compute_temporal_residual_statistics: True
+    forcings:
+      - cos_latitude
+      - sin_latitude
+      - cos_longitude
+      - sin_longitude
+      - cos_julian_day
+      - sin_julian_day
+      - cos_local_time
+      - sin_local_time
+      - insolation
+    name: anemoi
+    sort_channels_by_levels: True
+    statistics_period:
+      end: 2022-02-03T12 # RELATION TO FCST/ANL?
+      start: 2022-02-01T06 # RELATION TO FCST/ANL?
