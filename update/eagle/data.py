@@ -117,7 +117,7 @@ class Data(DriverTimeInvariant):
         hds = hrrr.open_sample_dataset(
             dims={"t0": hrrr.t0[0], "fhr": hrrr.fhr[0]},
             open_static_vars=True,
-            cache_dir=str(self.rundir),
+            cache_dir=str(self.rundir / "cache" / "conus-data-grid"),
         )
         hds = hds.rename({"latitude": "lat", "longitude": "lon"})
         # Get bounds as vertices.
