@@ -10,7 +10,7 @@ app:
     step: !timedelta 6
     stop: !datetime 2022-02-05T12
   variables:
-    anl:
+    analysis:
       # 3D Prognostic
       - gh
       - u
@@ -31,7 +31,7 @@ app:
       # Forcing
       - lsm
       - orog
-    fcst:
+    forecast:
       # Diagnostic
       - accum_tp
 data:
@@ -51,10 +51,8 @@ data:
       directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
       mover: !dict '{{ ufs2arco.mover }}'
       multisource:
-        # Analysis
-        - source: !dict '{{ dict(ufs2arco.source.anl, name="gfs_archive", slices=ufs2arco.slices) }}'
-        # Forecast
-        - source: !dict '{{ dict(ufs2arco.source.fcst, name="gfs_archive", slices=ufs2arco.slices) }}'
+        - source: !dict '{{ dict(ufs2arco.source.analysis, name="gfs_archive", slices=ufs2arco.slices) }}'
+        - source: !dict '{{ dict(ufs2arco.source.forecast, name="gfs_archive", slices=ufs2arco.slices) }}'
       target: !dict '{{ ufs2arco.target }}'
       transforms:
         horizontal_regrid:
@@ -64,16 +62,14 @@ data:
       directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
       mover: !dict '{{ ufs2arco.mover }}'
       multisource:
-        # Analysis
-        - source: !dict '{{ dict(ufs2arco.source.anl, name="aws_hrrr_archive") }}'
+        - source: !dict '{{ dict(ufs2arco.source.analysis, name="aws_hrrr_archive") }}'
           transforms:
             rotate_vectors:
               vector_pairs:
                 - ["u", "v"]
                 - ["u10", "v10"]
                 - ["u80", "v80"]
-        # Forecast
-        - source: !dict '{{ dict(ufs2arco.source.fcst, name="aws_hrrr_archive") }}'
+        - source: !dict '{{ dict(ufs2arco.source.forecast, name="aws_hrrr_archive") }}'
       target: !dict '{{ ufs2arco.target }}'
       transforms:
         horizontal_regrid:
@@ -97,7 +93,7 @@ ufs2arco:
     sel:
       latitude: [89.9, -89.9]
   source:
-    anl:
+    analysis:
       fhr:
         end: 0
         start: 0
@@ -107,8 +103,8 @@ ufs2arco:
         end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
         freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
         start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ app.variables.anl }}'
-    fcst:
+      variables: !list '{{ app.variables.analysis }}'
+    forecast:
       fhr:
         end: 6
         start: 6
@@ -117,7 +113,7 @@ ufs2arco:
         end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
         freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
         start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ app.variables.fcst }}'
+      variables: !list '{{ app.variables.forecast }}'
   target:
     chunks:
       cell: -1
