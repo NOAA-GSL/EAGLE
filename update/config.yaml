@@ -4,6 +4,9 @@ app:
   levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   partitions:
     netaccess: u1-service
+  platform: &platform
+    account: wrfruc
+    scheduler: slurm
   rundir: "{{ app.base }}/run"
   time:
     start: !datetime 2022-02-01T00
@@ -75,9 +78,7 @@ data:
         horizontal_regrid:
           regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
           target_grid_path: hrrr_15km.nc
-platform:
-  account: wrfruc
-  scheduler: slurm
+platform: *platform
 ufs2arco:
   dirs:
     cache: cache/X
