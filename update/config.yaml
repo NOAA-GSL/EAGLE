@@ -1,8 +1,8 @@
 app:
   fcst:
-    end: !datetime 2022-02-05T12
-    freq: !timedelta 6
     start: !datetime 2022-02-01T00
+    step: !timedelta 6
+    stop: !datetime 2022-02-05T12
   base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
   conda: "{{ app.base }}/conda"
   levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
@@ -28,21 +28,21 @@ app:
         fhr:
           end: 0
           start: 0
-          step: !int '{{ (app.fcst.freq.total_seconds() / 3600) | int }}'
+          step: !int '{{ (app.fcst.step.total_seconds() / 3600) | int }}'
         levels: !list '{{ app.levels }}'
         t0:
-          end: '{{ (app.fcst.end + app.fcst.freq).strftime("%Y-%m-%dT%H") }}'
-          freq: '{{ (app.fcst.freq.total_seconds() / 3600) | int }}h'
-          start: '{{ (app.fcst.start + app.fcst.freq).strftime("%Y-%m-%dT%H") }}'
+          end: '{{ (app.fcst.stop + app.fcst.step).strftime("%Y-%m-%dT%H") }}'
+          freq: '{{ (app.fcst.step.total_seconds() / 3600) | int }}h'
+          start: '{{ (app.fcst.start + app.fcst.step).strftime("%Y-%m-%dT%H") }}'
         variables: !list '{{ app.variables.anl }}'
       fcst:
         fhr:
           end: 6
           start: 6
-          step: !int '{{ (app.fcst.freq.total_seconds() / 3600) | int }}'
+          step: !int '{{ (app.fcst.step.total_seconds() / 3600) | int }}'
         t0:
-          end: '{{ app.fcst.end.strftime("%Y-%m-%dT%H") }}'
-          freq: '{{ (app.fcst.freq.total_seconds() / 3600) | int }}h'
+          end: '{{ app.fcst.stop.strftime("%Y-%m-%dT%H") }}'
+          freq: '{{ (app.fcst.step.total_seconds() / 3600) | int }}h'
           start: '{{ app.fcst.start.strftime("%Y-%m-%dT%H") }}'
         variables: !list '{{ app.variables.fcst }}'
     target:
