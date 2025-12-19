@@ -19,6 +19,9 @@ from xarray import Dataset
 
 
 class Data(DriverTimeInvariant):
+
+    CONUS_DATA_GRID_FN_PREFIX = "hrrr_15km"
+
     # Public tasks
 
     @task
@@ -35,7 +38,7 @@ class Data(DriverTimeInvariant):
 
     @task
     def conus_data_grid(self):
-        path = self.rundir / "hrrr_15km.nc"
+        path = self.rundir / f"{CONUS_DATA_GRID_FN_PREFIX}.nc"
         yield self.taskname(f"conus data grid {path}")
         yield Asset(path, path.is_file)
         yield None
@@ -108,7 +111,7 @@ class Data(DriverTimeInvariant):
 
     @cached_property
     def _conus_data_grid(self) -> Dataset:
-        with logging_to_file(self.rundir / "ufs2arco.log"):
+        with logging_to_file(self.rundir / f"{CONUS_DATA_GRID_FN_PREFIX}.log"):
             hrrr = sources.AWSHRRRArchive(
                 t0={"start": "2015-01-15T00", "end": "2015-01-15T06", "freq": "6h"},
                 fhr={"start": 0, "end": 0, "step": 6},
