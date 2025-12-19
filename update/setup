@@ -74,7 +74,7 @@ EOF
 conda_create_data() {
   local name=data
   conda_env_exists $name && return || true
-  conda_create $name impi_rt=2021.13.* "numpy<2.3" types-pyyaml ufs2arco=0.18.*
+  conda_create $name impi_rt=2021.13.* mpi4py=4.1.* "numpy<2.3" types-pyyaml ufs2arco=0.18.*
   pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
 }
 
