@@ -85,7 +85,7 @@ ufs2arco:
   dirs:
     cache: cache/X
     logs: logs/X
-    zarr: zarr.X
+    zarr: X.zarr
   mover:
     name: mpidatamover
   regridder:
