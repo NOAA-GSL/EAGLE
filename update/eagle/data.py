@@ -19,7 +19,6 @@ from xarray import Dataset
 
 
 class Data(DriverTimeInvariant):
-
     CONUS_DATA_GRID_FN_PREFIX = "hrrr_15km"
 
     # Public tasks

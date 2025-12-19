@@ -27,9 +27,11 @@ format:
 	@ruff check --select I --fix $(SRCDIRS)
 
 lint:
+	@echo "=> Linting code"
 	ruff check $(SRCDIRS)
 
 test: lint typecheck
 
 typecheck:
+	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)
