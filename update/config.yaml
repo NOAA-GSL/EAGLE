@@ -86,8 +86,7 @@ ufs2arco:
     logs: logs/X
     zarr: zarr.X
   mover:
-    batch_size: 2
-    name: datamover
+    name: mpidatamover
   regridder:
     method: conservative
     reuse_weights: True
