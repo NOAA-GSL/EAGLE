@@ -41,7 +41,7 @@ data:
   execution:
     batchargs:
       cores: 4
-      memory: 128G
+      memory: 10G
       partition: '{{ app.partitions.netaccess }}'
       rundir: '{{ app.rundir }}/data'
       walltime: '02:00:00'
