@@ -1,5 +1,5 @@
 app:
-  base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
+  base: /scratch3/BMC/hmtb/Paul.Madden/EAGLE/update
   conda: '{{ app.base }}/conda'
   levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   partitions:
