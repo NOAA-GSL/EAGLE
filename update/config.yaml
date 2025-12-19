@@ -43,14 +43,14 @@ data:
       cores: 4
       memory: 10G
       partition: '{{ app.partitions.netaccess }}'
-      rundir: '{{ app.rundir }}/data'
+      rundir: '{{ app.rundir }}'
       walltime: '02:00:00'
     envcmds:
       - source {{ app.conda }}/etc/profile.d/conda.sh
       - conda activate data
       - set -ex
     executable: for x in {{ " ".join(data.ufs2arco) }}; do srun ufs2arco ufs2arco-$x.yaml --overwrite; done
-  rundir: '{{ app.rundir }}/data'
+  rundir: '{{ app.rundir }}'
   ufs2arco:
     gfs:
       directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
