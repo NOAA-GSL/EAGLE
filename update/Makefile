@@ -12,7 +12,7 @@ all:
 data:
 	$(ACTIVATE) data
 	export FI_PSM3_UUID=eagle
-	uw execute --module eagle/data.py --classname Data --task run --config-file config.yaml --batch
+	uw execute --module eagle/data.py --classname Data --task run --batch --config-file config.yaml
 
 devenv:
 	EAGLE_DEV=1 ./setup
