@@ -49,6 +49,7 @@ data:
       - conda activate data
       - set -ex
     executable: for x in {{ " ".join(data.ufs2arco) }}; do ufs2arco ufs2arco-$x.yaml --overwrite; done
+    mpicmd: srun
   rundir: '{{ app.rundir }}'
   ufs2arco:
     gfs:
