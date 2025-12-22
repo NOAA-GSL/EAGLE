@@ -38,4 +38,4 @@ typecheck:
 
 zarr-dataset-gfs:
 	$(ACTIVATE) data
-	uw execute --module eagle/zarr-dataset.py --classname ZarrDataset --task run --batch --config-file config.yaml --key-path zarr-datasets.gfs
+	uw execute --module eagle/zarr_dataset.py --classname ZarrDataset --task run --batch --config-file config.yaml --key-path zarr-datasets.gfs

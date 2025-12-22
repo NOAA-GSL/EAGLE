@@ -47,7 +47,6 @@ grids-and-meshes:
     gfs_target_grid: '{{ app.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ app.filenames.hrrr_target_grid }}'
   rundir: '{{ app.rundir }}'
-platform: *platform
 ufs2arco:
   dirs:
     cache: cache/X
@@ -134,6 +133,7 @@ zarr-datasets:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
             target_grid_path: '{{ grid-and-meshes.rundir }}/{{ app.filenames.gfs_target_grid }}'
       rundir: '{{ app.rundir }}'
+    platform: *platform
   hrrr:
     zarr-dataset:
       execution:
@@ -168,3 +168,4 @@ zarr-datasets:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
             target_grid_path: '{{ grids-and-meshes.rundir }}/{{ app.filenames.hrrr_target_grid }}'
       rundir: '{{ app.rundir }}'
+    platform: *platform
