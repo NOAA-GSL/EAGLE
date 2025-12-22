@@ -18,7 +18,7 @@ conda_create() {
   local name=$1
   conda_activate base
   msg Creating environment: $name
-  conda create -y -q -c ufs-community -n $* $MAKE $UWTOOLS
+  conda create -y -q -c ufs-community -n $* jq $MAKE $UWTOOLS
   (
     conda_activate $name
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
