@@ -1,18 +1,20 @@
-ACTIVATE = source conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
 TARGETS  = data devenv env format grids-and-meshes lint test typecheck zarr-gfs zarr-hrrr
 
-.ONESHELL:
+activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
+exec     = uw execute --config-file config.yaml --module eagle/$(1).py --classname $(2) --task $(3)
+zarr     = $(call exec,zarr,Zarr,run --batch --key-path zarrs.$(1))
 
+.ONESHELL:
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
 
 grids-and-meshes:
-	$(ACTIVATE) data
 	export FI_PSM3_UUID=eagle
-	uw execute --module eagle/grids_and_meshes.py --classname GridsAndMeshes --task provisioned_rundir --config-file config.yaml
+	$(call activate,data)
+	$(call exec,grids_and_meshes,GridsAndMeshes,provisioned_rundir)
 
 data:
 	$(MAKE) grids-and-meshes
@@ -39,9 +41,9 @@ typecheck:
 	mypy $(SRCDIRS)
 
 zarr-gfs:
-	$(ACTIVATE) data
-	uw execute --module eagle/zarr.py --classname Zarr --task run --batch --config-file config.yaml --key-path zarrs.gfs
+	$(call activate, data)
+	$(call zarr,gfs)
 
 zarr-hrrr:
-	$(ACTIVATE) data
-	uw execute --module eagle/zarr.py --classname Zarr --task run --batch --config-file config.yaml --key-path zarrs.hrrr
+	$(call activate, data)
+	$(call zarr,hrrr)
