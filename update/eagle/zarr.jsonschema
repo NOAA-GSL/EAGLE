@@ -1,6 +1,6 @@
 {
   "properties": {
-    "zarr-dataset": {
+    "zarr": {
       "additionalProperties": false,
       "properties": {
         "execution": {
@@ -26,7 +26,7 @@
     }
   },
   "required": [
-    "zarr-dataset"
+    "zarr"
   ],
   "type": "object"
 }

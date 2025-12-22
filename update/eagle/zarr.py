@@ -6,7 +6,7 @@ from iotaa import Asset, collection, task
 from uwtools.api.driver import DriverTimeInvariant
 
 
-class ZarrDataset(DriverTimeInvariant):
+class Zarr(DriverTimeInvariant):
     @collection
     def provisioned_rundir(self):
         yield self.taskname("provisioned run directory")
@@ -26,7 +26,7 @@ class ZarrDataset(DriverTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
-        return "zarr-dataset"
+        return "zarr"
 
     @property
     def name(self) -> str:
