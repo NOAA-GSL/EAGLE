@@ -1,10 +1,13 @@
 {
   "properties": {
-    "data": {
+    "zarr-dataset": {
       "additionalProperties": false,
       "properties": {
         "execution": {
-          "$ref": "urn:uwtools:execution-serial"
+          "$ref": "urn:uwtools:execution-parallel"
+        },
+        "name": {
+          "type": "string"
         },
         "rundir": {
           "type": "string"
@@ -15,6 +18,7 @@
       },
       "required": [
         "execution",
+        "name",
         "rundir",
         "ufs2arco"
       ],
@@ -22,7 +26,7 @@
     }
   },
   "required": [
-    "data"
+    "zarr-dataset"
   ],
   "type": "object"
 }
