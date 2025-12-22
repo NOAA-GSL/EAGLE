@@ -12,14 +12,13 @@ from anemoi.datasets.grids import cutout_mask  # type: ignore[import-untyped]
 from anemoi.graphs.generate.utils import get_coordinates_ordering  # type: ignore[import-untyped]
 from iotaa import Asset, collection, task
 from ufs2arco import sources  # type: ignore[import-untyped]
-from uwtools.api.driver import DriverTimeInvariant, AssetsTimeInvariant
+from uwtools.api.driver import AssetsTimeInvariant, DriverTimeInvariant
 from xarray import Dataset
 
 # PM _conus_data_grid might need mutex
 
 
 class GridsAndMeshes(AssetsTimeInvariant):
-
     # Public tasks
 
     @task
@@ -158,7 +157,6 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
 
 class ZarrDataset(DriverTimeInvariant):
-
     # Public tasks
 
     @collection
