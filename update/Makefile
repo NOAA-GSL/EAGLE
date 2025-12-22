@@ -1,6 +1,6 @@
 ACTIVATE = source conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
-TARGETS  = data devenv env format grids-and-meshes lint test typecheck zarr-dataset-gfs
+TARGETS  = data devenv env format grids-and-meshes lint test typecheck zarr-gfs
 
 .ONESHELL:
 
@@ -36,6 +36,6 @@ typecheck:
 	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)
 
-zarr-dataset-gfs:
+zarr-gfs:
 	$(ACTIVATE) data
-	uw execute --module eagle/zarr_dataset.py --classname ZarrDataset --task run --batch --config-file config.yaml --key-path zarr-datasets.gfs
+	uw execute --module eagle/zarr.py --classname Zarr --task run --batch --config-file config.yaml --key-path zarr.gfs

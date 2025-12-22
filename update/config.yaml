@@ -104,9 +104,9 @@ ufs2arco:
     statistics_period:
       end: 2022-02-03T12 # RELATION TO FCST/ANL?
       start: 2022-02-01T06 # RELATION TO FCST/ANL?
-zarr-datasets:
+zarrs:
   gfs:
-    zarr-dataset:
+    zarr:
       execution:
         batchargs:
           cores: 4
@@ -135,7 +135,7 @@ zarr-datasets:
       rundir: '{{ app.rundir }}'
     platform: *platform
   hrrr:
-    zarr-dataset:
+    zarr:
       execution:
         batchargs:
           cores: 4
