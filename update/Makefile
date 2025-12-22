@@ -1,6 +1,6 @@
 ACTIVATE = source conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
-TARGETS  = data devenv env format grids-and-meshes lint test typecheck zarr-gfs
+TARGETS  = data devenv env format grids-and-meshes lint test typecheck zarr-gfs zarr-hrrr
 
 .ONESHELL:
 
@@ -16,6 +16,8 @@ grids-and-meshes:
 
 data:
 	$(MAKE) grids-and-meshes
+	$(MAKE) zarr-gfs
+	$(MAKE) zarr-hrrr
 
 devenv:
 	EAGLE_DEV=1 ./setup
@@ -38,4 +40,8 @@ typecheck:
 
 zarr-gfs:
 	$(ACTIVATE) data
-	uw execute --module eagle/zarr.py --classname Zarr --task run --batch --config-file config.yaml --key-path zarr.gfs
+	uw execute --module eagle/zarr.py --classname Zarr --task run --batch --config-file config.yaml --key-path zarrs.gfs
+
+zarr-hrrr:
+	$(ACTIVATE) data
+	uw execute --module eagle/zarr.py --classname Zarr --task run --batch --config-file config.yaml --key-path zarrs.hrrr

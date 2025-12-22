@@ -20,7 +20,7 @@ class Zarr(DriverTimeInvariant):
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("w") as f:
-            yaml.dump(self.config["ufs2arco"][self.name], f)
+            yaml.dump(self.config["ufs2arco"], f)
 
     # Public methods
 
