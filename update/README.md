@@ -8,18 +8,22 @@ To build the EAGLE runtime virtual environments:
 make env # alternatively: ./setup
 ```
 
-After the build completes successfully, activate the conda installation and the `base` environment:
+This will create a Miniforge conda installation in the current directory and create the virtual environments `data`, `anemoi`, and `vx`.
 
-``` bash
-source conda/etc/profile.d/conda.sh
-conda activate
-```
+After the runtime virtual environments are built, a variety of `make` targets are available to execute pipeline steps, each to be run with the specified environment activated:
 
-Other virtual environments will be activated as necessary by pipeline steps.
+| Target           | Purpose                                       | Depends on target | Run in environment |
+|------------------|-----------------------------------------------|-------------------|--------------------|
+| data             | Implies grids-and-meshes, zarr-gfs, zarr-hrrr | -                 | data               |
+| grids-and-meshes | Prepare grids and meshes                      | -                 | data               |
+| zarr-gfs         | Prepare Zarr-formatted GFS input data         | grids-and-meshes  | data               |
+| zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data               |
+
+Run `make` with no argument to list all available targets.
 
 ## Development environment
 
-To install the runtime virtual environments, complete with all required development packagesin each environment:
+To build the runtime virtual environments **and** install all required development packages in each environment:
 
 ``` bash
 make devenv # alternatively: EAGLE_DEV=1 ./setup
