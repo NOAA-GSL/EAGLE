@@ -1,6 +1,10 @@
 app:
   base: /scratch3/BMC/hmtb/Paul.Madden/EAGLE/update
   conda: '{{ app.base }}/conda'
+  filenames:
+    combined_grids: latentx2.spongex1.combined.sorted.npz
+    gfs_target_grid: global_one_degree.nc
+    hrrr_target_grid: hrrr_15km.nc
   levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   partitions:
     netaccess: u1-service
@@ -37,49 +41,12 @@ app:
     forecast:
       # Diagnostic
       - accum_tp
-data:
-  execution:
-    batchargs:
-      cores: 4
-      memory: 10G
-      partition: '{{ app.partitions.netaccess }}'
-      rundir: '{{ app.rundir }}'
-      walltime: '02:00:00'
-    envcmds:
-      - source {{ app.conda }}/etc/profile.d/conda.sh
-      - conda activate data
-      - set -ex
-    executable: for x in {{ " ".join(data.ufs2arco) }}; do srun ufs2arco ufs2arco-$x.yaml --overwrite; done
+grids-and-meshes:
+  filenames:
+    combined_grids: '{{ app.filenames.combined_grids }}'
+    gfs_target_grid: '{{ app.filenames.gfs_target_grid }}'
+    hrrr_target_grid: '{{ app.filenames.hrrr_target_grid }}'
   rundir: '{{ app.rundir }}'
-  ufs2arco:
-    gfs:
-      directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
-      mover: !dict '{{ ufs2arco.mover }}'
-      multisource:
-        - source: !dict '{{ dict(ufs2arco.source.analysis, name="gfs_archive", slices=ufs2arco.slices) }}'
-        - source: !dict '{{ dict(ufs2arco.source.forecast, name="gfs_archive", slices=ufs2arco.slices) }}'
-      target: !dict '{{ ufs2arco.target }}'
-      transforms:
-        horizontal_regrid:
-          regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
-          target_grid_path: global_one_degree.nc
-    hrrr:
-      directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
-      mover: !dict '{{ ufs2arco.mover }}'
-      multisource:
-        - source: !dict '{{ dict(ufs2arco.source.analysis, name="aws_hrrr_archive") }}'
-          transforms:
-            rotate_vectors:
-              vector_pairs:
-                - ['u', 'v']
-                - ['u10', 'v10']
-                - ['u80', 'v80']
-        - source: !dict '{{ dict(ufs2arco.source.forecast, name="aws_hrrr_archive") }}'
-      target: !dict '{{ ufs2arco.target }}'
-      transforms:
-        horizontal_regrid:
-          regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
-          target_grid_path: hrrr_15km.nc
 platform: *platform
 ufs2arco:
   dirs:
@@ -138,3 +105,46 @@ ufs2arco:
     statistics_period:
       end: 2022-02-03T12 # RELATION TO FCST/ANL?
       start: 2022-02-01T06 # RELATION TO FCST/ANL?
+zarr-dataset:
+  execution:
+    batchargs:
+      cores: 4
+      memory: 10G
+      partition: '{{ app.partitions.netaccess }}'
+      rundir: '{{ app.rundir }}'
+      walltime: '02:00:00'
+    envcmds:
+      - source {{ app.conda }}/etc/profile.d/conda.sh
+      - conda activate data
+      - set -ex
+    executable: for x in {{ " ".join(data.ufs2arco) }}; do srun ufs2arco ufs2arco-$x.yaml --overwrite; done
+  rundir: '{{ app.rundir }}'
+  ufs2arco:
+    gfs:
+      directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
+      mover: !dict '{{ ufs2arco.mover }}'
+      multisource:
+        - source: !dict '{{ dict(ufs2arco.source.analysis, name="gfs_archive", slices=ufs2arco.slices) }}'
+        - source: !dict '{{ dict(ufs2arco.source.forecast, name="gfs_archive", slices=ufs2arco.slices) }}'
+      target: !dict '{{ ufs2arco.target }}'
+      transforms:
+        horizontal_regrid:
+          regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
+          target_grid_path: '{{ grid-and-meshes.rundir }}/{{ app.filenames.gfs_target_grid }}'
+    hrrr:
+      directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
+      mover: !dict '{{ ufs2arco.mover }}'
+      multisource:
+        - source: !dict '{{ dict(ufs2arco.source.analysis, name="aws_hrrr_archive") }}'
+          transforms:
+            rotate_vectors:
+              vector_pairs:
+                - ['u', 'v']
+                - ['u10', 'v10']
+                - ['u80', 'v80']
+        - source: !dict '{{ dict(ufs2arco.source.forecast, name="aws_hrrr_archive") }}'
+      target: !dict '{{ ufs2arco.target }}'
+      transforms:
+        horizontal_regrid:
+          regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
+          target_grid_path: '{{ grids-and-meshes.rundir }}/{{ app.filenames.hrrr_target_grid }}'

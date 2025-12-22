@@ -1,0 +1,34 @@
+{
+  "properties": {
+    "grids-and-meshes": {
+      "additionalProperties": false,
+      "properties": {
+        "filenames": {
+          "additionalProperties": false,
+          "properties": {
+            "combined_grids": {"type": "string"},
+            "gfs_target_grid": {"type": "string"},
+            "hrrr_target_grid": {"type": "string"},
+          },
+          "required": [
+            "combined_grids",
+            "gfs_target_grid",
+            "hrrr_target_grid",
+          ],
+          "type": "object"
+        },
+        "rundir": {
+          "type": "string"
+        },
+      },
+      "required": [
+        "rundir",
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "grids-and-meshes"
+  ],
+  "type": "object"
+}

@@ -1,6 +1,6 @@
 ACTIVATE = source conda/etc/profile.d/conda.sh && conda activate
 SRCDIRS  = eagle
-TARGETS  = data devenv env format lint test typecheck
+TARGETS  = data devenv env format grids-and-meshes lint test typecheck
 
 .ONESHELL:
 
@@ -9,10 +9,13 @@ TARGETS  = data devenv env format lint test typecheck
 all:
 	$(error Valid targets are: $(TARGETS))
 
-data:
+grids-and-meshes:
 	$(ACTIVATE) data
 	export FI_PSM3_UUID=eagle
-	uw execute --module eagle/data.py --classname Data --task run --batch --config-file config.yaml
+	uw execute --module eagle/data.py --classname GridsAndMeshes --task run --config-file config.yaml
+
+data: grids-and-meshes
+	true
 
 devenv:
 	EAGLE_DEV=1 ./setup
@@ -21,10 +24,7 @@ env:
 	./setup
 
 format:
-	@echo "=> Formatting code"
-	@ruff format $(SRCDIRS)
-	@echo "=> Sorting imports"
-	@ruff check --select I --fix $(SRCDIRS)
+	./format $(SRCDIRS)
 
 lint:
 	@echo "=> Linting code"

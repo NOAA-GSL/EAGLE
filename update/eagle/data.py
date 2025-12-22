@@ -12,20 +12,19 @@ from anemoi.datasets.grids import cutout_mask  # type: ignore[import-untyped]
 from anemoi.graphs.generate.utils import get_coordinates_ordering  # type: ignore[import-untyped]
 from iotaa import Asset, collection, task
 from ufs2arco import sources  # type: ignore[import-untyped]
-from uwtools.api.driver import DriverTimeInvariant
+from uwtools.api.driver import DriverTimeInvariant, AssetsTimeInvariant
 from xarray import Dataset
 
 # PM _conus_data_grid might need mutex
 
 
-class Data(DriverTimeInvariant):
-    CONUS_DATA_GRID_FN_PREFIX = "hrrr_15km"
+class GridsAndMeshes(AssetsTimeInvariant):
 
     # Public tasks
 
     @task
     def combined_global_and_conus_meshes(self):
-        path = self.rundir / "latentx2.spongex1.combined.sorted.npz"
+        path = self.rundir / self.config["filenames"]["combined_grids"]
         yield self.taskname(f"combined global and conus meshes {path}")
         yield Asset(path, path.is_file)
         yield None
@@ -37,7 +36,7 @@ class Data(DriverTimeInvariant):
 
     @task
     def conus_data_grid(self):
-        path = self.rundir / f"{self.CONUS_DATA_GRID_FN_PREFIX}.nc"
+        path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
         yield self.taskname(f"conus data grid {path}")
         yield Asset(path, path.is_file)
         yield None
@@ -46,7 +45,7 @@ class Data(DriverTimeInvariant):
 
     @task
     def global_data_grid(self):
-        path = self.rundir / "global_one_degree.nc"
+        path = self.rundir / self.config["filenames"]["gfs_target_grid"]
         yield self.taskname(f"global data grid {path}")
         yield Asset(path, path.is_file)
         yield None
@@ -60,30 +59,16 @@ class Data(DriverTimeInvariant):
     def provisioned_rundir(self):
         yield self.taskname("provisioned run directory")
         yield [
-            *[self._ufs2arco_config(x) for x in self.config["ufs2arco"]],
             self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),
             self.global_data_grid(),
-            self.runscript(),
         ]
-
-    # Private tasks
-
-    @task
-    def _ufs2arco_config(self, name: str):
-        yield self.taskname(f"ufs2arco {name} config")
-        path = self.rundir / f"ufs2arco-{name}.yaml"
-        yield Asset(path, path.is_file)
-        yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w") as f:
-            yaml.dump(self.config["ufs2arco"][name], f)
 
     # Public methods
 
     @classmethod
     def driver_name(cls) -> str:
-        return "data"
+        return "grids-and-meshes"
 
     # Private methods
 
@@ -110,7 +95,8 @@ class Data(DriverTimeInvariant):
 
     @cached_property
     def _conus_data_grid(self) -> Dataset:
-        with logging_to_file(self.rundir / f"{self.CONUS_DATA_GRID_FN_PREFIX}.log"):
+        logfile = Path(self.config["filenames"]["hrrr_target_grid"]).with_suffix(".log")
+        with logging_to_file(self.rundir / logfile):
             hrrr = sources.AWSHRRRArchive(
                 t0={"start": "2015-01-15T00", "end": "2015-01-15T06", "freq": "6h"},
                 fhr={"start": 0, "end": 0, "step": 6},
@@ -169,6 +155,37 @@ class Data(DriverTimeInvariant):
         """
         mesh: Dataset = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
         return mesh.drop_vars("latitude_longitude")
+
+
+class ZarrDataset(DriverTimeInvariant):
+
+    # Public tasks
+
+    @collection
+    def provisioned_rundir(self):
+        yield self.taskname("provisioned run directory")
+        yield [
+            *[self._ufs2arco_config(x) for x in self.config["ufs2arco"]],
+            self.runscript(),
+        ]
+
+    # Private tasks
+
+    @task
+    def _ufs2arco_config(self, name: str):
+        yield self.taskname(f"ufs2arco {name} config")
+        path = self.rundir / f"ufs2arco-{name}.yaml"
+        yield Asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w") as f:
+            yaml.dump(self.config["ufs2arco"][name], f)
+
+    # Public methods
+
+    @classmethod
+    def driver_name(cls) -> str:
+        return "zarr-dataset"
 
 
 @contextmanager
