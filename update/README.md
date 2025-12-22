@@ -8,7 +8,7 @@ To build the EAGLE runtime virtual environments:
 make env # alternatively: ./setup
 ```
 
-This will create a Miniforge conda installation in the current directory and create the virtual environments `data`, `anemoi`, and `vx`.
+This will install Miniforge conda in the current directory and create the virtual environments `data`, `anemoi`, and `vx`.
 
 After the runtime virtual environments are built, a variety of `make` targets are available to execute pipeline steps, each to be run with the specified environment activated:
 
