@@ -41,9 +41,9 @@ typecheck:
 	mypy $(SRCDIRS)
 
 zarr-gfs:
-	$(call activate, data)
+	$(call activate,data)
 	$(call zarr,gfs)
 
 zarr-hrrr:
-	$(call activate, data)
+	$(call activate,data)
 	$(call zarr,hrrr)

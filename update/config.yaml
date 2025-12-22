@@ -147,7 +147,7 @@ zarrs:
           - source {{ app.conda }}/etc/profile.d/conda.sh
           - conda activate data
           - set -ex
-        executable: srun ufs2arco ufs2arco-hrrr.yaml --overwrite
+        executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
         mpicmd: srun
       name: hrrr
       ufs2arco:
