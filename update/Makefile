@@ -12,7 +12,7 @@ all:
 grids-and-meshes:
 	$(ACTIVATE) data
 	export FI_PSM3_UUID=eagle
-	uw execute --module eagle/data.py --classname GridsAndMeshes --task run --config-file config.yaml
+	uw execute --module eagle/grids_and_meshes.py --classname GridsAndMeshes --task provisioned_rundir --config-file config.yaml
 
 data: grids-and-meshes
 	true
