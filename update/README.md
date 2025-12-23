@@ -10,7 +10,14 @@ make env # alternatively: ./setup
 
 This will install Miniforge conda in the current directory and create the virtual environments `data`, `anemoi`, and `vx`.
 
-After the runtime virtual environments are built, a variety of `make` targets are available to execute pipeline steps, each to be run with the specified environment activated:
+After the runtime virtual environments are built, activate the `base` environment:
+
+``` bash
+source conda/etc/profile.d/conda.sh
+conda activate
+```
+
+Now, a variety of `make` targets are available to execute pipeline steps, each to be run with the specified environment activated:
 
 | Target           | Purpose                                       | Depends on target | Run in environment |
 |------------------|-----------------------------------------------|-------------------|--------------------|
@@ -23,7 +30,7 @@ Run `make` with no argument to list all available targets.
 
 ## Configuration
 
-WIP
+TODO Complete this section...
 
 The `config.yaml` file contains many cross-referenced values. To see the fully realized configuration, in which all references have been resolved to their final values, which may aid in debugging, run the command
 
