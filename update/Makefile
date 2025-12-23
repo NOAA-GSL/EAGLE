@@ -3,7 +3,7 @@ TARGETS  = data devenv env format grids-and-meshes lint realize-config test type
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
 exec     = uw execute --config-file config.yaml --module eagle/$(1).py --classname $(2) --task $(3)
-zarr     = $(call exec,zarr,Zarr,run --batch --key-path zarrs.$(1))
+zarr     = $(call exec,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
 .ONESHELL:
 .PHONY: $(TARGETS)

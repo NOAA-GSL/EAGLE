@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import cast
 
-import yaml
 from iotaa import Asset, collection, task
 from uwtools.api.driver import DriverTimeInvariant
+from uwtools.api.config import get_yaml_config
 
 
 class Zarr(DriverTimeInvariant):
@@ -18,9 +18,7 @@ class Zarr(DriverTimeInvariant):
         path = self.rundir / f"ufs2arco-{self.name}.yaml"
         yield Asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w") as f:
-            yaml.dump(self.config["ufs2arco"], f)
+        get_yaml_config(self.config["ufs2arco"]).dump(path)
 
     # Public methods
 
