@@ -1,11 +1,6 @@
 app:
+  # Application values likely to require configuration by users.
   base: /scratch3/BMC/hmtb/Paul.Madden/foo/EAGLE/update
-  conda: '{{ app.base }}/conda'
-  filenames:
-    combined_grids: latentx2.spongex1.combined.sorted.npz
-    gfs_target_grid: global_one_degree.nc
-    hrrr_target_grid: hrrr_15km.nc
-  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   partitions:
     netaccess: u1-service
   platform: &platform
@@ -16,6 +11,146 @@ app:
     start: !datetime 2022-02-01T00
     step: !timedelta 6
     stop: !datetime 2022-02-05T12
+grids_and_meshes:
+  # Config for the GridsAndMeshes driver.
+  filenames:
+    combined_grids: '{{ val.filenames.combined_grids }}'
+    gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
+    hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
+  rundir: '{{ app.rundir }}'
+ufs2arco:
+  # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
+  dirs:
+    cache: cache/X
+    logs: logs/X
+    zarr: X.zarr
+  mover:
+    name: mpidatamover
+  regridder:
+    method: conservative
+    reuse_weights: True
+  slices:
+    sel:
+      latitude: [89.9, -89.9]
+  source:
+    analysis:
+      fhr:
+        start: 0
+        step: !int '{{ val.step }}'
+        end: 0
+      levels: !list '{{ val.levels }}'
+      t0:
+        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.analysis }}'
+    forecast:
+      fhr:
+        start: 6
+        step: !int '{{ val.step }}'
+        end: 6
+      t0:
+        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.forecast }}'
+  target:
+    chunks:
+      cell: -1
+      ensemble: 1
+      time: 1
+      variable: -1
+    compute_temporal_residual_statistics: True
+    forcings:
+      - cos_latitude
+      - sin_latitude
+      - cos_longitude
+      - sin_longitude
+      - cos_julian_day
+      - sin_julian_day
+      - cos_local_time
+      - sin_local_time
+      - insolation
+    name: anemoi
+    sort_channels_by_levels: True
+    statistics_period:
+      start: '{{ ufs2arco.source.analysis.t0.start }}'
+      end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
+zarrs:
+  # Configs for the Zarr driver.
+  common:
+    # Shared config for the gfs and hrrr configurations.
+    execution: &zarrs-common-execution
+      batchargs:
+        cores: 4
+        memory: 10G
+        partition: '{{ app.partitions.netaccess }}'
+        rundir: '{{ app.rundir }}'
+        walltime: '00:30:00'
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate data
+        - set -ex
+      executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+      mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
+  gfs:
+    zarr:
+      # Config for the Zarr driver parameterized for GFS.
+      execution:
+        <<: *zarrs-common-execution
+        executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+      name: gfs
+      ufs2arco:
+        directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
+        mover: !dict '{{ ufs2arco.mover }}'
+        multisource:
+          - source: !dict '{{ dict(ufs2arco.source.analysis, name="gfs_archive", slices=ufs2arco.slices) }}'
+          - source: !dict '{{ dict(ufs2arco.source.forecast, name="gfs_archive", slices=ufs2arco.slices) }}'
+        target: !dict '{{ ufs2arco.target }}'
+        transforms:
+          horizontal_regrid:
+            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
+            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
+      rundir: '{{ app.rundir }}'
+    platform: *platform
+  hrrr:
+    zarr:
+      # Config for the Zarr driver parameterized for HRRR.
+      execution:
+        <<: *zarrs-common-execution
+        executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+      name: hrrr
+      ufs2arco:
+        directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
+        mover: !dict '{{ ufs2arco.mover }}'
+        multisource:
+          - source: !dict '{{ dict(ufs2arco.source.analysis, name="aws_hrrr_archive") }}'
+            transforms:
+              rotate_vectors:
+                vector_pairs:
+                  - ['u', 'v']
+                  - ['u10', 'v10']
+                  - ['u80', 'v80']
+          - source: !dict '{{ dict(ufs2arco.source.forecast, name="aws_hrrr_archive") }}'
+        target: !dict '{{ ufs2arco.target }}'
+        transforms:
+          horizontal_regrid:
+            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
+            target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.hrrr_target_grid }}'
+      rundir: '{{ app.rundir }}'
+    platform: *platform
+val:
+  # Computed or static values referenced elsewhere in the config.
+  conda: '{{ app.base }}/conda'
+  filenames:
+    combined_grids: latentx2.spongex1.combined.sorted.npz
+    gfs_target_grid: global_one_degree.nc
+    hrrr_target_grid: hrrr_15km.nc
+  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+  statsdelta:
+    aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
+    raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
+  step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
   variables:
     analysis:
       # 3D Prognostic
@@ -41,130 +176,3 @@ app:
     forecast:
       # Diagnostic
       - accum_tp
-grids_and_meshes:
-  filenames:
-    combined_grids: '{{ app.filenames.combined_grids }}'
-    gfs_target_grid: '{{ app.filenames.gfs_target_grid }}'
-    hrrr_target_grid: '{{ app.filenames.hrrr_target_grid }}'
-  rundir: '{{ app.rundir }}'
-ufs2arco:
-  dirs:
-    cache: cache/X
-    logs: logs/X
-    zarr: X.zarr
-  mover:
-    name: mpidatamover
-  regridder:
-    method: conservative
-    reuse_weights: True
-  slices:
-    sel:
-      latitude: [89.9, -89.9]
-  source:
-    analysis:
-      fhr:
-        start: 0
-        step: !int '{{ val.step }}'
-        end: 0
-      levels: !list '{{ app.levels }}'
-      t0:
-        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ app.variables.analysis }}'
-    forecast:
-      fhr:
-        start: 6
-        step: !int '{{ val.step }}'
-        end: 6
-      t0:
-        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
-        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ app.variables.forecast }}'
-  target:
-    chunks:
-      cell: -1
-      ensemble: 1
-      time: 1
-      variable: -1
-    compute_temporal_residual_statistics: True
-    forcings:
-      - cos_latitude
-      - sin_latitude
-      - cos_longitude
-      - sin_longitude
-      - cos_julian_day
-      - sin_julian_day
-      - cos_local_time
-      - sin_local_time
-      - insolation
-    name: anemoi
-    sort_channels_by_levels: True
-    statistics_period:
-      start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
-zarrs:
-  common:
-    execution: &zarrs-common-execution
-      batchargs:
-        cores: 4
-        memory: 10G
-        partition: '{{ app.partitions.netaccess }}'
-        rundir: '{{ app.rundir }}'
-        walltime: '00:30:00'
-      envcmds:
-        - source {{ app.conda }}/etc/profile.d/conda.sh
-        - conda activate data
-        - set -ex
-      executable: ufs2arco ufs2arco-gfs.yaml --overwrite
-      mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
-  gfs:
-    zarr:
-      execution:
-        <<: *zarrs-common-execution
-        executable: ufs2arco ufs2arco-gfs.yaml --overwrite
-      name: gfs
-      ufs2arco:
-        directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
-        mover: !dict '{{ ufs2arco.mover }}'
-        multisource:
-          - source: !dict '{{ dict(ufs2arco.source.analysis, name="gfs_archive", slices=ufs2arco.slices) }}'
-          - source: !dict '{{ dict(ufs2arco.source.forecast, name="gfs_archive", slices=ufs2arco.slices) }}'
-        target: !dict '{{ ufs2arco.target }}'
-        transforms:
-          horizontal_regrid:
-            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
-            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ app.filenames.gfs_target_grid }}'
-      rundir: '{{ app.rundir }}'
-    platform: *platform
-  hrrr:
-    zarr:
-      execution:
-        <<: *zarrs-common-execution
-        executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
-      name: hrrr
-      ufs2arco:
-        directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
-        mover: !dict '{{ ufs2arco.mover }}'
-        multisource:
-          - source: !dict '{{ dict(ufs2arco.source.analysis, name="aws_hrrr_archive") }}'
-            transforms:
-              rotate_vectors:
-                vector_pairs:
-                  - ['u', 'v']
-                  - ['u10', 'v10']
-                  - ['u80', 'v80']
-          - source: !dict '{{ dict(ufs2arco.source.forecast, name="aws_hrrr_archive") }}'
-        target: !dict '{{ ufs2arco.target }}'
-        transforms:
-          horizontal_regrid:
-            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
-            target_grid_path: '{{ grids_and_meshes.rundir }}/{{ app.filenames.hrrr_target_grid }}'
-      rundir: '{{ app.rundir }}'
-    platform: *platform
-val:
-  statsdelta:
-    aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
-    raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
-  step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
