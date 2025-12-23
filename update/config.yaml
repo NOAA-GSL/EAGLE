@@ -63,24 +63,24 @@ ufs2arco:
   source:
     analysis:
       fhr:
-        end: 0
         start: 0
         step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+        end: 0
       levels: !list '{{ app.levels }}'
       t0:
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
         start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
       variables: !list '{{ app.variables.analysis }}'
     forecast:
       fhr:
-        end: 6
         start: 6
         step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+        end: 6
       t0:
-        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
         start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
       variables: !list '{{ app.variables.forecast }}'
   target:
     chunks:
@@ -102,8 +102,8 @@ ufs2arco:
     name: anemoi
     sort_channels_by_levels: True
     statistics_period:
-      end: 2022-02-03T12 # RELATION TO FCST/ANL?
-      start: 2022-02-01T06 # RELATION TO FCST/ANL?
+      start: '{{ ufs2arco.source.analysis.t0.start }}'
+      end: '{{ (app.time.start + app.time.step + (app.time.stop - app.time.start) * 0.8).strftime("%Y-%m-%dT%H") }}'
 zarrs:
   common:
     execution: &zarrs-common-execution
