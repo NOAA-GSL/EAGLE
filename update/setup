@@ -97,7 +97,7 @@ conda_create_data() {
 conda_create_vx() {
   local name=vx
   conda_env_exists $name && return || true
-  conda_create $name -c paul.madden python=3.13 wxvx=0.3.*
+  conda_create $name -c paul.madden python=3.13 wxvx=0.4.*
 }
 
 conda_env_exists() {
