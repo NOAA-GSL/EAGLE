@@ -1,5 +1,5 @@
 app:
-  base: /scratch3/BMC/hmtb/Paul.Madden/EAGLE/update
+  base: /scratch3/BMC/hmtb/Paul.Madden/foo/EAGLE/update
   conda: '{{ app.base }}/conda'
   filenames:
     combined_grids: latentx2.spongex1.combined.sorted.npz
@@ -103,7 +103,7 @@ ufs2arco:
     sort_channels_by_levels: True
     statistics_period:
       start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: '{{ (app.time.start + app.time.step + (app.time.stop - app.time.start) * 0.8).strftime("%Y-%m-%dT%H") }}'
+      end: '{{ (app.time.start + app.time.step + val.statsperiod.aligned).strftime("%Y-%m-%dT%H") }}'
 zarrs:
   common:
     execution: &zarrs-common-execution
@@ -163,3 +163,7 @@ zarrs:
             target_grid_path: '{{ grids_and_meshes.rundir }}{{ app.filenames.hrrr_target_grid }}'
       rundir: '{{ app.rundir }}'
     platform: *platform
+val:
+  statsperiod:
+    aligned: !timedelta '{{ (val.statsperiod.raw - val.statsperiod.raw % app.time.step).total_seconds() / 3600 }}'
+    raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
