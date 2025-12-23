@@ -160,7 +160,7 @@ zarrs:
         transforms:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
-            target_grid_path: '{{ grids_and_meshes.rundir }}{{ app.filenames.hrrr_target_grid }}'
+            target_grid_path: '{{ grids_and_meshes.rundir }}/{{ app.filenames.hrrr_target_grid }}'
       rundir: '{{ app.rundir }}'
     platform: *platform
 val:
