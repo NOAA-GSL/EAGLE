@@ -64,22 +64,22 @@ ufs2arco:
     analysis:
       fhr:
         start: 0
-        step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+        step: !int '{{ val.step }}'
         end: 0
       levels: !list '{{ app.levels }}'
       t0:
         start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+        freq: '{{ val.step }}h'
         end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
       variables: !list '{{ app.variables.analysis }}'
     forecast:
       fhr:
         start: 6
-        step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+        step: !int '{{ val.step }}'
         end: 6
       t0:
         start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+        freq: '{{ val.step }}h'
         end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
       variables: !list '{{ app.variables.forecast }}'
   target:
@@ -103,7 +103,7 @@ ufs2arco:
     sort_channels_by_levels: True
     statistics_period:
       start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: '{{ (app.time.start + app.time.step + val.statsperiod.aligned).strftime("%Y-%m-%dT%H") }}'
+      end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
 zarrs:
   common:
     execution: &zarrs-common-execution
@@ -112,7 +112,7 @@ zarrs:
         memory: 10G
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ app.rundir }}'
-        walltime: '02:00:00'
+        walltime: '00:30:00'
       envcmds:
         - source {{ app.conda }}/etc/profile.d/conda.sh
         - conda activate data
@@ -164,6 +164,7 @@ zarrs:
       rundir: '{{ app.rundir }}'
     platform: *platform
 val:
-  statsperiod:
-    aligned: !timedelta '{{ (val.statsperiod.raw - val.statsperiod.raw % app.time.step).total_seconds() / 3600 }}'
+  statsdelta:
+    aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
     raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
+  step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
