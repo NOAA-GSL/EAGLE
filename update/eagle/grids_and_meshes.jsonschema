@@ -1,6 +1,6 @@
 {
   "properties": {
-    "grids-and-meshes": {
+    "grids_and_meshes": {
       "additionalProperties": false,
       "properties": {
         "filenames": {
@@ -34,7 +34,7 @@
     }
   },
   "required": [
-    "grids-and-meshes"
+    "grids_and_meshes"
   ],
   "type": "object"
 }

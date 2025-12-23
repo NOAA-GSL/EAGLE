@@ -1,5 +1,5 @@
 SRCDIRS  = eagle
-TARGETS  = data devenv env format grids-and-meshes lint test typecheck zarr-gfs zarr-hrrr
+TARGETS  = data devenv env format grids-and-meshes lint realize-config test typecheck zarr-gfs zarr-hrrr
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
 exec     = uw execute --config-file config.yaml --module eagle/$(1).py --classname $(2) --task $(3)
@@ -33,6 +33,10 @@ format:
 lint:
 	@echo "=> Linting code"
 	ruff check $(SRCDIRS)
+
+realize-config:
+	$(call activate, base)
+	uw config realize --input-file config.yaml
 
 test: lint typecheck
 

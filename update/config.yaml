@@ -41,7 +41,7 @@ app:
     forecast:
       # Diagnostic
       - accum_tp
-grids-and-meshes:
+grids_and_meshes:
   filenames:
     combined_grids: '{{ app.filenames.combined_grids }}'
     gfs_target_grid: '{{ app.filenames.gfs_target_grid }}'
@@ -135,7 +135,7 @@ zarrs:
         transforms:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
-            target_grid_path: '{{ grid-and-meshes.rundir }}/{{ app.filenames.gfs_target_grid }}'
+            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ app.filenames.gfs_target_grid }}'
       rundir: '{{ app.rundir }}'
     platform: *platform
   hrrr:
@@ -160,6 +160,6 @@ zarrs:
         transforms:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
-            target_grid_path: '{{ grids-and-meshes.rundir }}/{{ app.filenames.hrrr_target_grid }}'
+            target_grid_path: '{{ grids_and_meshes.rundir }}{{ app.filenames.hrrr_target_grid }}'
       rundir: '{{ app.rundir }}'
     platform: *platform

@@ -67,7 +67,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
-        return "grids-and-meshes"
+        return "grids_and_meshes"
 
     # Private methods
 

@@ -21,6 +21,16 @@ After the runtime virtual environments are built, a variety of `make` targets ar
 
 Run `make` with no argument to list all available targets.
 
+## Configuration
+
+WIP
+
+The `config.yaml` file contains many cross-referenced values. To see the fully realized configuration, in which all references have been resolved to their final values, run the command
+
+``` bash
+make realize-config
+```
+
 ## Development environment
 
 To build the runtime virtual environments **and** install all required development packages in each environment:

@@ -126,7 +126,7 @@ install_conda() {
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
   rm -v $installer
-  conda_install base -c ufs-community $UWTOOLS jq
+  conda_install base -c ufs-community $UWTOOLS
 }
 
 msg() {
