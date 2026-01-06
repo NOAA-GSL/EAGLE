@@ -77,7 +77,7 @@ ufs2arco: # Global ufs2arco defaults, referenced from and refined in the zarrs.{
 training: # Config for the Training driver.
   execution:
     batchargs:
-      --gres: gpu:h1001: # NB: Brittle, tied both to Slurm and to Ursa.
+      --gres: 'gpu:h1001:' # NB: Brittle, tied both to Slurm and to Ursa.
       memory: 128G
       nodes: 1
       partition: '{{ app.partitions.gpu }}'
