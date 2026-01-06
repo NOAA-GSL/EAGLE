@@ -8,11 +8,11 @@
         },
         "rundir": {
           "type": "string"
-        },
+        }
       },
       "required": [
         "execution",
-        "rundir",
+        "rundir"
       ],
       "type": "object"
     }
