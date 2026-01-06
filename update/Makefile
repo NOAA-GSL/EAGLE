@@ -40,6 +40,10 @@ realize-config:
 
 test: lint typecheck
 
+training:
+	$(call activate,anemoi)
+	$(call exec,training,Training,provisioned_rundir)
+
 typecheck:
 	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)

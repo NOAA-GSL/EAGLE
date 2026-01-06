@@ -16,7 +16,7 @@ grids_and_meshes: # Config for the GridsAndMeshes driver.
     combined_grids: '{{ val.filenames.combined_grids }}'
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
-  rundir: '{{ app.rundir }}'
+  rundir: '{{ app.rundir }}/data'
 ufs2arco: # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
   dirs:
     cache: cache/X
@@ -82,7 +82,7 @@ training: # Config for the Training driver.
       nodes: 1
       partition: '{{ app.partitions.gpu }}'
       queue: gpuwf # NB: Brittle, tied to Ursa.
-      rundir: '{{ app.rundir }}'
+      rundir: '{{ training.rundir }}'
       walltime: '03:00:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
@@ -92,7 +92,7 @@ training: # Config for the Training driver.
       - export SLURM_GPUS_PER_NODE=1
       #- export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: anemoi-training train --config-name=training
-  rundir: '{{ app.rundir }}'
+  rundir: '{{ app.rundir }}/training'
 zarrs: # Configs for the Zarr driver.
   common: # Shared config for the gfs and hrrr configurations.
     execution: &zarrs-common-execution
@@ -100,7 +100,7 @@ zarrs: # Configs for the Zarr driver.
         cores: 4
         memory: 10G
         partition: '{{ app.partitions.netaccess }}'
-        rundir: '{{ app.rundir }}'
+        rundir: '{{ grids_and_meshes.rundir }}'
         walltime: '00:30:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
@@ -125,7 +125,7 @@ zarrs: # Configs for the Zarr driver.
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
             target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
-      rundir: '{{ app.rundir }}'
+      rundir: '{{ grids_and_meshes.rundir }}'
     platform: *platform
   hrrr:
     zarr: # Config for the Zarr driver parameterized for HRRR.
@@ -150,7 +150,7 @@ zarrs: # Configs for the Zarr driver.
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
             target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.hrrr_target_grid }}'
-      rundir: '{{ app.rundir }}'
+      rundir: '{{ grids_and_meshes.rundir }}'
     platform: *platform
 val:
   # Computed or static values referenced elsewhere in the config.
