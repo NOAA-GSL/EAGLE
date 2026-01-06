@@ -158,7 +158,7 @@ pip_install() {
   )
 }
 
-environments=( data ) # anemoi vx
+environments=( data anemoi ) # vx
 
 install_conda
 for name in ${environments[*]}; do
