@@ -19,6 +19,10 @@ LOCK = Lock()
 
 
 class GridsAndMeshes(AssetsTimeInvariant):
+    """
+    Prepares grids and meshes.
+    """
+
     # Public tasks
 
     @task

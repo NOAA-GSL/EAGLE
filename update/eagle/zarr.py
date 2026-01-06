@@ -7,6 +7,9 @@ from uwtools.api.config import get_yaml_config
 
 
 class Zarr(DriverTimeInvariant):
+    """
+    Creates Zarr-formatted training datasets.
+    """
     @collection
     def provisioned_rundir(self):
         yield self.taskname("provisioned run directory")

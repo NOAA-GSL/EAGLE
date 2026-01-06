@@ -1,0 +1,24 @@
+{
+  "properties": {
+    "training": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "rundir": {
+          "type": "string"
+        },
+      },
+      "required": [
+        "execution",
+        "rundir",
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "training"
+  ],
+  "type": "object"
+}
