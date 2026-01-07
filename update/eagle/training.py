@@ -20,12 +20,9 @@ class Training(DriverTimeInvariant):
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         logfile = self.rundir / "config.log"
-        # Create Anemoi default config.yaml (and other files/directories):
         run("anemoi-training config generate >%s 2>&1" % logfile, cwd=self.rundir, shell=True)
-        # Customize config.yaml:
         config = get_yaml_config(self.rundir / "config.yaml")
         config.update_from(self.config["anemoi"])
-        # Dump as training.yaml:
         config.dump(path)
 
     @collection
