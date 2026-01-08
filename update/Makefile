@@ -35,8 +35,8 @@ lint:
 	ruff check $(SRCDIRS)
 
 realize-config:
-	$(call activate, base)
-	uw config realize --input-file config.yaml
+	$(call activate,base)
+	uw config realize --input-file config.yaml --output-file realized.yaml
 
 test: lint typecheck
 
