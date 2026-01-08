@@ -332,7 +332,6 @@ training:
   execution:
     batchargs:
       --gres: 'gpu:h1001:1' # NB: Brittle, tied both to Slurm and to Ursa.
-      export: NONE
       memory: 128G
       nodes: 1
       partition: '{{ app.partitions.gpu }}'
@@ -452,7 +451,6 @@ zarrs:
     execution: &zarrs-common-execution
       batchargs:
         cores: 4
-        export: NONE
         memory: 10G
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
