@@ -1,0 +1,45 @@
+from subprocess import run
+
+from iotaa import Asset, collection, task
+from uwtools.api.config import get_yaml_config
+from uwtools.api.driver import DriverTimeInvariant
+
+
+class Training(DriverTimeInvariant):
+    """
+    Trains an Anemoi model.
+    """
+
+    # Public tasks
+
+    @task
+    def anemoi_config(self):
+        yield self.taskname("training config")
+        path = self.rundir / "training.yaml"
+        yield Asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        logfile = self.rundir / "config.log"
+        run(
+            "anemoi-training config generate >%s 2>&1" % logfile,
+            check=False,
+            cwd=self.rundir,
+            shell=True,
+        )
+        config = get_yaml_config(self.rundir / "config.yaml")
+        config.update_from(self.config["anemoi"])
+        config.dump(path)
+
+    @collection
+    def provisioned_rundir(self):
+        yield self.taskname("provisioned run directory")
+        yield [
+            self.anemoi_config(),
+            self.runscript(),
+        ]
+
+    # Public methods
+
+    @classmethod
+    def driver_name(cls) -> str:
+        return "training"

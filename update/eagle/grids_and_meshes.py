@@ -19,6 +19,10 @@ LOCK = Lock()
 
 
 class GridsAndMeshes(AssetsTimeInvariant):
+    """
+    Prepares grids and meshes.
+    """
+
     # Public tasks
 
     @task
@@ -76,6 +80,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
         return (self.rundir / self.config["filenames"]["hrrr_target_grid"]).with_suffix(".log")
 
 
+# Private functions
+
+
 def _combined_global_and_conus_meshes(gmesh: Dataset, cmesh: Dataset) -> dict[str, np.ndarray]:
     glon, glat = np.meshgrid(gmesh["lon"], gmesh["lat"])
     mask = cutout_mask(
@@ -99,7 +106,7 @@ def _combined_global_and_conus_meshes(gmesh: Dataset, cmesh: Dataset) -> dict[st
 @cache
 def _conus_data_grid(rundir: Path, logfile: Path) -> Dataset:
     with LOCK:
-        with logging_to_file(logfile):
+        with _logging_to_file(logfile):
             hrrr = sources.AWSHRRRArchive(
                 t0={"start": "2015-01-15T00", "end": "2015-01-15T06", "freq": "6h"},
                 fhr={"start": 0, "end": 0, "step": 6},
@@ -163,7 +170,7 @@ def _global_latent_grid() -> Dataset:
 
 
 @contextmanager
-def logging_to_file(path: Path) -> Iterator:
+def _logging_to_file(path: Path) -> Iterator:
     logger = logging.getLogger()
     stream_handler = logger.handlers[0]
     logger.removeHandler(stream_handler)

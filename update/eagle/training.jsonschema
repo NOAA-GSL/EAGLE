@@ -1,0 +1,28 @@
+{
+  "properties": {
+    "training": {
+      "additionalProperties": false,
+      "properties": {
+        "anemoi": {
+          "type": "object"
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "anemoi",
+        "execution",
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "training"
+  ],
+  "type": "object"
+}

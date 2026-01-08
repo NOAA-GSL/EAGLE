@@ -19,12 +19,13 @@ conda activate
 
 Now, a variety of `make` targets are available to execute pipeline steps, each to be run with the specified environment activated:
 
-| Target           | Purpose                                       | Depends on target | Run in environment |
-|------------------|-----------------------------------------------|-------------------|--------------------|
-| data             | Implies grids-and-meshes, zarr-gfs, zarr-hrrr | -                 | data               |
-| grids-and-meshes | Prepare grids and meshes                      | -                 | data               |
-| zarr-gfs         | Prepare Zarr-formatted GFS input data         | grids-and-meshes  | data               |
-| zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data               |
+| Target           | Purpose                                       | Depends on target | Uses environment |
+|------------------|-----------------------------------------------|-------------------|------------------|
+| data             | Implies grids-and-meshes, zarr-gfs, zarr-hrrr | -                 | data             |
+| grids-and-meshes | Prepare grids and meshes                      | -                 | data             |
+| zarr-gfs         | Prepare Zarr-formatted GFS input data         | grids-and-meshes  | data             |
+| zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
+| training         | Performs Anemoi training                      | -                 | anemoi           |
 
 Run `make` with no argument to list all available targets.
 
