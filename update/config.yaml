@@ -83,7 +83,6 @@ zarrs:
     execution: &zarrs-common-execution
       batchargs:
         cores: 4
-        export: NONE
         memory: 10G
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ app.rundir }}'
@@ -91,7 +90,6 @@ zarrs:
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
-        - source /etc/profile.d/slurm.sh # Brittle, tied to Ursa.
         - set -ex
       executable: ufs2arco ufs2arco-gfs.yaml --overwrite
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
