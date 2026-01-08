@@ -91,7 +91,6 @@ zarrs:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
         - set -ex
-      executable: ufs2arco ufs2arco-gfs.yaml --overwrite
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:
     zarr:
