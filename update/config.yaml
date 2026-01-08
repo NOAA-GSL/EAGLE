@@ -5,7 +5,7 @@ app:
     gpu: u1-h100
     netaccess: u1-service
   platform: &platform
-    account: wrfruc
+    account: epic
     scheduler: slurm
   rundir: '{{ app.base }}/run'
   time:
