@@ -341,7 +341,7 @@ training:
           - q
   execution:
     batchargs:
-      --gres: 'gpu:h1001:1' # NB: Brittle, tied both to Slurm and to Ursa.
+      --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
       memory: 128G
       nodes: 1
       partition: '{{ app.partitions.gpu }}'
