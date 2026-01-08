@@ -28,6 +28,7 @@
         }
       },
       "required": [
+        "filenames",
         "rundir"
       ],
       "type": "object"
