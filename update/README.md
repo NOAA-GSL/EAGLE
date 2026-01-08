@@ -33,7 +33,7 @@ Run `make` with no argument to list all available targets.
 
 TODO Complete this section...
 
-The `config.yaml` file contains many cross-referenced values. To see the fully realized configuration, in which all references have been resolved to their final values, which may aid in debugging, run the command
+The `config.yaml` file contains many cross-referenced values. To create the file `realized.yaml`, in which all references have been resolved to their final values, which may aid in debugging, run the command
 
 ``` bash
 make realize-config
