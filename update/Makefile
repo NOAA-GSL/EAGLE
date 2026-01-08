@@ -1,4 +1,5 @@
 SRCDIRS  = eagle
+REALIZED = realized.yaml
 TARGETS  = data devenv env format grids-and-meshes lint realize-config test typecheck zarr-gfs zarr-hrrr
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
@@ -34,9 +35,7 @@ lint:
 	@echo "=> Linting code"
 	ruff check $(SRCDIRS)
 
-realize-config:
-	$(call activate,base)
-	uw config realize --input-file config.yaml --output-file realized.yaml
+realize-config: $(REALIZED)
 
 test: lint typecheck
 
@@ -51,3 +50,7 @@ zarr-gfs:
 zarr-hrrr:
 	$(call activate,data)
 	$(call zarr,hrrr)
+
+$(REALIZED): config.yaml
+	$(call activate,base)
+	uw config realize --input-file $< --output-file $@
