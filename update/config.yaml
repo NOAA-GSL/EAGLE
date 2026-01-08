@@ -91,6 +91,7 @@ zarrs:
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
+        - source /etc/profile.d/slurm.sh
         - set -ex
       executable: ufs2arco ufs2arco-gfs.yaml --overwrite
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
