@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /scratch3/BMC/hmtb/Paul.Madden/foo/EAGLE/update
+  base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
   partitions:
     netaccess: u1-service
   platform: &platform
@@ -83,6 +83,7 @@ zarrs:
     execution: &zarrs-common-execution
       batchargs:
         cores: 4
+        export: NONE
         memory: 10G
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ app.rundir }}'
