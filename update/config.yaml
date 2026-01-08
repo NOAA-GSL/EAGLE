@@ -106,14 +106,14 @@ training:
         training: 1
         validation: 1
       test:
-        end: 2022-02-17T00:00:00.000Z # PM derive
-        start: 2022-02-16T00:00:00.000Z # PM derive
+        end: 2022-02-17T00:00:00.000Z # TODO derive
+        start: 2022-02-16T00:00:00.000Z # TODO derive
       training:
-        end: 2022-02-03T00:00:00.000Z # PM derive
-        start: 2022-02-01T00:00:00.000Z # PM derive
+        end: 2022-02-03T00:00:00.000Z # TODO derive
+        start: 2022-02-01T00:00:00.000Z # TODO derive
       validation:
-        end: 2022-02-15T00:00:00.000Z # PM derive
-        start: 2022-02-04T00:00:00.000Z # PM derive
+        end: 2022-02-15T00:00:00.000Z # TODO derive
+        start: 2022-02-04T00:00:00.000Z # TODO derive
     diagnostics:
       log:
         mlflow:
