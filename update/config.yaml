@@ -19,64 +19,7 @@ grids_and_meshes:
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
   rundir: '{{ val.data.rundir }}'
-ufs2arco:
-  # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
-  dirs:
-    cache: cache/X
-    logs: logs/X
-    zarr: X.zarr
-  mover:
-    name: mpidatamover
-  regridder:
-    method: conservative
-    reuse_weights: True
-  slices:
-    sel:
-      latitude: [89.9, -89.9]
-  source:
-    analysis:
-      fhr:
-        start: 0
-        step: !int '{{ val.step }}'
-        end: 0
-      levels: !list '{{ val.levels }}'
-      t0:
-        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ val.variables.analysis }}'
-    forecast:
-      fhr:
-        start: 6
-        step: !int '{{ val.step }}'
-        end: 6
-      t0:
-        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
-        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ val.variables.forecast }}'
-  target:
-    chunks:
-      cell: -1
-      ensemble: 1
-      time: 1
-      variable: -1
-    compute_temporal_residual_statistics: True
-    forcings:
-      - cos_latitude
-      - sin_latitude
-      - cos_longitude
-      - sin_longitude
-      - cos_julian_day
-      - sin_julian_day
-      - cos_local_time
-      - sin_local_time
-      - insolation
-    name: anemoi
-    sort_channels_by_levels: True
-    statistics_period:
-      start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
+platform: *platform
 training:
   # Config for the Training driver.
   anemoi:
@@ -388,7 +331,7 @@ training:
           - q
   execution:
     batchargs:
-      --gres: 'gpu:h1001:' # NB: Brittle, tied both to Slurm and to Ursa.
+      --gres: 'gpu:h1001:1' # NB: Brittle, tied both to Slurm and to Ursa.
       memory: 128G
       nodes: 1
       partition: '{{ app.partitions.gpu }}'
@@ -404,6 +347,103 @@ training:
       #- export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: anemoi-training train --config-name=training
   rundir: '{{ app.rundir }}/training'
+ufs2arco:
+  # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
+  dirs:
+    cache: cache/X
+    logs: logs/X
+    zarr: X.zarr
+  mover:
+    name: mpidatamover
+  regridder:
+    method: conservative
+    reuse_weights: True
+  slices:
+    sel:
+      latitude: [89.9, -89.9]
+  source:
+    analysis:
+      fhr:
+        start: 0
+        step: !int '{{ val.step }}'
+        end: 0
+      levels: !list '{{ val.levels }}'
+      t0:
+        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.analysis }}'
+    forecast:
+      fhr:
+        start: 6
+        step: !int '{{ val.step }}'
+        end: 6
+      t0:
+        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.forecast }}'
+  target:
+    chunks:
+      cell: -1
+      ensemble: 1
+      time: 1
+      variable: -1
+    compute_temporal_residual_statistics: True
+    forcings:
+      - cos_latitude
+      - sin_latitude
+      - cos_longitude
+      - sin_longitude
+      - cos_julian_day
+      - sin_julian_day
+      - cos_local_time
+      - sin_local_time
+      - insolation
+    name: anemoi
+    sort_channels_by_levels: True
+    statistics_period:
+      start: '{{ ufs2arco.source.analysis.t0.start }}'
+      end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
+val:
+  # Computed or static values referenced elsewhere in the config.
+  conda: '{{ app.base }}/conda'
+  data:
+    rundir: '{{ app.rundir }}/data'
+  filenames:
+    combined_grids: latentx2.spongex1.combined.sorted.npz
+    gfs_target_grid: global_one_degree.nc
+    hrrr_target_grid: hrrr_15km.nc
+  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+  statsdelta:
+    aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
+    raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
+  step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+  variables:
+    analysis:
+      # 3D Prognostic
+      - gh
+      - u
+      - v
+      - w
+      - t
+      - q
+      # 2D Prognostic
+      - sp
+      - u10
+      - v10
+      - t2m
+      - t_surface
+      - sh2
+      # Diagnostic
+      - u80
+      - v80
+      # Forcing
+      - lsm
+      - orog
+    forecast:
+      # Diagnostic
+      - accum_tp
 zarrs:
   # Configs for the Zarr driver.
   common:
@@ -467,42 +507,3 @@ zarrs:
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
       rundir: '{{ val.data.rundir }}'
     platform: *platform
-val:
-  # Computed or static values referenced elsewhere in the config.
-  conda: '{{ app.base }}/conda'
-  data:
-    rundir: '{{ app.rundir }}/data'
-  filenames:
-    combined_grids: latentx2.spongex1.combined.sorted.npz
-    gfs_target_grid: global_one_degree.nc
-    hrrr_target_grid: hrrr_15km.nc
-  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
-  statsdelta:
-    aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
-    raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
-  step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
-  variables:
-    analysis:
-      # 3D Prognostic
-      - gh
-      - u
-      - v
-      - w
-      - t
-      - q
-      # 2D Prognostic
-      - sp
-      - u10
-      - v10
-      - t2m
-      - t_surface
-      - sh2
-      # Diagnostic
-      - u80
-      - v80
-      # Forcing
-      - lsm
-      - orog
-    forecast:
-      # Diagnostic
-      - accum_tp

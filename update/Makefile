@@ -42,7 +42,7 @@ test: lint typecheck
 
 training:
 	$(call activate,anemoi)
-	$(call exec,training,Training,provisioned_rundir)
+	$(call exec,training,Training,run --batch)
 
 typecheck:
 	@echo "=> Typechecking code"
