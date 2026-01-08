@@ -23,6 +23,16 @@ platform: *platform
 training:
   # Config for the Training driver.
   anemoi:
+    defaults:
+      - data: zarr
+      - dataloader: native_grid
+      - datamodule: single
+      - diagnostics: evaluation
+      - hardware: slurm
+      - graph: encoder_decoder_only
+      - model: transformer
+      - training: stretched
+      - _self_
     # Block to customize default Anemoi training config.
     data:
       diagnostic:
