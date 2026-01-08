@@ -18,7 +18,7 @@ grids_and_meshes:
     combined_grids: '{{ val.filenames.combined_grids }}'
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
-  rundir: '{{ app.rundir }}/data'
+  rundir: '{{ val.data.rundir }}'
 ufs2arco:
   # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
   dirs:
@@ -317,9 +317,9 @@ training:
         npz_file: latentx2.spongex1.combined.sorted.npz
       num_gpus_per_model: 1
       paths:
-        data: ../data
-        graph: ../data
-        output: outputs/
+        data: '{{ val.data.rundir }}'
+        graph: '{{ val.data.rundir }}'
+        output: '{{ training.rundir }}/outputs/'
     model:
       bounding:
         - _target_: anemoi.models.layers.bounding.ReluBounding
@@ -413,7 +413,7 @@ zarrs:
         cores: 4
         memory: 10G
         partition: '{{ app.partitions.netaccess }}'
-        rundir: '{{ grids_and_meshes.rundir }}'
+        rundir: '{{ val.data.rundir }}'
         walltime: '00:30:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
@@ -438,8 +438,8 @@ zarrs:
         transforms:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
-            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
-      rundir: '{{ grids_and_meshes.rundir }}'
+            target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
+      rundir: '{{ val.data.rundir }}'
     platform: *platform
   hrrr:
     zarr:
@@ -464,12 +464,14 @@ zarrs:
         transforms:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
-            target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.hrrr_target_grid }}'
-      rundir: '{{ grids_and_meshes.rundir }}'
+            target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
+      rundir: '{{ val.data.rundir }}'
     platform: *platform
 val:
   # Computed or static values referenced elsewhere in the config.
   conda: '{{ app.base }}/conda'
+  data:
+    rundir: '{{ app.rundir }}/data'
   filenames:
     combined_grids: latentx2.spongex1.combined.sorted.npz
     gfs_target_grid: global_one_degree.nc
