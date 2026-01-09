@@ -1,0 +1,32 @@
+{
+  "properties": {
+    "zarr": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution-parallel"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rundir": {
+          "type": "string"
+        },
+        "ufs2arco": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "execution",
+        "name",
+        "rundir",
+        "ufs2arco"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "zarr"
+  ],
+  "type": "object"
+}

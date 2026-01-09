@@ -1,0 +1,519 @@
+app:
+  # Application values likely to require configuration by users.
+  base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
+  partitions:
+    gpu: u1-h100
+    netaccess: u1-service
+  platform: &platform
+    account: epic
+    scheduler: slurm
+  rundir: '{{ app.base }}/run'
+  time:
+    start: !datetime 2022-02-01T00
+    step: !timedelta 6
+    stop: !datetime 2022-02-05T12
+grids_and_meshes:
+  # Config for the GridsAndMeshes driver.
+  filenames:
+    combined_grids: '{{ val.filenames.combined_grids }}'
+    gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
+    hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
+  rundir: '{{ val.data.rundir }}'
+platform: *platform
+training:
+  # Config for the Training driver.
+  anemoi:
+    defaults:
+      - data: zarr
+      - dataloader: native_grid
+      - datamodule: single
+      - diagnostics: evaluation
+      - hardware: slurm
+      - graph: encoder_decoder_only
+      - model: transformer
+      - training: stretched
+      - _self_
+    # Block to customize default Anemoi training config.
+    data:
+      diagnostic:
+        - accum_tp
+        - u80
+        - v80
+      forcing:
+        - cos_latitude
+        - sin_latitude
+        - cos_longitude
+        - sin_longitude
+        - cos_julian_day
+        - sin_julian_day
+        - cos_local_time
+        - sin_local_time
+        - insolation
+        - lsm
+        - orog
+      normalizer:
+        default: mean-std
+        max:
+          - orog
+        none:
+          - cos_latitude
+          - sin_latitude
+          - cos_longitude
+          - sin_longitude
+          - cos_julian_day
+          - sin_julian_day
+          - cos_local_time
+          - sin_local_time
+          - insolation
+          - lsm
+        std:
+          - accum_tp
+          - sh2
+          - q_100
+          - q_150
+          - q_200
+          - q_250
+          - q_300
+          - q_400
+          - q_500
+          - q_600
+          - q_700
+          - q_850
+          - q_925
+          - q_1000
+    dataloader:
+      batch_size:
+        test: 1
+        training: 2
+        validation: 2
+      dataset:
+        adjust: all
+        cutout:
+          - dataset: ${hardware.paths.data}/${hardware.files.lam_dataset}
+            trim_edge:
+              - 10
+              - 11
+              - 10
+              - 11
+          - dataset: ${hardware.paths.data}/${hardware.files.global_dataset}
+        min_distance_km: 0
+      limit_batches:
+        test: 1
+        training: null
+        validation: null
+      num_workers:
+        test: 1
+        training: 1
+        validation: 1
+      test:
+        end: 2022-02-17T00:00:00.000Z # TODO derive
+        start: 2022-02-16T00:00:00.000Z # TODO derive
+      training:
+        end: 2022-02-03T00:00:00.000Z # TODO derive
+        start: 2022-02-01T00:00:00.000Z # TODO derive
+      validation:
+        end: 2022-02-15T00:00:00.000Z # TODO derive
+        start: 2022-02-04T00:00:00.000Z # TODO derive
+    diagnostics:
+      log:
+        mlflow:
+          authentication: false
+          enabled: false
+          expand_hyperparams:
+            - config
+          experiment_name: Nested-EAGLE-1deg15km-deterministic
+          http_max_retries: 35
+          log_model: false
+          offline: false
+          on_resume_create_child: true
+          project_name: Nested-EAGLE
+          run_name: null
+          system: false
+          terminal: true
+          tracking_uri: null
+        wandb:
+          enabled: false
+          entity: null
+      plot:
+        callbacks:
+          - _target_: anemoi.training.diagnostics.callbacks.plot.GraphTrainableFeaturesPlot
+            every_n_epochs: ${diagnostics.plot.frequency.epoch}
+          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotLoss
+            every_n_batches: ${diagnostics.plot.frequency.batch}
+            parameter_groups:
+              moisture:
+                - accum_tp
+              sfc_wind:
+                - u10
+                - v10
+          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotSample
+            accumulation_levels_plot:
+              - 0
+              - 0.05
+              - 0.1
+              - 0.25
+              - 0.5
+              - 1
+              - 1.5
+              - 2
+              - 3
+              - 4
+              - 5
+              - 6
+              - 7
+              - 100
+            colormaps: ${diagnostics.plot.colormaps}
+            every_n_batches: ${diagnostics.plot.frequency.batch}
+            parameters: ${diagnostics.plot.parameters}
+            per_sample: 6
+            precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
+            sample_idx: ${diagnostics.plot.sample_idx}
+          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotSpectrum
+            every_n_batches: ${diagnostics.plot.frequency.batch}
+            parameters:
+              - gh_500
+              - accum_tp
+              - t2m
+              - u10
+              - v10
+            sample_idx: ${diagnostics.plot.sample_idx}
+          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotHistogram
+            every_n_batches: ${diagnostics.plot.frequency.batch}
+            parameters:
+              - gh_500
+              - accum_tp
+              - t2m
+              - u10
+              - v10
+            precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
+            sample_idx: ${diagnostics.plot.sample_idx}
+        frequency:
+          batch: 500
+          epoch: 1
+        parameters:
+          - gh_500
+          - t_850
+          - u_850
+          - v_850
+          - t2m
+          - sh2
+          - u10
+          - v10
+          - sp
+          - accum_tp
+        precip_and_related_fields:
+          - accum_tp
+    graph:
+      attributes:
+        edges:
+          edge_dirs:
+            _target_: anemoi.graphs.edges.attributes.EdgeDirection
+            norm: unit-std
+          edge_length:
+            _target_: anemoi.graphs.edges.attributes.EdgeLength
+            norm: unit-max
+        nodes:
+          area_weight:
+            _target_: anemoi.graphs.nodes.attributes.SphericalAreaWeights
+            fill_value: 0
+            norm: unit-max
+          boundary_mask:
+            _target_: anemoi.graphs.nodes.attributes.BooleanNot
+            masks:
+              _target_: anemoi.graphs.nodes.attributes.CutOutMask
+          cutout_mask:
+            _target_: anemoi.graphs.nodes.attributes.CutOutMask
+          lam_area_weight:
+            _target_: anemoi.graphs.nodes.attributes.MaskedPlanarAreaWeights
+            mask_node_attr_name: cutout_mask
+            norm: unit-max
+        post_processors:
+          - _target_: anemoi.graphs.processors.SortEdgeIndexByTargetNodes
+            descending: true
+      data: data
+      edges:
+        - attributes: ${graph.attributes.edges}
+          edge_builders:
+            - _target_: anemoi.graphs.edges.KNNEdges
+              num_nearest_neighbours: 12
+              source_mask_attr_name: null
+              target_mask_attr_name: null
+          source_name: ${graph.data}
+          target_name: ${graph.hidden}
+        - attributes: ${graph.attributes.edges}
+          edge_builders:
+            - _target_: anemoi.graphs.edges.KNNEdges
+              num_nearest_neighbours: 3
+              source_mask_attr_name: null
+              target_mask_attr_name: null
+          source_name: ${graph.hidden}
+          target_name: ${graph.data}
+      hidden: hidden
+      nodes:
+        data:
+          attributes: ${graph.attributes.nodes}
+          node_builder:
+            _target_: anemoi.graphs.nodes.AnemoiDatasetNodes
+            dataset: ${dataloader.dataset}
+        hidden:
+          node_builder:
+            _target_: anemoi.graphs.nodes.NPZFileNodes
+            lat_key: lat
+            lon_key: lon
+            npz_file: ${hardware.paths.data}/${hardware.files.npz_file}
+      overwrite: false
+    hardware:
+      files:
+        global_dataset: gfs.zarr
+        graph: graph.latentx2.spongex1.12knn.pt
+        lam_dataset: hrrr.zarr
+        npz_file: latentx2.spongex1.combined.sorted.npz
+      num_gpus_per_model: 1
+      paths:
+        data: '{{ val.data.rundir }}'
+        graph: '{{ val.data.rundir }}'
+        output: '{{ training.rundir }}/outputs/'
+    model:
+      bounding:
+        - _target_: anemoi.models.layers.bounding.ReluBounding
+          variables:
+            - accum_tp
+            - sh2
+            - q_100
+            - q_150
+            - q_200
+            - q_250
+            - q_300
+            - q_400
+            - q_500
+            - q_600
+            - q_700
+            - q_850
+            - q_925
+            - q_1000
+      num_channels: 512
+      processor:
+        window_size: 4320
+    training:
+      lr:
+        iterations: ${training.max_steps}
+        min: 3.e-7
+        rate: 0.0000625
+        warmup: 100
+      max_steps: 3000
+      metrics:
+        - gh_500
+        - t_850
+        - u_850
+        - v_850
+      scalers:
+        general_variable:
+          _target_: anemoi.training.losses.scalers.GeneralVariableLossScaler
+          weights:
+            accum_tp: 0.025
+            default: 1
+            gh: 12
+            q: 0.6
+            sp: 10
+            t: 6
+            u: 0.8
+            u10: 0.1
+            v: 0.5
+            v10: 0.1
+            w: 0.001
+        node_weights:
+          weight_frac_of_total: 0.1
+      training_loss:
+        _target_: anemoi.training.losses.MSELoss
+        ignore_nans: false
+        scalers:
+          - general_variable
+          - nan_mask_weights
+          - node_weights
+      variable_groups:
+        default: sfc
+        pl:
+          - gh
+          - u
+          - v
+          - w
+          - t
+          - q
+  execution:
+    batchargs:
+      --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
+      memory: 128G
+      nodes: 1
+      partition: '{{ app.partitions.gpu }}'
+      queue: gpuwf # NB: Brittle, tied to Ursa.
+      rundir: '{{ training.rundir }}'
+      walltime: '03:00:00'
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate anemoi
+      - module list
+      - set -ex
+      - export SLURM_GPUS_PER_NODE=1
+      #- export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+    executable: anemoi-training train --config-name=training
+  rundir: '{{ app.rundir }}/training'
+ufs2arco:
+  # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
+  dirs:
+    cache: cache/X
+    logs: logs/X
+    zarr: X.zarr
+  mover:
+    name: mpidatamover
+  regridder:
+    method: conservative
+    reuse_weights: True
+  slices:
+    sel:
+      latitude: [89.9, -89.9]
+  source:
+    analysis:
+      fhr:
+        start: 0
+        step: !int '{{ val.step }}'
+        end: 0
+      levels: !list '{{ val.levels }}'
+      t0:
+        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.analysis }}'
+    forecast:
+      fhr:
+        start: 6
+        step: !int '{{ val.step }}'
+        end: 6
+      t0:
+        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.forecast }}'
+  target:
+    chunks:
+      cell: -1
+      ensemble: 1
+      time: 1
+      variable: -1
+    compute_temporal_residual_statistics: True
+    forcings:
+      - cos_latitude
+      - sin_latitude
+      - cos_longitude
+      - sin_longitude
+      - cos_julian_day
+      - sin_julian_day
+      - cos_local_time
+      - sin_local_time
+      - insolation
+    name: anemoi
+    sort_channels_by_levels: True
+    statistics_period:
+      start: '{{ ufs2arco.source.analysis.t0.start }}'
+      end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
+val:
+  # Computed or static values referenced elsewhere in the config.
+  conda: '{{ app.base }}/conda'
+  data:
+    rundir: '{{ app.rundir }}/data'
+  filenames:
+    combined_grids: latentx2.spongex1.combined.sorted.npz
+    gfs_target_grid: global_one_degree.nc
+    hrrr_target_grid: hrrr_15km.nc
+  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+  statsdelta:
+    aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
+    raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
+  step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+  variables:
+    analysis:
+      # 3D Prognostic
+      - gh
+      - u
+      - v
+      - w
+      - t
+      - q
+      # 2D Prognostic
+      - sp
+      - u10
+      - v10
+      - t2m
+      - t_surface
+      - sh2
+      # Diagnostic
+      - u80
+      - v80
+      # Forcing
+      - lsm
+      - orog
+    forecast:
+      # Diagnostic
+      - accum_tp
+zarrs:
+  # Configs for the Zarr driver.
+  common:
+    # Shared config for the gfs and hrrr configurations.
+    execution: &zarrs-common-execution
+      batchargs:
+        cores: 4
+        memory: 10G
+        partition: '{{ app.partitions.netaccess }}'
+        rundir: '{{ val.data.rundir }}'
+        walltime: '00:30:00'
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate data
+        - set -ex
+      executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+      mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
+  gfs:
+    zarr:
+      # Config for the Zarr driver parameterized for GFS.
+      execution:
+        <<: *zarrs-common-execution
+        executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+      name: gfs
+      ufs2arco:
+        directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
+        mover: !dict '{{ ufs2arco.mover }}'
+        multisource:
+          - source: !dict '{{ dict(ufs2arco.source.analysis, name="gfs_archive", slices=ufs2arco.slices) }}'
+          - source: !dict '{{ dict(ufs2arco.source.forecast, name="gfs_archive", slices=ufs2arco.slices) }}'
+        target: !dict '{{ ufs2arco.target }}'
+        transforms:
+          horizontal_regrid:
+            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
+            target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
+      rundir: '{{ val.data.rundir }}'
+    platform: *platform
+  hrrr:
+    zarr:
+      # Config for the Zarr driver parameterized for HRRR.
+      execution:
+        <<: *zarrs-common-execution
+        executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+      name: hrrr
+      ufs2arco:
+        directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
+        mover: !dict '{{ ufs2arco.mover }}'
+        multisource:
+          - source: !dict '{{ dict(ufs2arco.source.analysis, name="aws_hrrr_archive") }}'
+            transforms:
+              rotate_vectors:
+                vector_pairs:
+                  - ['u', 'v']
+                  - ['u10', 'v10']
+                  - ['u80', 'v80']
+          - source: !dict '{{ dict(ufs2arco.source.forecast, name="aws_hrrr_archive") }}'
+        target: !dict '{{ ufs2arco.target }}'
+        transforms:
+          horizontal_regrid:
+            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
+            target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
+      rundir: '{{ val.data.rundir }}'
+    platform: *platform

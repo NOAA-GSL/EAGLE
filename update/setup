@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+
+set -aeu
+
+INSTALLDIR=$PWD/conda
+MAKE="make=4.4.*"
+UWTOOLS="uwtools=2.12.*"
+
+# In all functions, make variables local unless they are either intended for global use, or set in
+# a subshell that exits at the end of the function.
+
+conda_activate() {
+  local env=$1
+  source $INSTALLDIR/etc/profile.d/conda.sh
+  # Activation scripts shipped with conda packages may contain statements either expanding undefined
+  # variables or exiting with error status, so temporarily disable the checks for these conditions,
+  # then enable again.
+  set +eu
+  conda activate $env
+  set -eu
+}
+
+conda_create() {
+  local name=$1
+  conda_activate base
+  msg Creating environment: $name
+  # In each runtime virtual environment, "make format" requires jq to format JSON Schema files;
+  # invoking make targets requires make itself; and driver execution and config management require
+  # uwtools, so install those.
+  conda create -y -q -c ufs-community -n $* jq $MAKE $UWTOOLS
+  (
+    # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip cahes package
+    # files in the runtime area, rather than in the user's home directory, which might impact their
+    # quota. When deactivated, environments should reset or unset this value, as appropriate.
+    conda_activate $name
+    dir_activate=$CONDA_PREFIX/etc/conda/activate.d
+    mkdir -pv $dir_activate
+    cat <<EOF >$dir_activate/eagle.sh
+if [[ -v XDG_CACHE_HOME ]]; then
+  export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
+fi
+export XDG_CACHE_HOME=\$_CONDA_ROOT/cache
+EOF
+    dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
+    mkdir -pv $dir_deactivate
+    cat <<EOF >$dir_deactivate/eagle.sh
+if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
+  export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
+  unset EAGLE_OLD_XDG_CACHE_HOME
+else
+  unset XDG_CACHE_HOME
+fi
+EOF
+  )
+}
+
+conda_create_anemoi() {
+  local name=anemoi
+  conda_env_exists $name && return || true
+  (
+    # Find the latest "cuda" module, load it, then call nvcc to find out the version number. Export
+    # this version number when creating the conda environment so that the correct flash-attn package
+    # is installed. When activating the environment, purge existing modules, load the previously
+    # identified "cuda" module, and arrange to reset this when the environment is deactivated.
+    cudamod=$(module --terse spider cuda | grep -v "^$" | tail -n1)
+    test -z "${cudamod:-}" && echo "No CUDA module found" && exit 1
+    module load $cudamod
+    cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
+    CONDA_OVERRIDE_CUDA=$cu conda_create $name flash-attn=2.8.* python=3.12
+    conda_activate $name
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+modules="\$(module --terse list | grep -v 'No modules loaded' | tr '\n' ' ')"
+if [[ -n "\$modules" ]]; then
+  export EAGLE_OLD_MODULES="\$modules"
+fi
+module purge
+module load $cudamod
+EOF
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+module purge
+if [[ -v EAGLE_OLD_MODULES ]]; then
+  module load \$EAGLE_OLD_MODULES
+  unset EAGLE_OLD_MODULES
+fi
+EOF
+  )
+  pip_install $name anemoi-inference==0.6.* anemoi-models==0.8.* anemoi-training==0.5.*
+}
+
+conda_create_data() {
+  local name=data
+  conda_env_exists $name && return || true
+  conda_create $name impi_rt=2021.13.* mpi4py=4.1.* "numpy<2.3" types-pyyaml ufs2arco=0.18.*
+  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
+}
+
+conda_create_vx() {
+  local name=vx
+  conda_env_exists $name && return || true
+  conda_create $name -c paul.madden python=3.13 wxvx=0.4.*
+}
+
+conda_env_exists() {
+  name=$1
+  (
+    conda_activate base
+    if conda env list --json | jq -r .envs_details[].name | grep -q "^$name$"; then
+      msg Found existing conda environment: $name
+      exit 0
+    fi
+    exit 1
+  )
+}
+
+conda_install() {
+  name=$1
+  shift
+  (
+    conda_activate $name
+    set +eu
+    conda install -y -q $@
+    set -eu
+  )
+}
+
+conda_install_devpkgs() {
+  local name=$1
+  local devpkgs=( $MAKE mypy=1.19.* ruff=0.14.* )
+  msg Installing dev packages into environment: $name
+  conda_install $name ${devpkgs[@]}
+}
+
+install_conda() {
+  if [[ -d $INSTALLDIR ]]; then
+    msg Found existing conda installation: $INSTALLDIR
+    return
+  fi
+  local ver=25.9.1-0
+  local installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
+  local url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
+  msg Installing conda
+  wget -nv $url
+  bash $installer -bfp $INSTALLDIR
+  rm -v $installer
+  conda_install base -c ufs-community $UWTOOLS
+}
+
+msg() {
+  echo -e "=> $*"
+}
+
+pip_install() {
+  local name=$1
+  shift
+  (
+    conda_activate $name
+    pip install $@
+  )
+}
+
+environments=( data anemoi ) # vx
+
+install_conda
+for name in ${environments[*]}; do
+  conda_create_$name
+  test -v EAGLE_DEV && conda_install_devpkgs $name
+done
+msg Done
