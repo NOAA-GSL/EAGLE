@@ -19,6 +19,20 @@ grids_and_meshes:
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
   rundir: '{{ val.data.rundir }}'
+inference:
+  checkpoint_path: '{{ training.rundir }}/outputs/checkpoint/6b67c174-ae26-41e3-b8aa-50b74469fe80/inference-last.ckpt'
+  lead_time: 24
+  input_dataset_kwargs:
+    cutout:
+      - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
+        trim_edge: [10, 11, 10, 11]
+      - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
+    adjust: all
+    min_distance_km: 0
+  output_path: '{{ app.rundir }}/inference_files'
+  start_date: '{{ (app.time.start + app.time.step * 6).strftime("%Y-%m-%d") }}'
+  end_date: '{{ inference.start_date }}'
+  freq: '{{app.time.step }}h'
 platform: *platform
 training:
   # Config for the Training driver.
