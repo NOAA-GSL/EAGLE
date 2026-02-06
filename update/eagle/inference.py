@@ -20,8 +20,10 @@ class Inference(DriverTimeInvariant):
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        #if inference is a top-level key it might not need to specified.
-        config = get_yaml_config(config=self.config["inference"])
+        config = get_yaml_config(self.config["anemoi"])
+        ckpt_dir = self._config["checkpoint_dir"]
+        ckpts = sorted(ckpt_dir.glob("*/inference-last.ckpt"))
+        config["checkpoint_path"] = str(ckpts[-1])
         config.dump(path)
 
     @collection
