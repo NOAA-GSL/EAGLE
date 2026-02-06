@@ -84,7 +84,7 @@ if [[ -v EAGLE_OLD_MODULES ]]; then
 fi
 EOF
   )
-  pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* anemoi-training==0.6.*
+  pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* anemoi-training==0.6.* eagle-tools
 }
 
 conda_create_data() {
