@@ -106,15 +106,15 @@ training:
         test: 1
         training: 1
         validation: 1
-      test:
-        end: 2022-02-06
-        start: 2022-02-05
       training:
-        end: 2022-02-02
-        start: 2022-02-01
+        start: '{{ app.time.start.strftime("%Y-%m-%d") }}'
+        end: '{{ (app.time.start + app.time.step * 4).strftime("%Y-%m-%d") }}'
       validation:
-        end: 2022-02-04
-        start: 2022-02-03
+        start: '{{ (app.time.start + app.time.step * 8).strftime("%Y-%m-%d") }}'
+        end: '{{ (app.time.start + app.time.step * 12).strftime("%Y-%m-%d") }}'
+      test:
+        start: '{{ (app.time.start + app.time.step * 16).strftime("%Y-%m-%d") }}'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
     diagnostics:
       checkpoint:
         every_n_minutes:
@@ -173,15 +173,6 @@ training:
             per_sample: 6
             precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
             sample_idx: ${diagnostics.plot.sample_idx}
-          # - _target_: anemoi.training.diagnostics.callbacks.plot.PlotSpectrum
-          #   every_n_batches: ${diagnostics.plot.frequency.batch}
-          #   parameters:
-          #     - gh_500
-          #     - accum_tp
-          #     - t2m
-          #     - u10
-          #     - v10
-          #   sample_idx: ${diagnostics.plot.sample_idx}
           - _target_: anemoi.training.diagnostics.callbacks.plot.PlotHistogram
             every_n_batches: ${diagnostics.plot.frequency.batch}
             parameters:
@@ -470,7 +461,7 @@ zarrs:
     execution: &zarrs-common-execution
       batchargs:
         cores: 15
-        memory: 10G
+        memory: 128G
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:30:00'
