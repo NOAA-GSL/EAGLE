@@ -9,6 +9,9 @@
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
         },
+        "remove": {
+          "type": "array"
+        },
         "rundir": {
           "type": "string"
         }

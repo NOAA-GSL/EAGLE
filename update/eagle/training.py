@@ -29,6 +29,18 @@ class Training(DriverTimeInvariant):
         config = get_yaml_config(self.rundir / "config.yaml")
         config.update_from(self.config["anemoi"])
         config.dump(path)
+    
+
+    @task
+    def runscript(self):
+        yield self.taskname("training runscript")
+        path = self._runscript_path
+        yield Asset(path, path.is_file)
+        yield None
+        if rm := self._config.get("remove"):
+            rmkeys = " ".join(f"~{k}" for k in rm)
+            self._config["execution"]["executable"] += f" {rmkeys}"
+        self._write_runscript(path)
 
     @collection
     def provisioned_rundir(self):

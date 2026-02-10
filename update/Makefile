@@ -3,7 +3,7 @@ REALIZED = realized.yaml
 TARGETS  = data devenv env format grids-and-meshes lint realize-config test training typecheck zarr-gfs zarr-hrrr
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
-exec     = uw execute --config-file config.yaml --module eagle/$(1).py --classname $(2) --task $(3)
+exec     = uw execute --config-file nested_eagle.yaml --module eagle/$(1).py --classname $(2) --task $(3)
 zarr     = $(call exec,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
 .ONESHELL:
