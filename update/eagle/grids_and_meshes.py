@@ -8,7 +8,7 @@ from threading import Lock
 import cf_xarray as cfxr
 import numpy as np
 import xesmf  # type: ignore[import-untyped]
-from anemoi.datasets.grids import cutout_mask  # type: ignore[import-untyped]
+from anemoi.transform.spatial import cutout_mask  # type: ignore[import-untyped]
 from anemoi.graphs.generate.utils import get_coordinates_ordering  # type: ignore[import-untyped]
 from iotaa import Asset, collection, task
 from ufs2arco import sources  # type: ignore[import-untyped]
