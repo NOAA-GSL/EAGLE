@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /scratch4/BMC/zrtrr/elcarpenter/eagle/update
+  base: /path/to/eagle/update
   partitions:
     gpu: u1-h100
     netaccess: u1-service
