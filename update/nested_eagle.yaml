@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /path/to/eagle/update
+  base: /path/to/EAGLE/update
   partitions:
     gpu: u1-h100
     netaccess: u1-service
