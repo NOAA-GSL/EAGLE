@@ -51,6 +51,8 @@ training:
         - insolation
         - lsm
         - orog
+      imputer:
+        default: none
       normalizer:
         default: mean-std
         max:
