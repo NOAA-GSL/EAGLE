@@ -338,6 +338,14 @@ training:
           - node_weights
       variable_groups:
         default: sfc
+        pl:
+          param:
+          - gh
+          - q
+          - t
+          - u
+          - v
+          - w
   execution:
     batchargs:
       --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
