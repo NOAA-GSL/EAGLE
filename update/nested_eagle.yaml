@@ -108,15 +108,15 @@ training:
         test: 1
         training: 1
         validation: 1
+      test:
+        start: '{{ (app.time.start + app.time.step * 16).strftime("%Y-%m-%d") }}'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
       training:
         start: '{{ app.time.start.strftime("%Y-%m-%d") }}'
         end: '{{ (app.time.start + app.time.step * 4).strftime("%Y-%m-%d") }}'
       validation:
         start: '{{ (app.time.start + app.time.step * 8).strftime("%Y-%m-%d") }}'
         end: '{{ (app.time.start + app.time.step * 12).strftime("%Y-%m-%d") }}'
-      test:
-        start: '{{ (app.time.start + app.time.step * 16).strftime("%Y-%m-%d") }}'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
     diagnostics:
       checkpoint:
         every_n_minutes:
