@@ -354,6 +354,7 @@ training:
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: anemoi-training train --config-name=training
   remove:
+    # Remove keys from the default config that are not wanted in this experiment.
     - graph.nodes.hidden.node_builder.grid
     - diagnostics.check_val_every_n_epoch
   rundir: '{{ app.rundir }}/training'

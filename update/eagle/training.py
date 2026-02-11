@@ -29,7 +29,6 @@ class Training(DriverTimeInvariant):
         config = get_yaml_config(self.rundir / "config.yaml")
         config.update_from(self.config["anemoi"])
         config.dump(path)
-    
 
     @task
     def runscript(self):

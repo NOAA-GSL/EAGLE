@@ -29,10 +29,12 @@ env:
 	./setup
 
 format:
+	$(call activate,data)
 	./format $(SRCDIRS)
 
 lint:
 	@echo "=> Linting code"
+	$(call activate,anemoi)
 	ruff check $(SRCDIRS)
 
 realize-config: $(REALIZED)
@@ -44,6 +46,7 @@ training:
 	$(call exec,training,Training,run --batch)
 
 typecheck:
+	$(call activate,data)
 	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)
 
@@ -55,6 +58,6 @@ zarr-hrrr:
 	$(call activate,data)
 	$(call zarr,hrrr)
 
-$(REALIZED): config.yaml
+$(REALIZED): nested_eagle.yaml
 	$(call activate,base)
 	uw config realize --input-file $< --output-file $@
