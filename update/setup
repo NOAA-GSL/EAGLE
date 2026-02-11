@@ -64,7 +64,6 @@ conda_create_anemoi() {
     # purge existing modules, load the previously identified "cuda" module, and arrange to reset this 
     # when the environment is deactivated.
     cudamod="cuda/12.8.1"
-    test -z "${cudamod:-}" && echo "No CUDA module found" && exit 1
     module load $cudamod
     cu=$(nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/')
     CONDA_OVERRIDE_CUDA=$cu conda_create $name flash-attn=2.8.* python=3.12
