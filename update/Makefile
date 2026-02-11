@@ -3,7 +3,7 @@ REALIZED = realized.yaml
 TARGETS  = data devenv env format grids-and-meshes lint realize-config test training typecheck zarr-gfs zarr-hrrr
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
-exec     = uw execute --config-file config.yaml --module eagle/$(1).py --classname $(2) --task $(3)
+exec     = uw execute --config-file nested_eagle.yaml --module eagle/$(1).py --classname $(2) --task $(3)
 zarr     = $(call exec,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
 .ONESHELL:
@@ -29,10 +29,12 @@ env:
 	./setup
 
 format:
+	$(call activate,data)
 	./format $(SRCDIRS)
 
 lint:
 	@echo "=> Linting code"
+	$(call activate,anemoi)
 	ruff check $(SRCDIRS)
 
 realize-config: $(REALIZED)
@@ -44,6 +46,7 @@ training:
 	$(call exec,training,Training,run --batch)
 
 typecheck:
+	$(call activate,data)
 	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)
 
@@ -55,6 +58,6 @@ zarr-hrrr:
 	$(call activate,data)
 	$(call zarr,hrrr)
 
-$(REALIZED): config.yaml
+$(REALIZED): nested_eagle.yaml
 	$(call activate,base)
 	uw config realize --input-file $< --output-file $@

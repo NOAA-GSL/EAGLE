@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /scratch3/BMC/gsd-hpcs/Paul.Madden/EAGLE/update
+  base: /path/to/EAGLE/update
   partitions:
     gpu: u1-h100
     netaccess: u1-service
@@ -51,6 +51,8 @@ training:
         - insolation
         - lsm
         - orog
+      imputer:
+        default: none
       normalizer:
         default: mean-std
         max:
@@ -101,20 +103,24 @@ training:
         test: 1
         training: null
         validation: null
+      prefetch_factor: 1
       num_workers:
         test: 1
         training: 1
         validation: 1
       test:
-        end: 2022-02-17T00:00:00.000Z # TODO derive
-        start: 2022-02-16T00:00:00.000Z # TODO derive
+        start: '{{ (app.time.start + app.time.step * 16).strftime("%Y-%m-%d") }}'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
       training:
-        end: 2022-02-03T00:00:00.000Z # TODO derive
-        start: 2022-02-01T00:00:00.000Z # TODO derive
+        start: '{{ app.time.start.strftime("%Y-%m-%d") }}'
+        end: '{{ (app.time.start + app.time.step * 4).strftime("%Y-%m-%d") }}'
       validation:
-        end: 2022-02-15T00:00:00.000Z # TODO derive
-        start: 2022-02-04T00:00:00.000Z # TODO derive
+        start: '{{ (app.time.start + app.time.step * 8).strftime("%Y-%m-%d") }}'
+        end: '{{ (app.time.start + app.time.step * 12).strftime("%Y-%m-%d") }}'
     diagnostics:
+      checkpoint:
+        every_n_minutes:
+          save_frequency: 5
       log:
         mlflow:
           authentication: false
@@ -135,6 +141,7 @@ training:
           enabled: false
           entity: null
       plot:
+        asynchronous: false
         callbacks:
           - _target_: anemoi.training.diagnostics.callbacks.plot.GraphTrainableFeaturesPlot
             every_n_epochs: ${diagnostics.plot.frequency.epoch}
@@ -168,15 +175,6 @@ training:
             per_sample: 6
             precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
             sample_idx: ${diagnostics.plot.sample_idx}
-          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotSpectrum
-            every_n_batches: ${diagnostics.plot.frequency.batch}
-            parameters:
-              - gh_500
-              - accum_tp
-              - t2m
-              - u10
-              - v10
-            sample_idx: ${diagnostics.plot.sample_idx}
           - _target_: anemoi.training.diagnostics.callbacks.plot.PlotHistogram
             every_n_batches: ${diagnostics.plot.frequency.batch}
             parameters:
@@ -188,7 +186,7 @@ training:
             precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
             sample_idx: ${diagnostics.plot.sample_idx}
         frequency:
-          batch: 500
+          batch: 50
           epoch: 1
         parameters:
           - gh_500
@@ -291,21 +289,29 @@ training:
             - q_850
             - q_925
             - q_1000
+      decoder:
+        num_chunks: 1
+        shard_strategy: edges
+      encoder:
+        num_chunks: 1
+        shard_strategy: edges
       num_channels: 512
       processor:
+        num_chunks: 2
         window_size: 4320
     training:
       lr:
         iterations: ${training.max_steps}
         min: 3.e-7
         rate: 0.0000625
-        warmup: 100
-      max_steps: 3000
+        warmup: 5
+      max_steps: 50
       metrics:
         - gh_500
         - t_850
         - u_850
         - v_850
+      model_task: anemoi.training.train.tasks.GraphForecaster
       scalers:
         general_variable:
           _target_: anemoi.training.losses.scalers.GeneralVariableLossScaler
@@ -333,12 +339,13 @@ training:
       variable_groups:
         default: sfc
         pl:
-          - gh
-          - u
-          - v
-          - w
-          - t
-          - q
+          param:
+            - gh
+            - q
+            - t
+            - u
+            - v
+            - w
   execution:
     batchargs:
       --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
@@ -347,15 +354,19 @@ training:
       partition: '{{ app.partitions.gpu }}'
       queue: gpuwf # NB: Brittle, tied to Ursa.
       rundir: '{{ training.rundir }}'
-      walltime: '03:00:00'
+      walltime: '00:30:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
       - module list
       - set -ex
       - export SLURM_GPUS_PER_NODE=1
-      #- export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: anemoi-training train --config-name=training
+  remove:
+    # Dot-separated config keys paths to delete from the composed runtime config.
+    - graph.nodes.hidden.node_builder.grid
+    - diagnostics.check_val_every_n_epoch
   rundir: '{{ app.rundir }}/training'
 ufs2arco:
   # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
@@ -460,8 +471,8 @@ zarrs:
     # Shared config for the gfs and hrrr configurations.
     execution: &zarrs-common-execution
       batchargs:
-        cores: 4
-        memory: 10G
+        cores: 15
+        memory: 128G
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:30:00'
