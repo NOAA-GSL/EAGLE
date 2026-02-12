@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /path/to/eagle/update
+  base: /path/to/EAGLE/update
   gpu: &gpu_batch
     --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
     nodes: 1
