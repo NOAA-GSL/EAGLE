@@ -1,6 +1,6 @@
 {
   "properties": {
-    "training": {
+    "inference": {
       "additionalProperties": false,
       "properties": {
         "anemoi": {

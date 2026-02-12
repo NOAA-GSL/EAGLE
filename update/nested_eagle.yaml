@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /path/to/EAGLE/update
+  base: /scratch4/BMC/zrtrr/elcarpenter/eagle/update
   partitions:
     gpu: u1-h100
     netaccess: u1-service
@@ -30,10 +30,10 @@ inference:
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
       adjust: all
       min_distance_km: 0
-    output_path: '{{ app.rundir }}/inference_files'
+    output_path: '{{ inference.rundir }}/inference_files'
     start_date: '{{ (app.time.start + app.time.step * 6).strftime("%Y-%m-%d") }}'
-    end_date: '{{ inference.start_date }}'
-    freq: '{{ app.time.step }}h'
+    end_date: '{{ inference.anemoi.start_date }}'
+    freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs:
@@ -47,6 +47,8 @@ inference:
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
+      - set -ex
+      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
 platform: *platform

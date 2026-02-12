@@ -21,7 +21,7 @@ class Inference(DriverTimeInvariant):
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         config = get_yaml_config(self.config["anemoi"])
-        ckpt_dir = self._config["checkpoint_dir"]
+        ckpt_dir = Path(self._config["checkpoint_dir"])
         ckpts = sorted(ckpt_dir.glob("*/inference-last.ckpt"))
         config["checkpoint_path"] = str(ckpts[-1])
         config.dump(path)
