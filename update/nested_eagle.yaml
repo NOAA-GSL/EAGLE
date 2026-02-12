@@ -21,7 +21,7 @@ grids_and_meshes:
   rundir: '{{ val.data.rundir }}'
 inference:
   anemoi:
-    checkpoint_path: '{{ training.rundir }}/outputs/checkpoint/6b67c174-ae26-41e3-b8aa-50b74469fe80/inference-last.ckpt'
+    checkpoint_path: /path/to/checkpoint
     lead_time: 24
     input_dataset_kwargs:
       cutout:
