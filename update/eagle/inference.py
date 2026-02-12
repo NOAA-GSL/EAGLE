@@ -1,5 +1,4 @@
 from pathlib import Path
-from subprocess import run
 
 from iotaa import Asset, collection, task
 from uwtools.api.config import get_yaml_config

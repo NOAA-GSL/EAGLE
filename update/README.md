@@ -26,6 +26,7 @@ Now, a variety of `make` targets are available to execute pipeline steps, each t
 | zarr-gfs         | Prepare Zarr-formatted GFS input data         | grids-and-meshes  | data             |
 | zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
 | training         | Performs Anemoi training                      | -                 | anemoi           |
+| inference        | Performs Anemoi inference                     | -                 | anemoi           |
 
 Run `make` with no argument to list all available targets.
 

@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /scratch4/BMC/zrtrr/elcarpenter/eagle/update
+  base: /path/to/eagle/update
   partitions:
     gpu: u1-h100
     netaccess: u1-service
@@ -30,7 +30,7 @@ inference:
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
       adjust: all
       min_distance_km: 0
-    output_path: '{{ inference.rundir }}/inference_files'
+    output_path: '{{ inference.rundir }}/output'
     start_date: '{{ (app.time.start + app.time.step * 6).strftime("%Y-%m-%d") }}'
     end_date: '{{ inference.anemoi.start_date }}'
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'

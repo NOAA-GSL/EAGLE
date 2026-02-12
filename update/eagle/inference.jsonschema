@@ -7,7 +7,7 @@
           "type": "object"
         },
         "checkpoint_dir": {
-            "type": "string"
+          "type": "string"
         },
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
