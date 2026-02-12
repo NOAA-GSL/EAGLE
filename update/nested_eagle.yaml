@@ -21,7 +21,7 @@ grids_and_meshes:
   rundir: '{{ val.data.rundir }}'
 inference:
   anemoi:
-    checkpoint_path: /path/to/checkpoint
+    checkpoint_path: /path/to/checkpoint # NB: This will be overridden by the driver to point to the checkpoint in the training run directory.
     lead_time: 24
     input_dataset_kwargs:
       cutout:
