@@ -18,7 +18,6 @@
       },
       "required": [
         "anemoi",
-        "checkpoint_dir",
         "execution",
         "rundir"
       ],

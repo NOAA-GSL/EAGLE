@@ -1,7 +1,7 @@
 app:
   # Application values likely to require configuration by users.
-  base: /path/to/EAGLE/update
-  gpu: &gpu_batch
+  base: /scratch4/BMC/zrtrr/elcarpenter/eagle/update
+  gpu: &gpu-batch
     --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
     nodes: 1
     partition: '{{ app.partitions.gpu }}'
@@ -27,7 +27,7 @@ grids_and_meshes:
   rundir: '{{ val.data.rundir }}'
 inference:
   anemoi:
-    checkpoint_path: /path/to/checkpoint # NB: This will be overridden by the driver to point to the checkpoint in the training run directory.
+    checkpoint_path: /path/to/checkpoint # NB: If a value for inference.checkpoint_dir is provided, it will override this value with the latest checkpoint in that directory.
     lead_time: 24
     input_dataset_kwargs:
       cutout:
@@ -43,7 +43,7 @@ inference:
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs: 
-      <<: *gpu_batch
+      <<: *gpu-batch
       memory: 64G
       rundir: '{{ inference.rundir }}'
     envcmds:
@@ -382,7 +382,7 @@ training:
             - w
   execution:
     batchargs:
-      <<: *gpu_batch
+      <<: *gpu-batch
       memory: 128G
       rundir: '{{ training.rundir }}'
     envcmds:
