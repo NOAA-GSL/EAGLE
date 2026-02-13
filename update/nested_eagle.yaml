@@ -1,14 +1,15 @@
 app:
   # Application values likely to require configuration by users.
   base: /path/to/EAGLE/update
-  gpu: &gpu-batch
-    --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
-    nodes: 1
-    partition: '{{ app.partitions.gpu }}'
-    queue: gpuwf # NB: Brittle, tied to Ursa.
-    walltime: '00:30:00'
+  gpu:
+    batchargs: &gpu-batchargs
+      --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
+      nodes: 1
+      partition: '{{ app.gpu.partition }}'
+      queue: gpuwf # NB: Brittle, tied to Ursa.
+    partition: u1-h100
+  leadtime: 24
   partitions:
-    gpu: u1-h100
     netaccess: u1-service
   platform: &platform
     account: epic
@@ -28,7 +29,7 @@ grids_and_meshes:
 inference:
   anemoi:
     checkpoint_path: /path/to/checkpoint # NB: If a value for inference.checkpoint_dir is provided, it will override this value with the latest checkpoint in that directory.
-    lead_time: 24
+    lead_time: !int '{{ app.leadtime }}'
     input_dataset_kwargs:
       cutout:
         - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
@@ -43,9 +44,10 @@ inference:
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs: 
-      <<: *gpu-batch
+      <<: *gpu-batchargs
       memory: 64G
       rundir: '{{ inference.rundir }}'
+      walltime: '00:10:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
@@ -382,9 +384,10 @@ training:
             - w
   execution:
     batchargs:
-      <<: *gpu-batch
+      <<: *gpu-batchargs
       memory: 128G
       rundir: '{{ training.rundir }}'
+      walltime: '00:30:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
