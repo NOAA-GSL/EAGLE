@@ -29,7 +29,7 @@ conda_create() {
   # uwtools, so install those.
   conda create -y -q -c ufs-community -n $* jq $MAKE $UWTOOLS
   (
-    # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip cahes package
+    # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
     # files in the runtime area, rather than in the user's home directory, which might impact their
     # quota. When deactivated, environments should reset or unset this value, as appropriate.
     conda_activate $name
@@ -97,7 +97,8 @@ conda_create_data() {
 conda_create_vx() {
   local name=vx
   conda_env_exists $name && return || true
-  conda_create $name -c paul.madden python=3.13 wxvx=0.4.*
+  conda_create $name -c oar-gsl -c conda-forge python=3.13 wxvx=0.5.* xesmf
+  pip_install $name eagle-tools
 }
 
 conda_env_exists() {
@@ -158,7 +159,7 @@ pip_install() {
   )
 }
 
-environments=( data anemoi ) # vx
+environments=( data anemoi vx )
 
 install_conda
 for name in ${environments[*]}; do

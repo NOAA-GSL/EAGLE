@@ -1,0 +1,32 @@
+{
+  "properties": {
+    "prewxvx": {
+      "additionalProperties": false,
+      "properties": {
+        "eagle-tools": {
+          "type": "object"
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-parallel"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "name",
+        "rundir",
+        "eagle-tools"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "prewxvx"
+  ],
+  "type": "object"
+}
