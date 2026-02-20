@@ -85,6 +85,7 @@ typecheck:
 	mypy $(SRCDIRS)
 
 vx:
+	$(MAKE) prewxvx
 	$(MAKE) grid2grid-global
 	$(MAKE) grid2grid-lam
 	$(MAKE) grid2obs-global

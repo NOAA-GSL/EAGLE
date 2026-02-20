@@ -39,7 +39,7 @@ inference:
       min_distance_km: 0
     output_path: '{{ inference.rundir }}/output'
     start_date: !datetime 2022-02-03T12
-    end_date: !datetime 2022-02-03T12
+    end_date: "{{ inference.anemoi.start_date }}"
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
@@ -70,8 +70,8 @@ prewxvx:
         - 250
         - 500
         - 850
-      start_date: 2022-02-03T12
-      end_date: 2022-02-03T12
+      start_date: "{{ inference.anemoi.start_date }}"
+      end_date: "{{ inference.anemoi.end_date }}"
       vars_of_interest:
         - t2m
         - gh
@@ -589,9 +589,9 @@ vx:
         - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     wxvx: &wxvx-common
       cycles:
-        start: 2022-02-03T12:00:00
+        start: !datetime "{{ inference.anemoi.start_date }}"
         step: 0
-        stop: 2022-02-03T12:00:00
+        stop: !datetime "{{ inference.anemoi.end_date }}"
       forecast:
         coords:
           latitude: latitude
@@ -725,17 +725,91 @@ vx:
             method: NEAREST
             to: forecast
 
-  # grid2obs:
-  #   global:
-  #     execution:
-  #     name:
-  #     rundir:
-  #     wxvx:
-  #   lam:
-  #     execution:
-  #     name:
-  #     rundir:
-  #     wxvx:
+  grid2obs:
+    global:
+      platform: *platform
+      wxvx:
+        execution:
+          <<: *wxvx-common-execution
+          executable: wxvx -c wxvx-grid2obs-global.yaml -t plots
+        name: grid2obs-global
+        rundir: "{{ prewxvx.common.rundir }}"
+        wxvx:
+          <<: *wxvx-common
+          truth:
+            name: PREPBUFR
+            type: point
+            url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+          forecast:
+            coords:
+              latitude: latitude
+              level: level
+              longitude: longitude
+              time:
+                inittime: forecast_reference_time
+                validtime: time
+            name: nested_global
+            path: "{{ meta.postprocessed_files }}/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            projection:
+              proj: latlon
+          meta:
+            grids: "{{ meta.workdir }}/grids"
+            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
+            workdir: "{{ prewxvx.common.rundir }}"
+          paths:
+            grids:
+              forecast: "{{ meta.grids }}/forecast"
+            obs: "{{ meta.workdir }}/obs"
+            run: "{{ meta.workdir }}/run"
+          regrid:
+            method: BILIN
+            to: G104
+    lam:
+      platform: *platform
+      wxvx:
+        execution:
+          <<: *wxvx-common-execution
+          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots
+        name: grid2obs-lam
+        rundir: "{{ prewxvx.common.rundir }}"
+        wxvx:
+          <<: *wxvx-common
+          truth:
+            name: PREPBUFR
+            type: point
+            url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+          forecast:
+            coords:
+              latitude: latitude
+              level: level
+              longitude: longitude
+              time:
+                inittime: forecast_reference_time
+                validtime: time
+            name: nested_lam
+            path: "{{ meta.postprocessed_files }}/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            projection:
+              a: 6371229
+              b: 6371229
+              lat_0: 38.5
+              lat_1: 38.5
+              lat_2: 38.5
+              lon_0: 262.5
+              proj: lcc
+          meta:
+            grids: "{{ meta.workdir }}/grids"
+            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
+            workdir: "{{ prewxvx.common.rundir }}"
+          ncdiffs: false
+          paths:
+            grids:
+              forecast: "{{ meta.grids }}/forecast"
+            obs: "{{ meta.workdir }}/obs"
+            run: "{{ meta.workdir }}/run"
+          regrid:
+            method: BILIN
+            to: G104
+
 zarrs:
   # Configs for the Zarr driver.
   common:
