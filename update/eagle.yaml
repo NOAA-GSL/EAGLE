@@ -414,8 +414,8 @@ training:
         iterations: ${training.max_steps}
         min: 3.e-7
         rate: 0.0000625
-        warmup: 5
-      max_steps: 50
+        warmup: 2
+      max_steps: 20
       metrics:
         - gh_500
         - t_850
