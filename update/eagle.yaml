@@ -45,7 +45,7 @@ inference:
   execution:
     batchargs: 
       <<: *gpu-batchargs
-      memory: 64G
+      memory: 16G
       rundir: '{{ inference.rundir }}'
       walltime: '00:10:00'
     envcmds:

@@ -47,7 +47,7 @@ class Inference(DriverTimeInvariant):
     # Private methods
 
     @external
-    def checkpoint_exists(self, path: str):
+    def checkpoint_exists(self, path: Path):
         taskname = "Existing path %s" % path
         yield taskname
         yield Asset(path, path.exists)
