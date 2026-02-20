@@ -24,7 +24,7 @@ class Inference(DriverTimeInvariant):
             if ckpt_dir
             else Path(config["checkpoint_path"])
         )
-        yield self.checkpoint_exists(ckpt_path)
+        yield self._checkpoint_exists(ckpt_path)
         if ckpt_dir:
             config["checkpoint_path"] = str(ckpt_path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -47,7 +47,7 @@ class Inference(DriverTimeInvariant):
     # Private methods
 
     @external
-    def checkpoint_exists(self, path: Path):
-        taskname = "Existing path %s" % path
+    def _checkpoint_exists(self, path: Path):
+        taskname = "Checkpoint exists %s" % path
         yield taskname
         yield Asset(path, path.exists)

@@ -8,7 +8,7 @@ app:
       partition: '{{ app.gpu.partition }}'
       queue: gpuwf # NB: Brittle, tied to Ursa.
     partition: u1-h100
-  leadtime: !int 24
+  leadtime: 24
   partitions:
     netaccess: u1-service
   platform: &platform
