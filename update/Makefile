@@ -1,6 +1,6 @@
 SRCDIRS  = eagle
 REALIZED = realized.yaml
-TARGETS  = data devenv env format grids-and-meshes inference lint prewxvx realize-config test training typecheck vx zarr-gfs zarr-hrrr
+TARGETS  = data devenv env format grids-and-meshes grid2grid grid2obs inference lint prewxvx realize-config test training typecheck vx zarr-gfs zarr-hrrr
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
 exec     = uw execute --config-file eagle.yaml --module eagle/$(1).py --classname $(2) --task $(3)
@@ -34,6 +34,10 @@ format:
 	$(call activate,data)
 	./format $(SRCDIRS)
 
+grid2grid:
+	$(MAKE) grid2grid-global
+	$(MAKE) grid2grid-lam
+
 grid2grid-global:
 	$(call activate,vx)
 	$(call wxvx,grid2grid,global)
@@ -41,6 +45,10 @@ grid2grid-global:
 grid2grid-lam:
 	$(call activate,vx)
 	$(call wxvx,grid2grid,lam)
+
+grid2obs:
+	$(MAKE) grid2obs-global
+	$(MAKE) grid2obs-lam
 
 grid2obs-global:
 	$(call activate,vx)
@@ -86,10 +94,8 @@ typecheck:
 
 vx:
 	$(MAKE) prewxvx
-	$(MAKE) grid2grid-global
-	$(MAKE) grid2grid-lam
-	$(MAKE) grid2obs-global
-	$(MAKE) grid2obs-lam
+	$(MAKE) grid2grid
+	$(MAKE) grid2obs
 
 zarr-gfs:
 	$(call activate,data)

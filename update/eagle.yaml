@@ -587,6 +587,7 @@ vx:
         - conda activate vx
         - set -ex
         - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+    rundir: "{{ prewxvx.common.rundir }}"
     wxvx: &wxvx-common
       cycles:
         start: !datetime "{{ inference.anemoi.start_date }}"
@@ -644,7 +645,7 @@ vx:
           <<: *wxvx-common-execution
           executable: wxvx -c wxvx-grid2grid-global.yaml -t plots
         name: grid2grid-global
-        rundir: "{{ prewxvx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}"
         wxvx:
           <<: *wxvx-common
           baseline:
@@ -666,15 +667,16 @@ vx:
             projection:
               proj: latlon
           meta:
-            grids: "{{ meta.workdir }}/grids"
+            grids: "{{ meta.subdir }}/grids"
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            workdir: "{{ prewxvx.common.rundir }}"
+            subdir: "{{ vx.common.rundir }}/grid2grid/global"
+            workdir: "{{ vx.common.rundir }}"
           ncdiffs: true
           paths:
             grids:
               forecast: "{{ meta.grids }}/forecast"
               truth: "{{ meta.grids }}/truth"
-            run: "{{ meta.workdir }}/run"
+            run: "{{ meta.subdir }}/run"
           regrid:
             method: NEAREST
             to: forecast
@@ -685,7 +687,7 @@ vx:
           <<: *wxvx-common-execution
           executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots
         name: grid2grid-lam
-        rundir: "{{ prewxvx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}"
         wxvx:
           <<: *wxvx-common
           baseline:
@@ -713,18 +715,18 @@ vx:
               lon_0: 262.5
               proj: lcc
           meta:
-            grids: "{{ meta.workdir }}/grids"
+            grids: "{{ meta.subdir }}/grids"
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            workdir: "{{ prewxvx.common.rundir }}"
+            subdir: "{{ vx.common.rundir }}/grid2grid/lam"
+            workdir: "{{ vx.common.rundir }}"
           paths:
             grids:
               forecast: "{{ meta.grids }}/forecast"
               truth: "{{ meta.grids }}/truth"
-            run: "{{ meta.workdir }}/run"
+            run: "{{ meta.subdir }}/run"
           regrid:
             method: NEAREST
             to: forecast
-
   grid2obs:
     global:
       platform: *platform
@@ -733,7 +735,7 @@ vx:
           <<: *wxvx-common-execution
           executable: wxvx -c wxvx-grid2obs-global.yaml -t plots
         name: grid2obs-global
-        rundir: "{{ prewxvx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -753,14 +755,15 @@ vx:
             projection:
               proj: latlon
           meta:
-            grids: "{{ meta.workdir }}/grids"
+            grids: "{{ meta.subdir }}/grids"
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            workdir: "{{ prewxvx.common.rundir }}"
+            subdir: "{{ vx.common.rundir }}/grid2obs/global"
+            workdir: "{{ vx.common.rundir }}"
           paths:
             grids:
               forecast: "{{ meta.grids }}/forecast"
-            obs: "{{ meta.workdir }}/obs"
-            run: "{{ meta.workdir }}/run"
+            obs: "{{ meta.subdir }}/obs"
+            run: "{{ meta.subdir }}/run"
           regrid:
             method: BILIN
             to: G104
@@ -771,7 +774,7 @@ vx:
           <<: *wxvx-common-execution
           executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots
         name: grid2obs-lam
-        rundir: "{{ prewxvx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -797,15 +800,16 @@ vx:
               lon_0: 262.5
               proj: lcc
           meta:
-            grids: "{{ meta.workdir }}/grids"
+            grids: "{{ meta.subdir }}/grids"
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            workdir: "{{ prewxvx.common.rundir }}"
+            subdir: "{{ vx.common.rundir }}/grid2obs/lam"
+            workdir: "{{ vx.common.rundir }}"
           ncdiffs: false
           paths:
             grids:
-              forecast: "{{ meta.grids }}/forecast"
-            obs: "{{ meta.workdir }}/obs"
-            run: "{{ meta.workdir }}/run"
+              forecast: "{{ meta.subdir }}/forecast"
+            obs: "{{ meta.subdir }}/obs"
+            run: "{{ meta.subdir }}/run"
           regrid:
             method: BILIN
             to: G104

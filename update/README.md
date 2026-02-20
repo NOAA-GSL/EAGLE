@@ -27,6 +27,11 @@ Now, a variety of `make` targets are available to execute pipeline steps, each t
 | zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
 | training         | Performs Anemoi training                      | -                 | anemoi           |
 | inference        | Performs Anemoi inference                     | -                 | anemoi           |
+| vx               | Implies prewxvx, grid2grid, grid2obs          | -                 | vx               |
+| prewxvx          | Performs postprocessing on inference          | -                 | vx               |
+| grid2grid        | Verify global & CONUS against grided analysis | prewxvx           | vx               |
+| grid2obs         | Verify global & CONUS against obs             | prewxvx           | vx               |
+
 
 Run `make` with no argument to list all available targets.
 
@@ -34,7 +39,7 @@ Run `make` with no argument to list all available targets.
 
 TODO Complete this section...
 
-The `nested_egle.yaml` file contains many cross-referenced values. To create the file `realized.yaml`, in which all references have been resolved to their final values, which may aid in debugging, run the command
+The `eagle.yaml` file contains many cross-referenced values. To create the file `realized.yaml`, in which all references have been resolved to their final values, which may aid in debugging, run the command
 
 ``` bash
 make realize-config
