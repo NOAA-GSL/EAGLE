@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /path/to/EAGLE/update
+  base: /scratch4/BMC/zrtrr/elcarpenter/eagle/update
   gpu:
     batchargs: &gpu-batchargs
       --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
@@ -38,14 +38,14 @@ inference:
       adjust: all
       min_distance_km: 0
     output_path: '{{ inference.rundir }}/output'
-    start_date: '{{ (app.time.start + app.time.step * 6).strftime("%Y-%m-%d") }}'
-    end_date: '{{ inference.anemoi.start_date }}'
+    start_date: !datetime 2022-02-03T12
+    end_date: "{{ inference.anemoi.start_date }}"
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs: 
       <<: *gpu-batchargs
-      memory: 64G
+      memory: 16G
       rundir: '{{ inference.rundir }}'
       walltime: '00:10:00'
     envcmds:
@@ -56,6 +56,80 @@ inference:
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
 platform: *platform
+prewxvx:
+  common:
+    prewxvx: &prewxvx-common
+      forecast_path: "{{ inference.anemoi.output_path }}"
+      freq: 6h
+      lead_time: "{{ app.leadtime }}"
+      lam_index: 64220
+      lcc_info:
+        n_x: 338
+        n_y: 190
+      levels:
+        - 250
+        - 500
+        - 850
+      start_date: "{{ inference.anemoi.start_date }}"
+      end_date: "{{ inference.anemoi.end_date }}"
+      vars_of_interest:
+        - t2m
+        - gh
+        - sp
+        - t
+        - u
+        - u10
+        - v
+        - v10
+    execution: &prewxvx-common-execution
+      batchargs:
+        cores: 1
+        memory: 32G
+        nodes: 1
+        rundir: '{{ prewxvx.common.rundir }}'
+        partition: u1-service
+        walltime: '00:30:00'
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate vx
+        - set -ex
+        - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+    rundir: "{{ app.rundir }}/vx"
+  global:
+    prewxvx:
+      execution:
+        <<: *prewxvx-common-execution
+        executable: eagle-tools prewxvx prewxvx-global.yaml
+      name: global
+      eagle-tools:
+        <<: *prewxvx-common
+        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/global"
+        model_type: nested-global
+        anemoi_reference_dataset_kwargs:
+          cutout:
+            - dataset: "{{ val.data.rundir }}/hrrr.zarr"
+              trim_edge: [10, 11, 10, 11]
+            - dataset: "{{ val.data.rundir }}/gfs.zarr"
+          adjust: all
+          min_distance_km: 0
+        forecast_regrid_kwargs:
+          regridder_kwargs:
+            method: "conservative_normed"
+          target_grid_path: "{{ val.data.rundir }}/global_one_degree.nc"
+      rundir: '{{ prewxvx.common.rundir }}'
+    platform: *platform
+  lam:
+    prewxvx:
+      execution:
+        <<: *prewxvx-common-execution
+        executable: eagle-tools prewxvx prewxvx-lam.yaml
+      name: lam
+      eagle-tools:
+        <<: *prewxvx-common
+        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/lam"
+        model_type: nested-lam
+      rundir: '{{ prewxvx.common.rundir }}'
+    platform: *platform
 training:
   # Config for the Training driver.
   anemoi:
@@ -340,8 +414,8 @@ training:
         iterations: ${training.max_steps}
         min: 3.e-7
         rate: 0.0000625
-        warmup: 5
-      max_steps: 50
+        warmup: 2
+      max_steps: 20
       metrics:
         - gh_500
         - t_850
@@ -498,6 +572,248 @@ val:
     forecast:
       # Diagnostic
       - accum_tp
+vx:
+  common:
+    execution: &wxvx-common-execution
+      batchargs:
+        cores: 1
+        memory: 32G
+        nodes: 1
+        rundir: '{{ prewxvx.common.rundir }}'
+        partition: u1-service
+        walltime: '00:30:00'
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate vx
+        - set -ex
+        - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+    rundir: "{{ prewxvx.common.rundir }}"
+    wxvx: &wxvx-common
+      cycles:
+        start: !datetime "{{ inference.anemoi.start_date }}"
+        step: 0
+        stop: !datetime "{{ inference.anemoi.end_date }}"
+      forecast:
+        coords:
+          latitude: latitude
+          level: level
+          longitude: longitude
+          time:
+            inittime: forecast_reference_time
+            validtime: time
+      leadtimes:
+        start: 0
+        step: 6
+        stop: 24
+      variables:
+        t2m:
+          level_type: heightAboveGround
+          levels: [2]
+          name: 2t
+        gh:
+          level_type: isobaricInhPa
+          levels: [500]
+          name: gh
+        sp:
+          level_type: surface
+          name: sp
+        t:
+          level_type: isobaricInhPa
+          levels: [850]
+          name: t
+        u:
+          level_type: isobaricInhPa
+          levels: [250]
+          name: u
+        u10:
+          level_type: heightAboveGround
+          levels: [10]
+          name: u_10m
+        v:
+          level_type: isobaricInhPa
+          levels: [250]
+          name: v
+        v10:
+          level_type: heightAboveGround
+          levels: [10]
+          name: v_10m
+  grid2grid:
+    global:
+      platform: *platform
+      wxvx:
+        execution:
+          <<: *wxvx-common-execution
+          executable: wxvx -c wxvx-grid2grid-global.yaml -t plots
+        name: grid2grid-global
+        rundir: "{{ vx.common.rundir }}"
+        wxvx:
+          <<: *wxvx-common
+          baseline:
+            name: truth
+          truth:
+            name: GFS
+            type: grid
+            url: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{{ yyyymmdd }}/{{ hh }}/atmos/gfs.t{{ hh }}z.pgrb2.0p25.f{{ "%03d" % fh }}
+          forecast:
+            coords:
+              latitude: latitude
+              level: level
+              longitude: longitude
+              time:
+                inittime: forecast_reference_time
+                validtime: time
+            name: nested_global
+            path: "{{ meta.postprocessed_files }}/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            projection:
+              proj: latlon
+          meta:
+            grids: "{{ meta.subdir }}/grids"
+            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
+            subdir: "{{ vx.common.rundir }}/grid2grid/global"
+            workdir: "{{ vx.common.rundir }}"
+          ncdiffs: true
+          paths:
+            grids:
+              forecast: "{{ meta.grids }}/forecast"
+              truth: "{{ meta.grids }}/truth"
+            run: "{{ meta.subdir }}/run"
+          regrid:
+            method: NEAREST
+            to: forecast
+    lam:
+      platform: *platform
+      wxvx:
+        execution:
+          <<: *wxvx-common-execution
+          executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots
+        name: grid2grid-lam
+        rundir: "{{ vx.common.rundir }}"
+        wxvx:
+          <<: *wxvx-common
+          baseline:
+            name: truth
+          truth:
+            name: HRRR
+            type: grid
+            url: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.{{ yyyymmdd }}/conus/hrrr.t{{ hh }}z.wrfprsf{{ "%02d" % fh }}.grib2
+          forecast:
+            coords:
+              latitude: latitude
+              level: level
+              longitude: longitude
+              time:
+                inittime: forecast_reference_time
+                validtime: time
+            name: nested_lam
+            path: "{{ meta.postprocessed_files }}/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            projection:
+              a: 6371229
+              b: 6371229
+              lat_0: 38.5
+              lat_1: 38.5
+              lat_2: 38.5
+              lon_0: 262.5
+              proj: lcc
+          meta:
+            grids: "{{ meta.subdir }}/grids"
+            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
+            subdir: "{{ vx.common.rundir }}/grid2grid/lam"
+            workdir: "{{ vx.common.rundir }}"
+          paths:
+            grids:
+              forecast: "{{ meta.grids }}/forecast"
+              truth: "{{ meta.grids }}/truth"
+            run: "{{ meta.subdir }}/run"
+          regrid:
+            method: NEAREST
+            to: forecast
+  grid2obs:
+    global:
+      platform: *platform
+      wxvx:
+        execution:
+          <<: *wxvx-common-execution
+          executable: wxvx -c wxvx-grid2obs-global.yaml -t plots
+        name: grid2obs-global
+        rundir: "{{ vx.common.rundir }}"
+        wxvx:
+          <<: *wxvx-common
+          truth:
+            name: PREPBUFR
+            type: point
+            url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+          forecast:
+            coords:
+              latitude: latitude
+              level: level
+              longitude: longitude
+              time:
+                inittime: forecast_reference_time
+                validtime: time
+            name: nested_global
+            path: "{{ meta.postprocessed_files }}/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            projection:
+              proj: latlon
+          meta:
+            grids: "{{ meta.subdir }}/grids"
+            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
+            subdir: "{{ vx.common.rundir }}/grid2obs/global"
+            workdir: "{{ vx.common.rundir }}"
+          paths:
+            grids:
+              forecast: "{{ meta.grids }}/forecast"
+            obs: "{{ meta.subdir }}/obs"
+            run: "{{ meta.subdir }}/run"
+          regrid:
+            method: BILIN
+            to: G104
+    lam:
+      platform: *platform
+      wxvx:
+        execution:
+          <<: *wxvx-common-execution
+          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots
+        name: grid2obs-lam
+        rundir: "{{ vx.common.rundir }}"
+        wxvx:
+          <<: *wxvx-common
+          truth:
+            name: PREPBUFR
+            type: point
+            url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+          forecast:
+            coords:
+              latitude: latitude
+              level: level
+              longitude: longitude
+              time:
+                inittime: forecast_reference_time
+                validtime: time
+            name: nested_lam
+            path: "{{ meta.postprocessed_files }}/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            projection:
+              a: 6371229
+              b: 6371229
+              lat_0: 38.5
+              lat_1: 38.5
+              lat_2: 38.5
+              lon_0: 262.5
+              proj: lcc
+          meta:
+            grids: "{{ meta.subdir }}/grids"
+            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
+            subdir: "{{ vx.common.rundir }}/grid2obs/lam"
+            workdir: "{{ vx.common.rundir }}"
+          ncdiffs: false
+          paths:
+            grids:
+              forecast: "{{ meta.subdir }}/forecast"
+            obs: "{{ meta.subdir }}/obs"
+            run: "{{ meta.subdir }}/run"
+          regrid:
+            method: BILIN
+            to: G104
+
 zarrs:
   # Configs for the Zarr driver.
   common:

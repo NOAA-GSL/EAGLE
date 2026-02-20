@@ -1,31 +1,32 @@
 {
   "properties": {
-    "inference": {
+    "wxvx": {
       "additionalProperties": false,
       "properties": {
-        "anemoi": {
-          "type": "object"
-        },
-        "checkpoint_dir": {
-          "type": "string"
-        },
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
         },
+        "name": {
+          "type": "string"
+        },
         "rundir": {
           "type": "string"
+        },
+        "wxvx": {
+          "type": "object"
         }
       },
       "required": [
-        "anemoi",
         "execution",
-        "rundir"
+        "name",
+        "rundir",
+        "wxvx"
       ],
       "type": "object"
     }
   },
   "required": [
-    "inference"
+    "wxvx"
   ],
   "type": "object"
 }
