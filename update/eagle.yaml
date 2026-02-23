@@ -82,13 +82,6 @@ prewxvx:
         - v
         - v10
     execution: &prewxvx-common-execution
-      batchargs:
-        cores: 1
-        memory: 32G
-        nodes: 1
-        rundir: '{{ prewxvx.common.rundir }}'
-        partition: u1-service
-        walltime: '00:30:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate vx
@@ -577,8 +570,7 @@ vx:
     execution: &wxvx-common-execution
       batchargs:
         cores: 1
-        memory: 32G
-        nodes: 1
+        # memory: 32G
         rundir: '{{ prewxvx.common.rundir }}'
         partition: u1-service
         walltime: '00:30:00'
@@ -586,7 +578,7 @@ vx:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate vx
         - set -ex
-        - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+        # - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     rundir: "{{ prewxvx.common.rundir }}"
     wxvx: &wxvx-common
       cycles:
@@ -648,8 +640,6 @@ vx:
         rundir: "{{ vx.common.rundir }}"
         wxvx:
           <<: *wxvx-common
-          baseline:
-            name: truth
           truth:
             name: GFS
             type: grid
@@ -667,7 +657,7 @@ vx:
             projection:
               proj: latlon
           meta:
-            grids: "{{ meta.subdir }}/grids"
+            grids: "{{ meta.subdir }}/grids" # ELC: make globally valid reference 
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
             subdir: "{{ vx.common.rundir }}/grid2grid/global"
             workdir: "{{ vx.common.rundir }}"
@@ -690,8 +680,6 @@ vx:
         rundir: "{{ vx.common.rundir }}"
         wxvx:
           <<: *wxvx-common
-          baseline:
-            name: truth
           truth:
             name: HRRR
             type: grid
@@ -742,7 +730,7 @@ vx:
             name: PREPBUFR
             type: point
             url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
-          forecast:
+          forecast: # ELC !dict '{{ vx.*.grid2grid.*.forecast }}'
             coords:
               latitude: latitude
               level: level
@@ -764,7 +752,7 @@ vx:
               forecast: "{{ meta.grids }}/forecast"
             obs: "{{ meta.subdir }}/obs"
             run: "{{ meta.subdir }}/run"
-          regrid:
+          regrid: # ELC ask about whether it's needed for obs, both global and lam
             method: BILIN
             to: G104
     lam:

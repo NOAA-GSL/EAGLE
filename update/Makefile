@@ -1,10 +1,10 @@
 SRCDIRS  = eagle
 REALIZED = realized.yaml
-TARGETS  = data devenv env format grids-and-meshes grid2grid grid2obs inference lint prewxvx realize-config test training typecheck vx zarr-gfs zarr-hrrr
+TARGETS  = data devenv env format grids-and-meshes inference lint prewxvx-global prewxvx-lam realize-config test training typecheck vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
 exec     = uw execute --config-file eagle.yaml --module eagle/$(1).py --classname $(2) --task $(3)
-prewxvx  = $(call exec,prewxvx,PreWXVX,run --key-path prewxvx.$(1) --batch)
+prewxvx  = $(call exec,prewxvx,PreWXVX,run --key-path prewxvx.$(1))
 wxvx     = $(call exec,vx,WXVX,run --key-path vx.$(1).$(2) --batch)
 zarr     = $(call exec,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
@@ -34,30 +34,6 @@ format:
 	$(call activate,data)
 	./format $(SRCDIRS)
 
-grid2grid:
-	$(MAKE) grid2grid-global
-	$(MAKE) grid2grid-lam
-
-grid2grid-global:
-	$(call activate,vx)
-	$(call wxvx,grid2grid,global)
-
-grid2grid-lam:
-	$(call activate,vx)
-	$(call wxvx,grid2grid,lam)
-
-grid2obs:
-	$(MAKE) grid2obs-global
-	$(MAKE) grid2obs-lam
-
-grid2obs-global:
-	$(call activate,vx)
-	$(call wxvx,grid2obs,global)
-
-grid2obs-lam:
-	$(call activate,vx)
-	$(call wxvx,grid2obs,lam)
-
 inference:
 	$(call activate,anemoi)
 	$(call exec,inference,Inference,run --batch)
@@ -66,10 +42,6 @@ lint:
 	@echo "=> Linting code"
 	$(call activate,anemoi)
 	ruff check $(SRCDIRS)
-
-prewxvx:
-	$(MAKE) prewxvx-global
-	$(MAKE) prewxvx-lam
 
 prewxvx-global:
 	$(call activate,vx)
@@ -92,10 +64,21 @@ typecheck:
 	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)
 
-vx:
-	$(MAKE) prewxvx
-	$(MAKE) grid2grid
-	$(MAKE) grid2obs
+vx-grid-global:
+	$(call activate,vx)
+	$(call wxvx,grid2grid,global)
+
+vx-grid-lam:
+	$(call activate,vx)
+	$(call wxvx,grid2grid,lam)
+
+vx-obs-global:
+	$(call activate,vx)
+	$(call wxvx,grid2obs,global)
+
+vx-obs-lam:
+	$(call activate,vx)
+	$(call wxvx,grid2obs,lam)
 
 zarr-gfs:
 	$(call activate,data)

@@ -7,7 +7,7 @@
           "type": "object"
         },
         "execution": {
-          "$ref": "urn:uwtools:execution-parallel"
+          "$ref": "urn:uwtools:execution-serial"
         },
         "name": {
           "type": "string"
