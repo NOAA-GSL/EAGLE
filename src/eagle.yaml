@@ -1,6 +1,6 @@
 app:
   # Application values likely to require configuration by users.
-  base: /path/to/eagle/src
+  base: /scratch4/BMC/zrtrr/elcarpenter/eagle/src
   gpu:
     batchargs: &gpu-batchargs
       --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
@@ -29,18 +29,18 @@ grids_and_meshes:
 inference:
   anemoi:
     checkpoint_path: /path/to/checkpoint # NB: If a value for inference.checkpoint_dir is provided, it will override this value with the latest checkpoint in that directory.
-    lead_time: !int '{{ app.leadtime }}'
-    input_dataset_kwargs:
+    input_dataset_kwargs: &dataset-kwargs
       cutout:
         - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
           trim_edge: [10, 11, 10, 11]
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
       adjust: all
       min_distance_km: 0
-    output_path: '{{ inference.rundir }}/output'
-    start_date: !datetime 2022-02-03T12
     end_date: "{{ inference.anemoi.start_date }}"
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+    lead_time: !int '{{ app.leadtime }}'
+    output_path: '{{ inference.rundir }}/output'
+    start_date: !datetime 2022-02-03T12
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs: 
@@ -60,7 +60,7 @@ prewxvx:
   common:
     prewxvx: &prewxvx-common
       forecast_path: "{{ inference.anemoi.output_path }}"
-      freq: 6h
+      freq: '{{ inference.anemoi.freq }}'
       lead_time: "{{ app.leadtime }}"
       lam_index: 64220
       lcc_info:
@@ -72,56 +72,42 @@ prewxvx:
         - 850
       start_date: "{{ inference.anemoi.start_date }}"
       end_date: "{{ inference.anemoi.end_date }}"
-      vars_of_interest:
-        - t2m
-        - gh
-        - sp
-        - t
-        - u
-        - u10
-        - v
-        - v10
+      vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
     execution: &prewxvx-common-execution
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate vx
         - set -ex
-        - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     rundir: "{{ app.rundir }}/vx"
   global:
     prewxvx:
       execution:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-global.yaml
-      name: global
+      name: prewxvx-global
       eagle-tools:
         <<: *prewxvx-common
         output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/global"
         model_type: nested-global
         anemoi_reference_dataset_kwargs:
-          cutout:
-            - dataset: "{{ val.data.rundir }}/hrrr.zarr"
-              trim_edge: [10, 11, 10, 11]
-            - dataset: "{{ val.data.rundir }}/gfs.zarr"
-          adjust: all
-          min_distance_km: 0
+          <<: *dataset-kwargs
         forecast_regrid_kwargs:
           regridder_kwargs:
             method: "conservative_normed"
-          target_grid_path: "{{ val.data.rundir }}/global_one_degree.nc"
-      rundir: '{{ prewxvx.common.rundir }}'
+          target_grid_path: "{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}"
+      rundir: '{{ prewxvx.common.rundir }}/{{ prewxvx.global.prewxvx.name }}'
     platform: *platform
   lam:
     prewxvx:
       execution:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-lam.yaml
-      name: lam
+      name: prewxvx-lam
       eagle-tools:
         <<: *prewxvx-common
         output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/lam"
         model_type: nested-lam
-      rundir: '{{ prewxvx.common.rundir }}'
+      rundir: '{{ prewxvx.common.rundir }}/{{ prewxvx.lam.prewxvx.name }}'
     platform: *platform
 training:
   # Config for the Training driver.
@@ -191,17 +177,8 @@ training:
         test: 1
         training: 2
         validation: 2
-      dataset:
-        adjust: all
-        cutout:
-          - dataset: ${hardware.paths.data}/${hardware.files.lam_dataset}
-            trim_edge:
-              - 10
-              - 11
-              - 10
-              - 11
-          - dataset: ${hardware.paths.data}/${hardware.files.global_dataset}
-        min_distance_km: 0
+      dataset: 
+        <<: *dataset-kwargs
       limit_batches:
         test: 1
         training: null
@@ -377,21 +354,7 @@ training:
     model:
       bounding:
         - _target_: anemoi.models.layers.bounding.ReluBounding
-          variables:
-            - accum_tp
-            - sh2
-            - q_100
-            - q_150
-            - q_200
-            - q_250
-            - q_300
-            - q_400
-            - q_500
-            - q_600
-            - q_700
-            - q_850
-            - q_925
-            - q_1000
+          variables: !list '{{ training.anemoi.data.normalizer.std }}'
       decoder:
         num_chunks: 1
         shard_strategy: edges
@@ -571,7 +534,7 @@ vx:
       batchargs:
         cores: 1
         rundir: '{{ prewxvx.common.rundir }}'
-        partition: u1-service
+        partition: '{{ app.partitions.netaccess }}'
         walltime: '00:30:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
@@ -632,10 +595,14 @@ vx:
       platform: *platform
       vx:
         execution:
-          <<: *wxvx-common-execution
+          batchargs:
+            cores: 1
+            rundir: '{{ vx.grid2grid.global.vx.rundir }}'
+            partition: '{{ app.partitions.netaccess }}'
+            walltime: '00:30:00'
           executable: wxvx -c wxvx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
-        rundir: "{{ vx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}/grid2grid/global"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -645,20 +612,19 @@ vx:
           forecast:
             coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
             name: nested_global
-            path: "{{ meta.postprocessed_files }}/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            path: "{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection:
               proj: latlon
           meta:
-            grids: "{{ meta.subdir }}/grids" 
-            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            subdir: "{{ vx.common.rundir }}/grid2grid/global"
-            workdir: "{{ vx.common.rundir }}"
+            grids: "{{ vx.grid2grid.global.vx.wxvx.meta.workdir }}/grids" 
+            post_files: "{{ vx.common.rundir }}/postprocessed_files/global"
+            workdir: "{{ vx.grid2grid.global.vx.rundir }}"
           ncdiffs: true
           paths:
             grids:
-              forecast: "{{ meta.grids }}/forecast"
-              truth: "{{ meta.grids }}/truth"
-            run: "{{ meta.subdir }}/run"
+              forecast: "{{ vx.grid2grid.global.vx.wxvx.meta.grids }}/forecast"
+              truth: "{{ vx.grid2grid.global.vx.wxvx.meta.grids }}/truth"
+            run: "{{ vx.grid2grid.global.vx.wxvx.meta.workdir }}/run"
           regrid:
             method: NEAREST
             to: forecast

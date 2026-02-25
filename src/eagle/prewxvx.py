@@ -18,8 +18,8 @@ class PreWXVX(DriverTimeInvariant):
         """
         Prewxvx config for this run, provisioned to the rundir.
         """
-        yield self.taskname(f"prewxvx {self._name} config")
-        path = self.rundir / f"prewxvx-{self._name}.yaml"
+        yield self.taskname(f"{self._name} config")
+        path = self.rundir / f"{self._name}.yaml"
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -50,4 +50,4 @@ class PreWXVX(DriverTimeInvariant):
 
     @property
     def _runscript_path(self) -> Path:
-        return self.rundir / f"runscript.{self.driver_name()}-{self._name}"
+        return self.rundir / f"runscript.{self._name}"
