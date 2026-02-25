@@ -30,7 +30,7 @@ class PreWXVX(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self.taskname("provisioned run directory")
+        yield self.taskname(f"{self._name} provisioned run directory")
         yield [
             self.eagle_tools_config(),
             self.runscript(),

@@ -18,7 +18,7 @@ class Zarr(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self.taskname("provisioned run directory")
+        yield self.taskname(f"{self._name} provisioned run directory")
         yield [
             self.runscript(),
             self.ufs2arco_config(),
