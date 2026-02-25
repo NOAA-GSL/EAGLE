@@ -25,8 +25,8 @@ Now, a variety of `make` targets are available to execute pipeline steps, each t
 | grids-and-meshes | Prepare grids and meshes                      | -                 | data             |
 | zarr-gfs         | Prepare Zarr-formatted GFS input data         | grids-and-meshes  | data             |
 | zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
-| training         | Performs Anemoi training                      | data              | anemoi           |
-| inference        | Performs Anemoi inference                     | training          | anemoi           |
+| training         | Performs Anemoi training                      | data              | training         |
+| inference        | Performs Anemoi inference                     | training          | inference        |
 | prewxvx-global   | Performs postprocessing on inference          | inference         | vx               |
 | prewxvx-lam      | Performs postprocessing on inference          | inference         | vx               |
 | vx-grid-global   | Verify global against grided analysis         | prewxvx-global    | vx               |
