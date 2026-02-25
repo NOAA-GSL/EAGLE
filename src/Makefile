@@ -45,15 +45,16 @@ lint:
 	$(call activate,anemoi)
 	ruff check $(SRCDIRS)
 
-prewxvx-global:
+prewxvx:
 	$(call checkcfg)
 	$(call activate,vx)
-	$(call prewxvx,global)
+	$(call prewxvx,$(extent))
+
+prewxvx-global:
+	$(MAKE) prewxvx extent=global
 
 prewxvx-lam:
-	$(call checkcfg)
-	$(call activate,vx)
-	$(call prewxvx,lam)
+	$(MAKE) prewxvx extent=lam
 
 test: lint typecheck
 
@@ -67,32 +68,30 @@ typecheck:
 	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)
 
-vx-grid-global:
+vx:
 	$(call checkcfg)
 	$(call activate,vx)
-	$(call wxvx,grid2grid,global)
+	$(call wxvx,$(truth),$(extent))
+
+vx-grid-global:
+	$(MAKE) vx truth=grid2grid extent=global
 
 vx-grid-lam:
-	$(call checkcfg)
-	$(call activate,vx)
-	$(call wxvx,grid2grid,lam)
+	$(MAKE) vx truth=grid2grid extent=lam
 
 vx-obs-global:
-	$(call checkcfg)
-	$(call activate,vx)
-	$(call wxvx,grid2obs,global)
+	$(MAKE) vx truth=grid2obs extent=gloabl
 
 vx-obs-lam:
+	$(MAKE) vx truth=grid2obs extent=lam
+
+zarr:
 	$(call checkcfg)
-	$(call activate,vx)
-	$(call wxvx,grid2obs,lam)
+	$(call activate,data)
+	$(call zarr,$(source))
 
 zarr-gfs:
-	$(call checkcfg)
-	$(call activate,data)
-	$(call zarr,gfs)
+	$(MAKE) zarr source=gfs
 
 zarr-hrrr:
-	$(call checkcfg)
-	$(call activate,data)
-	$(call zarr,hrrr)
+	$(MAKE) zarr source=hrrr
