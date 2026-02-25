@@ -25,7 +25,7 @@ class VX(DriverTimeInvariant):
     @task
     def wxvx_config(self):
         """
-        WXVX config written to the rundir.
+        The wxvx config, provisioned to the rundir.
         """
         yield self.taskname(f"{self._name} config")
         path = self.rundir / f"wxvx-{self._name}.yaml"

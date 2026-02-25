@@ -27,6 +27,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @task
     def combined_global_and_conus_meshes(self):
+        """
+        The combined global and CONUS meshes, provisioned to the rundir.
+        """
         path = self.rundir / self.config["filenames"]["combined_grids"]
         yield self.taskname(f"combined global and conus meshes {path}")
         yield Asset(path, path.is_file)
@@ -39,6 +42,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @task
     def conus_data_grid(self):
+        """
+        The CONUS grid, provisioned to the rundir.
+        """
         path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
         yield self.taskname(f"conus data grid {path}")
         yield Asset(path, path.is_file)
@@ -48,6 +54,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @task
     def global_data_grid(self):
+        """
+        The global grid, provisioned to the rundir.
+        """
         path = self.rundir / self.config["filenames"]["gfs_target_grid"]
         yield self.taskname(f"global data grid {path}")
         yield Asset(path, path.is_file)
