@@ -15,6 +15,9 @@ class Zarr(DriverTimeInvariant):
 
     @collection
     def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
         yield self.taskname("provisioned run directory")
         yield [
             self.runscript(),
@@ -23,6 +26,9 @@ class Zarr(DriverTimeInvariant):
 
     @task
     def ufs2arco_config(self):
+        """
+        Generate the config for ufs2arco and writes it to the rundir.
+        """
         yield self.taskname(f"ufs2arco {self._name} config")
         path = self.rundir / f"ufs2arco-{self._name}.yaml"
         yield Asset(path, path.is_file)
@@ -33,14 +39,23 @@ class Zarr(DriverTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
+        """
+        Provide the name of this driver.
+        """
         return "zarr"
 
     # Private methods
 
     @property
     def _name(self) -> str:
+        """
+        The name of this Zarr run.
+        """
         return cast("str", self.config["name"])
 
     @property
     def _runscript_path(self) -> Path:
+        """
+        The path to the runscript.
+        """
         return self.rundir / f"runscript.{self.driver_name()}-{self._name}"

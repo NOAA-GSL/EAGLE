@@ -97,7 +97,7 @@ conda_create_data() {
 conda_create_vx() {
   local name=vx
   conda_env_exists $name && return || true
-  conda_create $name -c oar-gsl -c conda-forge python=3.13 wxvx=0.5.* xesmf
+  conda_create $name -c oar-gsl -c conda-forge python=3.13 wxvx=0.7.* xesmf
   pip_install $name eagle-tools
 }
 

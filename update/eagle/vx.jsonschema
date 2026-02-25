@@ -1,6 +1,6 @@
 {
   "properties": {
-    "wxvx": {
+    "vx": {
       "additionalProperties": false,
       "properties": {
         "execution": {
@@ -26,7 +26,7 @@
     }
   },
   "required": [
-    "wxvx"
+    "vx"
   ],
   "type": "object"
 }

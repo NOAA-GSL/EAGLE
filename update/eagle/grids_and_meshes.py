@@ -60,6 +60,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @collection
     def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
         yield self.taskname("provisioned run directory")
         yield [
             self.combined_global_and_conus_meshes(),

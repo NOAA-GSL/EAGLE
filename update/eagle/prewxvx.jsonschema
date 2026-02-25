@@ -17,10 +17,10 @@
         }
       },
       "required": [
+        "eagle-tools",
         "execution",
         "name",
-        "rundir",
-        "eagle-tools"
+        "rundir"
       ],
       "type": "object"
     }

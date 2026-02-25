@@ -8,13 +8,16 @@ from uwtools.api.driver import DriverTimeInvariant
 
 class PreWXVX(DriverTimeInvariant):
     """
-    Runs eagle-tools' prewxvx step.
+    Prepares the config for and runs eagle-tools' prewxvx component.
     """
 
     # Public tasks
 
     @task
     def eagle_tools_config(self):
+        """
+        Prewxvx config for this run, written to the rundir.
+        """
         yield self.taskname(f"prewxvx {self._name} config")
         path = self.rundir / f"prewxvx-{self._name}.yaml"
         yield Asset(path, path.is_file)
@@ -24,6 +27,9 @@ class PreWXVX(DriverTimeInvariant):
 
     @collection
     def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
         yield self.taskname("provisioned run directory")
         yield [
             self.eagle_tools_config(),
@@ -34,14 +40,23 @@ class PreWXVX(DriverTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
+        """
+        Provide the name of this driver.
+        """
         return "prewxvx"
 
     # Private methods
 
     @property
     def _name(self) -> str:
+        """
+        The name of this prewxvx run.
+        """
         return cast("str", self.config["name"])
 
     @property
     def _runscript_path(self) -> Path:
+        """
+        The path to the runscript.
+        """
         return self.rundir / f"runscript.{self.driver_name()}-{self._name}"

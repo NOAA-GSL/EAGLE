@@ -570,7 +570,6 @@ vx:
     execution: &wxvx-common-execution
       batchargs:
         cores: 1
-        # memory: 32G
         rundir: '{{ prewxvx.common.rundir }}'
         partition: u1-service
         walltime: '00:30:00'
@@ -578,7 +577,6 @@ vx:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate vx
         - set -ex
-        # - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     rundir: "{{ prewxvx.common.rundir }}"
     wxvx: &wxvx-common
       cycles:
@@ -595,8 +593,8 @@ vx:
             validtime: time
       leadtimes:
         start: 0
-        step: 6
-        stop: 24
+        step: "{{ app.time.step }}"
+        stop: "{{ app.leadtime }}"
       variables:
         t2m:
           level_type: heightAboveGround
@@ -632,10 +630,10 @@ vx:
   grid2grid:
     global:
       platform: *platform
-      wxvx:
+      vx:
         execution:
           <<: *wxvx-common-execution
-          executable: wxvx -c wxvx-grid2grid-global.yaml -t plots
+          executable: wxvx -c wxvx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
         rundir: "{{ vx.common.rundir }}"
         wxvx:
@@ -645,19 +643,13 @@ vx:
             type: grid
             url: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{{ yyyymmdd }}/{{ hh }}/atmos/gfs.t{{ hh }}z.pgrb2.0p25.f{{ "%03d" % fh }}
           forecast:
-            coords:
-              latitude: latitude
-              level: level
-              longitude: longitude
-              time:
-                inittime: forecast_reference_time
-                validtime: time
+            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
             name: nested_global
             path: "{{ meta.postprocessed_files }}/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection:
               proj: latlon
           meta:
-            grids: "{{ meta.subdir }}/grids" # ELC: make globally valid reference 
+            grids: "{{ meta.subdir }}/grids" 
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
             subdir: "{{ vx.common.rundir }}/grid2grid/global"
             workdir: "{{ vx.common.rundir }}"
@@ -672,10 +664,10 @@ vx:
             to: forecast
     lam:
       platform: *platform
-      wxvx:
+      vx:
         execution:
           <<: *wxvx-common-execution
-          executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots
+          executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
         name: grid2grid-lam
         rundir: "{{ vx.common.rundir }}"
         wxvx:
@@ -685,13 +677,7 @@ vx:
             type: grid
             url: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.{{ yyyymmdd }}/conus/hrrr.t{{ hh }}z.wrfprsf{{ "%02d" % fh }}.grib2
           forecast:
-            coords:
-              latitude: latitude
-              level: level
-              longitude: longitude
-              time:
-                inittime: forecast_reference_time
-                validtime: time
+            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
             name: nested_lam
             path: "{{ meta.postprocessed_files }}/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection:
@@ -712,16 +698,14 @@ vx:
               forecast: "{{ meta.grids }}/forecast"
               truth: "{{ meta.grids }}/truth"
             run: "{{ meta.subdir }}/run"
-          regrid:
-            method: NEAREST
-            to: forecast
+          regrid: !dict "{{ vx.grid2grid.global.vx.wxvx.regrid }}"
   grid2obs:
     global:
       platform: *platform
-      wxvx:
+      vx:
         execution:
           <<: *wxvx-common-execution
-          executable: wxvx -c wxvx-grid2obs-global.yaml -t plots
+          executable: wxvx -c wxvx-grid2obs-global.yaml -t plots -f
         name: grid2obs-global
         rundir: "{{ vx.common.rundir }}"
         wxvx:
@@ -730,18 +714,11 @@ vx:
             name: PREPBUFR
             type: point
             url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
-          forecast: # ELC !dict '{{ vx.*.grid2grid.*.forecast }}'
-            coords:
-              latitude: latitude
-              level: level
-              longitude: longitude
-              time:
-                inittime: forecast_reference_time
-                validtime: time
+          forecast: 
+            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
             name: nested_global
             path: "{{ meta.postprocessed_files }}/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
-            projection:
-              proj: latlon
+            projection: !dict "{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}"
           meta:
             grids: "{{ meta.subdir }}/grids"
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
@@ -752,41 +729,25 @@ vx:
               forecast: "{{ meta.grids }}/forecast"
             obs: "{{ meta.subdir }}/obs"
             run: "{{ meta.subdir }}/run"
-          regrid: # ELC ask about whether it's needed for obs, both global and lam
+          regrid:
             method: BILIN
             to: G104
     lam:
       platform: *platform
-      wxvx:
+      vx:
         execution:
           <<: *wxvx-common-execution
-          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots
+          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
         rundir: "{{ vx.common.rundir }}"
         wxvx:
           <<: *wxvx-common
-          truth:
-            name: PREPBUFR
-            type: point
-            url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+          truth: !dict "{{ vx.grid2obs.global.vx.wxvx.truth }}"
           forecast:
-            coords:
-              latitude: latitude
-              level: level
-              longitude: longitude
-              time:
-                inittime: forecast_reference_time
-                validtime: time
+            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
             name: nested_lam
             path: "{{ meta.postprocessed_files }}/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
-            projection:
-              a: 6371229
-              b: 6371229
-              lat_0: 38.5
-              lat_1: 38.5
-              lat_2: 38.5
-              lon_0: 262.5
-              proj: lcc
+            projection: !dict "{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}"
           meta:
             grids: "{{ meta.subdir }}/grids"
             postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
@@ -798,9 +759,7 @@ vx:
               forecast: "{{ meta.subdir }}/forecast"
             obs: "{{ meta.subdir }}/obs"
             run: "{{ meta.subdir }}/run"
-          regrid:
-            method: BILIN
-            to: G104
+          regrid: !dict "{{ vx.grid2obs.global.vx.wxvx.regrid }}"
 
 zarrs:
   # Configs for the Zarr driver.

@@ -25,12 +25,14 @@ Now, a variety of `make` targets are available to execute pipeline steps, each t
 | grids-and-meshes | Prepare grids and meshes                      | -                 | data             |
 | zarr-gfs         | Prepare Zarr-formatted GFS input data         | grids-and-meshes  | data             |
 | zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
-| training         | Performs Anemoi training                      | -                 | anemoi           |
-| inference        | Performs Anemoi inference                     | -                 | anemoi           |
-| vx               | Implies prewxvx, grid2grid, grid2obs          | -                 | vx               |
-| prewxvx          | Performs postprocessing on inference          | -                 | vx               |
-| grid2grid        | Verify global & CONUS against grided analysis | prewxvx           | vx               |
-| grid2obs         | Verify global & CONUS against obs             | prewxvx           | vx               |
+| training         | Performs Anemoi training                      | data              | anemoi           |
+| inference        | Performs Anemoi inference                     | training          | anemoi           |
+| prewxvx-global   | Performs postprocessing on inference          | inference         | vx               |
+| prewxvx-lam      | Performs postprocessing on inference          | inference         | vx               |
+| vx-grid-global   | Verify global against grided analysis         | prewxvx-global    | vx               |
+| vx-grid-lam      | Verify LAM against grided analysis            | prewxvx-lam       | vx               |
+| vx-obs-global    | Verify global against obs                     | prewxvx-global    | vx               |
+| vx-obs-lam       | Verify LAM against obs                        | prewxvx-lam       | vx               |
 
 
 Run `make` with no argument to list all available targets.
