@@ -27,7 +27,7 @@ class Zarr(DriverTimeInvariant):
     @task
     def ufs2arco_config(self):
         """
-        The ufs2arco config, written to the rundir.
+        The ufs2arco config, provisioned to the rundir.
         """
         yield self.taskname(f"ufs2arco {self._name} config")
         path = self.rundir / f"ufs2arco-{self._name}.yaml"

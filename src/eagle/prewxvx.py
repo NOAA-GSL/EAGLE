@@ -16,7 +16,7 @@ class PreWXVX(DriverTimeInvariant):
     @task
     def eagle_tools_config(self):
         """
-        Prewxvx config for this run, written to the rundir.
+        Prewxvx config for this run, provisioned to the rundir.
         """
         yield self.taskname(f"prewxvx {self._name} config")
         path = self.rundir / f"prewxvx-{self._name}.yaml"
