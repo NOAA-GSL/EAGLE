@@ -25,7 +25,7 @@ class VX(DriverTimeInvariant):
     @task
     def wxvx_config(self):
         """
-        Generate the WXVX config and writes it to the rundir.
+        WXVX config written to the rundir.
         """
         yield self.taskname(f"{self._name} config")
         path = self.rundir / f"wxvx-{self._name}.yaml"
@@ -37,23 +37,14 @@ class VX(DriverTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
-        """
-        Provide the name of this driver.
-        """
         return "vx"
 
     # Private methods
 
     @property
     def _name(self) -> str:
-        """
-        The name of this WXVX run.
-        """
         return cast("str", self.config["name"])
 
     @property
     def _runscript_path(self) -> Path:
-        """
-        The path to the runscript.
-        """
         return self.rundir / f"runscript.{self.driver_name()}-{self._name}"
