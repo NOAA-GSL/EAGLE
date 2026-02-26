@@ -95,7 +95,7 @@ prewxvx:
           regridder_kwargs:
             method: "conservative_normed"
           target_grid_path: "{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}"
-      rundir: '{{ prewxvx.common.rundir }}/{{ prewxvx.global.prewxvx.name }}'
+      rundir: '{{ prewxvx.common.rundir }}/prewxvx/global'
     platform: *platform
   lam:
     prewxvx:
@@ -107,7 +107,7 @@ prewxvx:
         <<: *prewxvx-common
         output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/lam"
         model_type: nested-lam
-      rundir: '{{ prewxvx.common.rundir }}/{{ prewxvx.lam.prewxvx.name }}'
+      rundir: '{{ prewxvx.common.rundir }}//prewxvx/lam'
     platform: *platform
 training:
   # Config for the Training driver.
