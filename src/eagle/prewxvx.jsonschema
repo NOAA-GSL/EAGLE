@@ -26,8 +26,8 @@
             "lcc_info": {
               "type": "object",
               "properties": {
-                "n_x": { "type": "integer", "minimum": 1 },
-                "n_y": { "type": "integer", "minimum": 1 }
+                "n_x": { "type": "integer" },
+                "n_y": { "type": "integer" }
               },
               "required": ["n_x", "n_y"]
             },
