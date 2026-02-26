@@ -541,14 +541,14 @@ vx:
         - set -ex
     paths_grid:
       grids:
-        forecast: "{{ vx.common.rundir }}/KIND/SCOPE/grids/forecast"
-        truth: "{{ vx.common.rundir }}/KIND/SCOPE/grids/truth"
-      run: "{{ vx.common.rundir }}/KIND/SCOPE/run"
+        forecast: "{{ vx.common.rundir }}/TRUTH/EXTENT/grids/forecast"
+        truth: "{{ vx.common.rundir }}/TRUTH/EXTENT/grids/truth"
+      run: "{{ vx.common.rundir }}/TRUTH/EXTENT/run"
     paths_obs:
       grids:
-        forecast: "{{ vx.common.rundir }}/KIND/SCOPE/forecast"
-      obs: "{{ vx.common.rundir }}/KIND/SCOPE/obs"
-      run: "{{ vx.common.rundir }}/KIND/SCOPE/run"
+        forecast: "{{ vx.common.rundir }}/TRUTH/EXTENT/forecast"
+      obs: "{{ vx.common.rundir }}/TRUTH/EXTENT/obs"
+      run: "{{ vx.common.rundir }}/TRUTH/EXTENT/run"
     rundir: "{{ prewxvx.common.rundir }}"
     wxvx: &wxvx-common
       cycles:
@@ -568,9 +568,9 @@ vx:
         step: "{{ app.time.step }}"
         stop: "{{ app.leadtime }}"
       meta:
-        workdir: "{{ vx.common.rundir }}/KIND/SCOPE"
-        grids: "{{ vx.common.rundir }}/KIND/SCOPE/grids"
-        post_files: "{{ vx.common.rundir }}/postprocessed_files/SCOPE"
+        workdir: "{{ vx.common.rundir }}/TRUTH/EXTENT"
+        grids: "{{ vx.common.rundir }}/TRUTH/EXTENT/grids"
+        post_files: "{{ vx.common.rundir }}/postprocessed_files/EXTENT"
       variables:
         t2m:
           level_type: heightAboveGround
@@ -627,9 +627,9 @@ vx:
             path: "{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection:
               proj: latlon
-          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2grid") | replace("SCOPE", "global") }}'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
           ncdiffs: true
-          paths: !dict '{{ vx.common.paths_grid | replace("KIND", "grid2grid") | replace("SCOPE", "global") }}'
+          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
           regrid:
             method: NEAREST
             to: forecast
@@ -662,9 +662,9 @@ vx:
               lat_2: 38.5
               lon_0: 262.5
               proj: lcc
-          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2grid") | replace("SCOPE", "lam") }}'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
           ncdiffs: !bool "{{ vx.grid2grid.global.vx.wxvx.ncdiffs }}"
-          paths: !dict '{{ vx.common.paths_grid | replace("KIND", "grid2grid") | replace("SCOPE", "lam") }}'
+          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
           regrid: !dict "{{ vx.grid2grid.global.vx.wxvx.regrid }}"
   grid2obs:
     global:
@@ -689,8 +689,8 @@ vx:
             name: "{{ vx.grid2grid.global.vx.wxvx.forecast.name }}"
             path: "{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection: !dict "{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}"
-          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2obs") | replace("SCOPE", "global") }}'
-          paths: !dict '{{ vx.common.paths_obs | replace("KIND", "grid2obs") | replace("SCOPE", "global") }}'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
+          paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           regrid:
             method: BILIN
             to: G104
@@ -713,8 +713,8 @@ vx:
             name: "{{ vx.grid2grid.lam.vx.wxvx.forecast.name }}"
             path: "{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection: !dict "{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}"
-          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2obs") | replace("SCOPE", "lam") }}'
-          paths: !dict '{{ vx.common.paths_obs | replace("KIND", "grid2obs") | replace("SCOPE", "lam") }}'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
+          paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
           regrid: !dict "{{ vx.grid2obs.global.vx.wxvx.regrid }}"
 zarrs:
   # Configs for the Zarr driver.
