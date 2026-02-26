@@ -530,16 +530,25 @@ val:
       - accum_tp
 vx:
   common:
-    execution: &wxvx-common-execution
-      batchargs:
+    execution: 
+      batchargs: &wxvx-common-batchargs
         cores: 1
-        rundir: '{{ prewxvx.common.rundir }}'
         partition: '{{ app.partitions.netaccess }}'
         walltime: '00:30:00'
-      envcmds:
+      envcmds: &wxvx-common-envcmds
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate vx
         - set -ex
+    paths_grid:
+      grids:
+        forecast: "{{ vx.common.rundir }}/KIND/SCOPE/grids/forecast"
+        truth: "{{ vx.common.rundir }}/KIND/SCOPE/grids/truth"
+      run: "{{ vx.common.rundir }}/KIND/SCOPE/run"
+    paths_obs:
+      grids:
+        forecast: "{{ vx.common.rundir }}/KIND/SCOPE/forecast"
+      obs: "{{ vx.common.rundir }}/KIND/SCOPE/obs"
+      run: "{{ vx.common.rundir }}/KIND/SCOPE/run"
     rundir: "{{ prewxvx.common.rundir }}"
     wxvx: &wxvx-common
       cycles:
@@ -558,6 +567,10 @@ vx:
         start: 0
         step: "{{ app.time.step }}"
         stop: "{{ app.leadtime }}"
+      meta:
+        workdir: "{{ vx.common.rundir }}/KIND/SCOPE"
+        grids: "{{ vx.common.rundir }}/KIND/SCOPE/grids"
+        post_files: "{{ vx.common.rundir }}/postprocessed_files/SCOPE"
       variables:
         t2m:
           level_type: heightAboveGround
@@ -596,10 +609,9 @@ vx:
       vx:
         execution:
           batchargs:
-            cores: 1
-            rundir: '{{ vx.grid2grid.global.vx.rundir }}'
-            partition: '{{ app.partitions.netaccess }}'
-            walltime: '00:30:00'
+            <<: *wxvx-common-batchargs
+            rundir: "{{ vx.grid2grid.global.vx.rundir }}"
+          envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c wxvx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
         rundir: "{{ vx.common.rundir }}/grid2grid/global"
@@ -615,16 +627,9 @@ vx:
             path: "{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection:
               proj: latlon
-          meta:
-            grids: "{{ vx.grid2grid.global.vx.wxvx.meta.workdir }}/grids" 
-            post_files: "{{ vx.common.rundir }}/postprocessed_files/global"
-            workdir: "{{ vx.grid2grid.global.vx.rundir }}"
+          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2grid") | replace("SCOPE", "global") }}'
           ncdiffs: true
-          paths:
-            grids:
-              forecast: "{{ vx.grid2grid.global.vx.wxvx.meta.grids }}/forecast"
-              truth: "{{ vx.grid2grid.global.vx.wxvx.meta.grids }}/truth"
-            run: "{{ vx.grid2grid.global.vx.wxvx.meta.workdir }}/run"
+          paths: !dict '{{ vx.common.paths_grid | replace("KIND", "grid2grid") | replace("SCOPE", "global") }}'
           regrid:
             method: NEAREST
             to: forecast
@@ -632,10 +637,13 @@ vx:
       platform: *platform
       vx:
         execution:
-          <<: *wxvx-common-execution
+          batchargs:
+            <<: *wxvx-common-batchargs
+            rundir: "{{ vx.grid2grid.lam.vx.rundir }}"
+          envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
         name: grid2grid-lam
-        rundir: "{{ vx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}/grid2grid/lam"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -645,7 +653,7 @@ vx:
           forecast:
             coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
             name: nested_lam
-            path: "{{ meta.postprocessed_files }}/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            path: "{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection:
               a: 6371229
               b: 6371229
@@ -654,26 +662,22 @@ vx:
               lat_2: 38.5
               lon_0: 262.5
               proj: lcc
-          meta:
-            grids: "{{ meta.subdir }}/grids"
-            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            subdir: "{{ vx.common.rundir }}/grid2grid/lam"
-            workdir: "{{ vx.common.rundir }}"
-          paths:
-            grids:
-              forecast: "{{ meta.grids }}/forecast"
-              truth: "{{ meta.grids }}/truth"
-            run: "{{ meta.subdir }}/run"
+          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2grid") | replace("SCOPE", "lam") }}'
+          ncdiffs: !bool "{{ vx.grid2grid.global.vx.wxvx.ncdiffs }}"
+          paths: !dict '{{ vx.common.paths_grid | replace("KIND", "grid2grid") | replace("SCOPE", "lam") }}'
           regrid: !dict "{{ vx.grid2grid.global.vx.wxvx.regrid }}"
   grid2obs:
     global:
       platform: *platform
       vx:
         execution:
-          <<: *wxvx-common-execution
+          batchargs:
+            <<: *wxvx-common-batchargs
+            rundir: "{{ vx.grid2obs.global.vx.rundir }}"
+          envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c wxvx-grid2obs-global.yaml -t plots -f
         name: grid2obs-global
-        rundir: "{{ vx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}/grid2obs/global"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -682,19 +686,11 @@ vx:
             url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
           forecast: 
             coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
-            name: nested_global
-            path: "{{ meta.postprocessed_files }}/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            name: "{{ vx.grid2grid.global.vx.wxvx.forecast.name }}"
+            path: "{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection: !dict "{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}"
-          meta:
-            grids: "{{ meta.subdir }}/grids"
-            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            subdir: "{{ vx.common.rundir }}/grid2obs/global"
-            workdir: "{{ vx.common.rundir }}"
-          paths:
-            grids:
-              forecast: "{{ meta.grids }}/forecast"
-            obs: "{{ meta.subdir }}/obs"
-            run: "{{ meta.subdir }}/run"
+          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2obs") | replace("SCOPE", "global") }}'
+          paths: !dict '{{ vx.common.paths_obs | replace("KIND", "grid2obs") | replace("SCOPE", "global") }}'
           regrid:
             method: BILIN
             to: G104
@@ -702,31 +698,24 @@ vx:
       platform: *platform
       vx:
         execution:
-          <<: *wxvx-common-execution
+          batchargs:
+            <<: *wxvx-common-batchargs
+            rundir: "{{ vx.grid2obs.lam.vx.rundir }}"
+          envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
-        rundir: "{{ vx.common.rundir }}"
+        rundir: "{{ vx.common.rundir }}/grid2obs/lam"
         wxvx:
           <<: *wxvx-common
           truth: !dict "{{ vx.grid2obs.global.vx.wxvx.truth }}"
           forecast:
             coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
-            name: nested_lam
-            path: "{{ meta.postprocessed_files }}/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
+            name: "{{ vx.grid2grid.lam.vx.wxvx.forecast.name }}"
+            path: "{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc"
             projection: !dict "{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}"
-          meta:
-            grids: "{{ meta.subdir }}/grids"
-            postprocessed_files: "{{ meta.workdir }}/postprocessed_files"
-            subdir: "{{ vx.common.rundir }}/grid2obs/lam"
-            workdir: "{{ vx.common.rundir }}"
-          ncdiffs: false
-          paths:
-            grids:
-              forecast: "{{ meta.subdir }}/forecast"
-            obs: "{{ meta.subdir }}/obs"
-            run: "{{ meta.subdir }}/run"
+          meta: !dict '{{ vx.common.wxvx.meta | replace("KIND", "grid2obs") | replace("SCOPE", "lam") }}'
+          paths: !dict '{{ vx.common.paths_obs | replace("KIND", "grid2obs") | replace("SCOPE", "lam") }}'
           regrid: !dict "{{ vx.grid2obs.global.vx.wxvx.regrid }}"
-
 zarrs:
   # Configs for the Zarr driver.
   common:
