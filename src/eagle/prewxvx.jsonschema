@@ -47,12 +47,8 @@
             "forecast_path",
             "freq",
             "lead_time",
-            "lam_index",
-            "lcc_info",
-            "levels",
             "start_date",
             "end_date",
-            "vars_of_interest",
             "output_path",
             "model_type"
           ]
