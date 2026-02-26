@@ -1,10 +1,61 @@
 {
+  "$defs": {
+    "datetime": {
+      "anyOf": [
+        { "type": "datetime" },
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$"
+        }
+      ]
+    }
+  },
   "properties": {
     "prewxvx": {
       "additionalProperties": false,
       "properties": {
         "eagle-tools": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "forecast_path": { "type": "string" },
+            "output_path": { "type": "string" },
+            "freq": { "type": "string" },
+            "lead_time": {"type": "integer" },
+            "lam_index": { "type": "integer" },
+            "lcc_info": {
+              "type": "object",
+              "properties": {
+                "n_x": { "type": "integer", "minimum": 1 },
+                "n_y": { "type": "integer", "minimum": 1 }
+              },
+              "required": ["n_x", "n_y"]
+            },
+            "levels": {
+              "type": "array",
+              "items": { "type": "integer" }
+            },
+            "start_date": { "$ref": "#/$defs/datetime" },
+            "end_date": { "$ref": "#/$defs/datetime" },
+            "vars_of_interest": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "model_type": { "type": "string" }
+          },
+          "required": [
+            "forecast_path",
+            "freq",
+            "lead_time",
+            "lam_index",
+            "lcc_info",
+            "levels",
+            "start_date",
+            "end_date",
+            "vars_of_interest",
+            "output_path",
+            "model_type"
+          ]
         },
         "execution": {
           "$ref": "urn:uwtools:execution-serial"

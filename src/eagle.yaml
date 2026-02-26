@@ -58,10 +58,15 @@ inference:
 platform: *platform
 prewxvx:
   common:
+    execution: &prewxvx-common-execution
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate vx
+        - set -ex
     prewxvx: &prewxvx-common
       forecast_path: "{{ inference.anemoi.output_path }}"
       freq: '{{ inference.anemoi.freq }}'
-      lead_time: "{{ app.leadtime }}"
+      lead_time: !int "{{ app.leadtime }}"
       lam_index: 64220
       lcc_info:
         n_x: 338
@@ -70,14 +75,9 @@ prewxvx:
         - 250
         - 500
         - 850
-      start_date: "{{ inference.anemoi.start_date }}"
-      end_date: "{{ inference.anemoi.end_date }}"
+      start_date: !datetime "{{ inference.anemoi.start_date }}"
+      end_date: !datetime "{{ inference.anemoi.end_date }}"
       vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
-    execution: &prewxvx-common-execution
-      envcmds:
-        - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate vx
-        - set -ex
     rundir: "{{ app.rundir }}/vx"
   global:
     prewxvx:
@@ -535,7 +535,7 @@ vx:
         cores: 1
         partition: '{{ app.partitions.netaccess }}'
         walltime: '00:30:00'
-      envcmds: &wxvx-common-envcmds
+      envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate vx
         - set -ex
@@ -612,7 +612,7 @@ vx:
             <<: *wxvx-common-batchargs
             rundir: "{{ vx.grid2grid.global.vx.rundir }}"
           envcmds: !list "{{ vx.common.execution.envcmds }}"
-          executable: wxvx -c wxvx-grid2grid-global.yaml -t plots -f
+          executable: wxvx -c vx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
         rundir: "{{ vx.common.rundir }}/grid2grid/global"
         wxvx:
@@ -641,7 +641,7 @@ vx:
             <<: *wxvx-common-batchargs
             rundir: "{{ vx.grid2grid.lam.vx.rundir }}"
           envcmds: !list "{{ vx.common.execution.envcmds }}"
-          executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
+          executable: wxvx -c vx-grid2grid-lam.yaml -t plots -f
         name: grid2grid-lam
         rundir: "{{ vx.common.rundir }}/grid2grid/lam"
         wxvx:
@@ -675,7 +675,7 @@ vx:
             <<: *wxvx-common-batchargs
             rundir: "{{ vx.grid2obs.global.vx.rundir }}"
           envcmds: !list "{{ vx.common.execution.envcmds }}"
-          executable: wxvx -c wxvx-grid2obs-global.yaml -t plots -f
+          executable: wxvx -c vx-grid2obs-global.yaml -t plots -f
         name: grid2obs-global
         rundir: "{{ vx.common.rundir }}/grid2obs/global"
         wxvx:
@@ -702,7 +702,7 @@ vx:
             <<: *wxvx-common-batchargs
             rundir: "{{ vx.grid2obs.lam.vx.rundir }}"
           envcmds: !list "{{ vx.common.execution.envcmds }}"
-          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
+          executable: wxvx -c vx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
         rundir: "{{ vx.common.rundir }}/grid2obs/lam"
         wxvx:
