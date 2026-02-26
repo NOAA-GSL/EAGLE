@@ -4,31 +4,31 @@
 
 In the `src/` directory:
 
-1. Run `make env`.
+### 1. Run `make env`.
 
 This step creates the runtime software environment, comprising conda virtual environments `data`, `training`, `inference`, and `vx` for data prep, training, inference, and verification, respectively. The `conda/` subdirectory it creates is self-contained and can be removed and recreated by running `make env` again, as long as pipeline steps are not currently running.
 
 Developers who will be modifying Python driver code should instead use `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, typechecking, and unit testing.
  
-2. Set the `app.base` value in `eagle.yaml` to the absolute path to the current (`src/`) directory.
+### 2. Set the `app.base` value in `eagle.yaml` to the absolute path to the current (`src/`) directory.
 
-3. Run `make config=eagle.yaml data`.
+### 3. Run `make config=eagle.yaml data`.
 
 This step stages data required for training and inference. The `data` target delegates to targets `grids-and-meshes`, `zarr-gfs`, and `zarr-hrrr`, which can also be run individually (e.g. `make grids-and-meshes`), but note that `grids-and-meshes`, which runs locally, must be run first. The `zarr-gfs` and `zarr-hrrr` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully.
 
-4. Run `make config=eagle.yaml training`.
+### 4. Run `make config=eagle.yaml training`.
 
 This step trains a model using data staged by the previous step. It submits a batch job: Do not proceed until the batch job completes successfully.
 
-5. Run `make config=eagle.yaml inference`.
+### 5. Run `make config=eagle.yaml inference`.
 
 This step performs inference, producing a forecast. It submits a batch job: Do not proceed until the batch job completes successfully.
 
-6. Run `make config=eagle.yaml prewxvx-global` followed by `make config=eagle.yaml prewxvx-lam`.
+### 6. Run `make config=eagle.yaml prewxvx-global` followed by `make config=eagle.yaml prewxvx-lam`.
 
 These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, it is safe to proceed when the commands return.
 
-7. Run `make config=eagle-yaml` followed by any of the targets `vx-grid-global`, `vx-grid-lam`, `vx-obs-global`, `vs-obs-lam`.
+### 7. Run `make config=eagle-yaml` followed by any of the targets `vx-grid-global`, `vx-grid-lam`, `vx-obs-global`, `vs-obs-lam`.
 
 These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/vx/grid2{grid,obs}/{global,lam}/run/`.
 
