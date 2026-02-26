@@ -6,7 +6,7 @@ TOOLING = devenv env format lint test typecheck
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
 checkcfg = @$(if $(config),,$(error config= argument required))
-cqtool   = @for env in $(ENVS); do $(MAKE) --no-print-directory env=$$env $(1); done
+envloop   = @for env in $(ENVS); do $(MAKE) --no-print-directory env=$$env $(1); done
 exec     = uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 prewxvx  = $(call exec,vx,prewxvx,PreWXVX,run --key-path prewxvx.$(1))
 wxvx     = $(call exec,vx,vx,VX,run --key-path vx.$(1).$(2) --batch)
@@ -55,7 +55,7 @@ ifdef env
 	$(call activate,$(env))
 	ruff check $(PACKAGE)/$(env)
 else
-	$(call cqtool,lint)
+	$(call envloop,lint)
 endif
 
 prewxvx:
@@ -82,7 +82,7 @@ ifdef env
 	$(call activate,$(env))
 	mypy $(PACKAGE)/$(env)
 else
-	$(call cqtool,lint)
+	$(call envloop,lint)
 endif
 
 vx:
