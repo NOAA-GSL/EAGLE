@@ -37,12 +37,12 @@ format:
 
 inference:
 	$(call checkcfg)
-	$(call activate,anemoi)
+	$(call activate,inference)
 	$(call exec,inference,Inference,run --batch)
 
 lint:
 	@echo "=> Linting code"
-	$(call activate,anemoi)
+	$(call activate,data)
 	ruff check $(SRCDIRS)
 
 prewxvx:
@@ -60,7 +60,7 @@ test: lint typecheck
 
 training:
 	$(call checkcfg)
-	$(call activate,anemoi)
+	$(call activate,training)
 	$(call exec,training,Training,run --batch)
 
 typecheck:
