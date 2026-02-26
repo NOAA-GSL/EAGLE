@@ -84,6 +84,8 @@ make typeheck # run the typechecker on Python code
 make test     # all of the above except formatting
 ```
 
+The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pair that, if provided, will restrict the tool to the code associated with a particular virtual environment. For example, `make env=data lint` will lint only the code associated with the `data` environment. If no `env` value is provided, all code will be tested.
+
 ## Notes
 
 - For each `make` target that invokes an EAGLE driver, the following files will be created in the appropriate run directory:
