@@ -87,7 +87,7 @@ vx-grid-lam:
 	$(MAKE) vx truth=grid2grid extent=lam
 
 vx-obs-global:
-	$(MAKE) vx truth=grid2obs extent=gloabl
+	$(MAKE) vx truth=grid2obs extent=global
 
 vx-obs-lam:
 	$(MAKE) vx truth=grid2obs extent=lam
