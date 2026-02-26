@@ -1,5 +1,7 @@
-SRCDIRS  = eagle
-TARGETS  = data devenv env format grids-and-meshes inference lint prewxvx-global prewxvx-lam test training typecheck vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+HELPERS = prewxvx vx zarr
+SRCDIRS = eagle
+STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+TOOLING = devenv env format lint test typecheck
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
 checkcfg = @$(if $(config),,$(error config= argument required))
@@ -9,16 +11,13 @@ wxvx     = $(call exec,vx,VX,run --key-path vx.$(1).$(2) --batch)
 zarr     = $(call exec,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
 .ONESHELL:
-.PHONY: $(TARGETS)
+.PHONY: $(HELPERS) $(STEPS) $(TOOLING)
 
 all:
-	$(error Valid targets are: $(TARGETS))
-
-grids-and-meshes:
-	$(call checkcfg)
-	export FI_PSM3_UUID=eagle
-	$(call activate,data)
-	$(call exec,grids_and_meshes,GridsAndMeshes,provisioned_rundir)
+	@echo "\nSpecify a target:\n"
+	@echo "Pipeline steps: $(STEPS)"
+	@echo "Tooling: $(TOOLING)\n"
+	false
 
 data:
 	$(MAKE) grids-and-meshes
@@ -34,6 +33,12 @@ env:
 format:
 	$(call activate,data)
 	./format $(SRCDIRS)
+
+grids-and-meshes:
+	$(call checkcfg)
+	export FI_PSM3_UUID=eagle
+	$(call activate,data)
+	$(call exec,grids_and_meshes,GridsAndMeshes,provisioned_rundir)
 
 inference:
 	$(call checkcfg)
