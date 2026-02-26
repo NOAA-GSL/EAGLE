@@ -32,7 +32,7 @@ These steps prepare forecast output from the previous step for verification by `
 
 ### 7. Run `make config=eagle.yaml` followed by any of the targets `vx-grid-global`, `vx-grid-lam`, `vx-obs-global`, `vs-obs-lam`.
 
-These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/vx/grid2{grid,obs}/{global,lam}/run/`.
+These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/vx/grid2{grid,obs}/{global,lam}/run/`. The files `run/vx/*.log` contain the logs from each verification run.
 
 ## Runtime Environment
 
