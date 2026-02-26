@@ -183,7 +183,7 @@ EOF
 environments=( data training inference vx )
 
 install_conda
-for name in ${environments[*]}; do
+for name in base ${environments[*]}; do
   conda_create_$name
   test -v EAGLE_DEV && conda_install_devpkgs $name
 done
