@@ -54,6 +54,10 @@ EOF
   )
 }
 
+conda_create_base() {
+  true
+}
+
 conda_create_inference() {
   local name=inference
   conda_env_exists $name && return || true
