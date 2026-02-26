@@ -14,9 +14,11 @@ zarr     = $(call exec,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
 
 all:
-	@echo "\nSpecify a target:\n"
-	@echo "Pipeline steps: $(STEPS)"
-	@echo "Tooling: $(TOOLING)\n"
+	@echo Available targets:
+	@echo
+	@echo Pipeline steps: $(STEPS)
+	@echo Tooling: $(TOOLING)
+	@echo
 	false
 
 data:
