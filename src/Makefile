@@ -1,23 +1,25 @@
-SRCDIRS  = eagle
-REALIZED = realized.yaml
-TARGETS  = data devenv env format grids-and-meshes inference lint prewxvx-global prewxvx-lam realize-config test training typecheck vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+HELPERS = prewxvx vx zarr
+SRCDIRS = eagle
+STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+TOOLING = devenv env format lint test typecheck
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
-exec     = uw execute --config-file eagle.yaml --module eagle/$(1).py --classname $(2) --task $(3)
+checkcfg = @$(if $(config),,$(error config= argument required))
+exec     = uw execute --config-file $(config) --module eagle/$(1).py --classname $(2) --task $(3)
 prewxvx  = $(call exec,prewxvx,PreWXVX,run --key-path prewxvx.$(1))
 wxvx     = $(call exec,vx,VX,run --key-path vx.$(1).$(2) --batch)
 zarr     = $(call exec,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
 .ONESHELL:
-.PHONY: $(TARGETS)
+.PHONY: $(HELPERS) $(STEPS) $(TOOLING)
 
 all:
-	$(error Valid targets are: $(TARGETS))
-
-grids-and-meshes:
-	export FI_PSM3_UUID=eagle
-	$(call activate,data)
-	$(call exec,grids_and_meshes,GridsAndMeshes,provisioned_rundir)
+	@echo Available targets:
+	@echo
+	@echo Pipeline steps: $(STEPS)
+	@echo Tooling: $(TOOLING)
+	@echo
+	false
 
 data:
 	$(MAKE) grids-and-meshes
@@ -34,29 +36,38 @@ format:
 	$(call activate,data)
 	./format $(SRCDIRS)
 
+grids-and-meshes:
+	$(call checkcfg)
+	export FI_PSM3_UUID=eagle
+	$(call activate,data)
+	$(call exec,grids_and_meshes,GridsAndMeshes,provisioned_rundir)
+
 inference:
-	$(call activate,anemoi)
+	$(call checkcfg)
+	$(call activate,inference)
 	$(call exec,inference,Inference,run --batch)
 
 lint:
 	@echo "=> Linting code"
-	$(call activate,anemoi)
+	$(call activate,data)
 	ruff check $(SRCDIRS)
 
-prewxvx-global:
+prewxvx:
+	$(call checkcfg)
 	$(call activate,vx)
-	$(call prewxvx,global)
+	$(call prewxvx,$(extent))
+
+prewxvx-global:
+	$(MAKE) prewxvx extent=global
 
 prewxvx-lam:
-	$(call activate,vx)
-	$(call prewxvx,lam)
-
-realize-config: $(REALIZED)
+	$(MAKE) prewxvx extent=lam
 
 test: lint typecheck
 
 training:
-	$(call activate,anemoi)
+	$(call checkcfg)
+	$(call activate,training)
 	$(call exec,training,Training,run --batch)
 
 typecheck:
@@ -64,30 +75,30 @@ typecheck:
 	@echo "=> Typechecking code"
 	mypy $(SRCDIRS)
 
-vx-grid-global:
+vx:
+	$(call checkcfg)
 	$(call activate,vx)
-	$(call wxvx,grid2grid,global)
+	$(call wxvx,$(truth),$(extent))
+
+vx-grid-global:
+	$(MAKE) vx truth=grid2grid extent=global
 
 vx-grid-lam:
-	$(call activate,vx)
-	$(call wxvx,grid2grid,lam)
+	$(MAKE) vx truth=grid2grid extent=lam
 
 vx-obs-global:
-	$(call activate,vx)
-	$(call wxvx,grid2obs,global)
+	$(MAKE) vx truth=grid2obs extent=global
 
 vx-obs-lam:
-	$(call activate,vx)
-	$(call wxvx,grid2obs,lam)
+	$(MAKE) vx truth=grid2obs extent=lam
+
+zarr:
+	$(call checkcfg)
+	$(call activate,data)
+	$(call zarr,$(source))
 
 zarr-gfs:
-	$(call activate,data)
-	$(call zarr,gfs)
+	$(MAKE) zarr source=gfs
 
 zarr-hrrr:
-	$(call activate,data)
-	$(call zarr,hrrr)
-
-$(REALIZED): eagle.yaml
-	$(call activate,base)
-	uw config realize --input-file $< --output-file $@
+	$(MAKE) zarr source=hrrr
