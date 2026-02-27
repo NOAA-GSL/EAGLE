@@ -15,6 +15,7 @@ app:
     scheduler: slurm
   rundir: '{{ app.base }}/run'
   time:
+    freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
     inference_start: !datetime 2022-02-03T12
     inference_stop: !datetime '{{ app.time.inference_start }}'
     leadtime: 24
@@ -39,7 +40,7 @@ inference:
       adjust: all
       min_distance_km: 0
     end_date: !datetime "{{ app.time.inference_stop }}"
-    freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+    freq: '{{ app.time.freq }}'
     lead_time: !int '{{ app.time.leadtime }}'
     output_path: '{{ inference.rundir }}/output'
     start_date: !datetime '{{ app.time.inference_start }}'
@@ -67,7 +68,7 @@ prewxvx:
         - set -ex
     prewxvx: &prewxvx-common
       forecast_path: "{{ inference.anemoi.output_path }}"
-      freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+      freq: '{{ app.time.freq }}'
       lead_time: !int "{{ app.time.leadtime }}"
       lam_index: 64220
       lcc_info:
