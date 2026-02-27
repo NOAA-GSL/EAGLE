@@ -85,6 +85,18 @@ conda_create_data() {
   local name=data
   conda_env_exists $name && return || true
   conda_create $name impi_rt=2021.13.* mpi4py=4.1.* "numpy<2.3" types-pyyaml ufs2arco=0.18.*
+  cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+if [[ -v FI_PSM3_UUID ]]; then
+  export EAGLE_OLD_FI_PSM3_UUID=\$FI_PSM3_UUID
+	export FI_PSM3_UUID=eagle
+fi
+EOF
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
+  export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
+  unset EAGLE_OLD_FI_PSM3_UUID
+fi
+EOF
   pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
 }
 

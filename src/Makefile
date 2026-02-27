@@ -40,7 +40,6 @@ format:
 
 grids-and-meshes:
 	$(call checkcfg)
-	export FI_PSM3_UUID=eagle
 	$(call activate,data)
 	$(call exec,data,grids_and_meshes,GridsAndMeshes,provisioned_rundir)
 
