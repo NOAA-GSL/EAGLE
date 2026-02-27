@@ -8,10 +8,7 @@ activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
 checkcfg = @$(if $(config),,$(error config= argument required))
 envloop  = @for env in $(ENVS); do $(MAKE) --no-print-directory env=$$env $(1); done
 exec     = uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
-prewxvx  = $(call exec,vx,prewxvx,PreWXVX,run --key-path prewxvx.$(1))
 tasklist = uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
-wxvx     = $(call exec,vx,vx,VX,run --key-path vx.$(1).$(2) --batch)
-zarr     = $(call exec,data,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
@@ -51,7 +48,11 @@ endif
 inference:
 	$(call checkcfg)
 	$(call activate,inference)
-	$(call exec,inference,inference,Inference,run --batch)
+ifeq ($(task),?)
+	$(call tasklist,inference,inference,Inference)
+else
+	$(call exec,inference,inference,Inference,$(or $(task),run) --batch)
+endif
 
 lint:
 ifdef env
@@ -63,9 +64,13 @@ else
 endif
 
 prewxvx:
-	$(call checkcfg)
+	$(call checkcfg) # PM FIXME take argument, also check extent=
 	$(call activate,vx)
-	$(call prewxvx,$(extent))
+ifeq ($(task),?)
+	$(call tasklist,vx,prewxvx,PreWXVX)
+else
+	$(call exec,vx,prewxvx,PreWXVX,$(or $(task),run) --key-path prewxvx.$(extent))
+endif
 
 prewxvx-global:
 	$(MAKE) prewxvx extent=global
@@ -78,7 +83,11 @@ test: lint typecheck
 training:
 	$(call checkcfg)
 	$(call activate,training)
-	$(call exec,training,training,Training,run --batch)
+ifeq ($(task),?)
+	$(call tasklist,training,training,Training)
+else
+	$(call exec,training,training,Training,$(or $(task),run) --batch)
+endif
 
 typecheck:
 ifdef env
@@ -92,7 +101,11 @@ endif
 vx:
 	$(call checkcfg)
 	$(call activate,vx)
-	$(call wxvx,$(truth),$(extent))
+ifeq ($(task),?)
+	$(call tasklist,vx,vx,VX)
+else
+	$(call exec,vx,vx,VX,$(or $(task),run) --key-path vx.$(truth).$(extent) --batch)
+endif
 
 vx-grid-global:
 	$(MAKE) vx truth=grid2grid extent=global
@@ -109,7 +122,11 @@ vx-obs-lam:
 zarr:
 	$(call checkcfg)
 	$(call activate,data)
-	$(call zarr,$(source))
+ifeq ($(task),?)
+	$(call tasklist,data,zarr,Zarr)
+else
+	$(call exec,data,zarr,Zarr,$(or $(task),run) --key-path zarrs.$(source) --batch)
+endif
 
 zarr-gfs:
 	$(MAKE) zarr source=gfs
