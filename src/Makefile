@@ -9,6 +9,7 @@ checkcfg = @$(if $(config),,$(error config= argument required))
 envloop  = @for env in $(ENVS); do $(MAKE) --no-print-directory env=$$env $(1); done
 exec     = uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 prewxvx  = $(call exec,vx,prewxvx,PreWXVX,run --key-path prewxvx.$(1))
+tasklist = $(call activate,$(1)) && uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
 wxvx     = $(call exec,vx,vx,VX,run --key-path vx.$(1).$(2) --batch)
 zarr     = $(call exec,data,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
@@ -67,6 +68,23 @@ prewxvx-global:
 
 prewxvx-lam:
 	$(MAKE) prewxvx extent=lam
+
+tasklist:
+ifeq ($(driver),GridsAndMeshes)
+	$(call tasklist,data,grids_and_meshes,GridsAndMeshes)
+else ifeq ($(driver),Inference)
+	$(call tasklist,inference,inference,Inference)
+else ifeq ($(driver),PreWXVX)
+	$(call tasklist,vx,prewxvx,PreWXVX)
+else ifeq ($(driver),Training)
+	$(call tasklist,training,training,Training)
+else ifeq ($(driver),VX)
+	$(call tasklist,vx,vx,VX)
+else ifeq ($(driver),Zarr)
+	$(call tasklist,data,zarr,Zarr)
+else
+	$(error driver=GridsAndMeshes|Inference|PreWXVX|Training|VX|Zarr argument required)
+endif
 
 test: lint typecheck
 
