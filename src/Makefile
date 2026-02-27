@@ -9,7 +9,7 @@ checkcfg = @$(if $(config),,$(error config= argument required))
 envloop  = @for env in $(ENVS); do $(MAKE) --no-print-directory env=$$env $(1); done
 exec     = uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 prewxvx  = $(call exec,vx,prewxvx,PreWXVX,run --key-path prewxvx.$(1))
-tasklist = $(call activate,$(1)) && uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
+tasklist = uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
 wxvx     = $(call exec,vx,vx,VX,run --key-path vx.$(1).$(2) --batch)
 zarr     = $(call exec,data,zarr,Zarr,run --key-path zarrs.$(1) --batch)
 
