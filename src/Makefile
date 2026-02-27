@@ -42,7 +42,11 @@ format:
 grids-and-meshes:
 	$(call checkcfg)
 	$(call activate,data)
-	$(call exec,data,grids_and_meshes,GridsAndMeshes,provisioned_rundir)
+ifeq ($(task),?)
+	$(call tasklist,data,grids_and_meshes,GridsAndMeshes)
+else
+	$(call exec,data,grids_and_meshes,GridsAndMeshes,$(or $(task),provisioned_rundir))
+endif
 
 inference:
 	$(call checkcfg)
@@ -68,23 +72,6 @@ prewxvx-global:
 
 prewxvx-lam:
 	$(MAKE) prewxvx extent=lam
-
-tasklist:
-ifeq ($(driver),GridsAndMeshes)
-	$(call tasklist,data,grids_and_meshes,GridsAndMeshes)
-else ifeq ($(driver),Inference)
-	$(call tasklist,inference,inference,Inference)
-else ifeq ($(driver),PreWXVX)
-	$(call tasklist,vx,prewxvx,PreWXVX)
-else ifeq ($(driver),Training)
-	$(call tasklist,training,training,Training)
-else ifeq ($(driver),VX)
-	$(call tasklist,vx,vx,VX)
-else ifeq ($(driver),Zarr)
-	$(call tasklist,data,zarr,Zarr)
-else
-	$(error driver=GridsAndMeshes|Inference|PreWXVX|Training|VX|Zarr argument required)
-endif
 
 test: lint typecheck
 
