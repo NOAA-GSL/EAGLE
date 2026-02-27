@@ -28,7 +28,7 @@ This step performs inference, producing a forecast. It submits a batch job: Do n
 
 ### 6. Run `make config=eagle.yaml prewxvx-global` followed by `make config=eagle.yaml prewxvx-lam`.
 
-These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, it is safe to proceed when the commands return. See the files `run/vx/runscript.prewxvx-*.out` for details.
+These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, it is safe to proceed when the commands return. See the files `run/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out` for details.
 
 ### 7. Run `make config=eagle.yaml` followed by any of the targets `vx-grid-global`, `vx-grid-lam`, `vx-obs-global`, `vs-obs-lam`.
 
