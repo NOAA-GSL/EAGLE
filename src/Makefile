@@ -38,20 +38,20 @@ format:
 	./format $(PACKAGE)
 
 grids-and-meshes:
-	$(call check,$(config),config)
 	$(call activate,data)
 ifeq ($(task),?)
 	$(call tasklist,data,grids_and_meshes,GridsAndMeshes)
 else
+	$(call check,$(config),config)
 	$(call exec,data,grids_and_meshes,GridsAndMeshes,$(or $(task),provisioned_rundir))
 endif
 
 inference:
-	$(call check,$(config),config)
 	$(call activate,inference)
 ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
 else
+	$(call check,$(config),config)
 	$(call exec,inference,inference,Inference,$(or $(task),run) --batch)
 endif
 
@@ -65,11 +65,11 @@ else
 endif
 
 prewxvx:
-	$(call check,$(config),config)
 	$(call activate,vx)
 ifeq ($(task),?)
 	$(call tasklist,vx,prewxvx,PreWXVX)
 else
+	$(call check,$(config),config)
 	$(call check,$(extent),extent)
 	$(call exec,vx,prewxvx,PreWXVX,$(or $(task),run) --key-path prewxvx.$(extent))
 endif
@@ -83,11 +83,11 @@ prewxvx-lam:
 test: lint typecheck
 
 training:
-	$(call check,$(config),config)
 	$(call activate,training)
 ifeq ($(task),?)
 	$(call tasklist,training,training,Training)
 else
+	$(call check,$(config),config)
 	$(call exec,training,training,Training,$(or $(task),run) --batch)
 endif
 
@@ -101,13 +101,13 @@ else
 endif
 
 vx:
-	$(call check,$(config),config)
 	$(call activate,vx)
 ifeq ($(task),?)
 	$(call tasklist,vx,vx,VX)
 else
-	$(call check,$(truth),truth)
+	$(call check,$(config),config)
 	$(call check,$(extent),extent)
+	$(call check,$(truth),truth)
 	$(call exec,vx,vx,VX,$(or $(task),run) --key-path vx.$(truth).$(extent) --batch)
 endif
 
@@ -124,11 +124,11 @@ vx-obs-lam:
 	$(make) vx truth=grid2obs extent=lam
 
 zarr:
-	$(call check,$(config),config)
 	$(call activate,data)
 ifeq ($(task),?)
 	$(call tasklist,data,zarr,Zarr)
 else
+	$(call check,$(config),config)
 	$(call check,$(source),source)
 	$(call exec,data,zarr,Zarr,$(or $(task),run) --key-path zarrs.$(source) --batch)
 endif
