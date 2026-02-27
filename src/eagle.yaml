@@ -8,7 +8,6 @@ app:
       partition: '{{ app.gpu.partition }}'
       queue: gpuwf # NB: Brittle, tied to Ursa.
     partition: u1-h100
-  leadtime: 24
   partitions:
     netaccess: u1-service
   platform: &platform
@@ -16,6 +15,9 @@ app:
     scheduler: slurm
   rundir: '{{ app.base }}/run'
   time:
+    inference_start: !datetime 2022-02-03T12
+    inference_stop: !datetime '{{ app.time.inference_start }}'
+    leadtime: 24
     start: !datetime 2022-02-01T00
     step: !timedelta 6
     stop: !datetime 2022-02-05T12
@@ -36,11 +38,11 @@ inference:
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
       adjust: all
       min_distance_km: 0
-    end_date: "{{ inference.anemoi.start_date }}"
+    end_date: !datetime "{{ app.time.inference_stop }}"
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
-    lead_time: !int '{{ app.leadtime }}'
+    lead_time: !int '{{ app.time.leadtime }}'
     output_path: '{{ inference.rundir }}/output'
-    start_date: !datetime 2022-02-03T12
+    start_date: !datetime '{{ app.time.inference_start }}'
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs: 
@@ -65,8 +67,8 @@ prewxvx:
         - set -ex
     prewxvx: &prewxvx-common
       forecast_path: "{{ inference.anemoi.output_path }}"
-      freq: '{{ inference.anemoi.freq }}'
-      lead_time: !int "{{ app.leadtime }}"
+      freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
+      lead_time: !int "{{ app.time.leadtime }}"
       lam_index: 64220
       lcc_info:
         n_x: 338
@@ -75,8 +77,8 @@ prewxvx:
         - 250
         - 500
         - 850
-      start_date: !datetime "{{ inference.anemoi.start_date }}"
-      end_date: !datetime "{{ inference.anemoi.end_date }}"
+      start_date: !datetime "{{ app.time.inference_start }}"
+      end_date: !datetime "{{ app.time.inference_stop }}"
       vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
     rundir: "{{ app.rundir }}/vx"
   global:
@@ -84,10 +86,10 @@ prewxvx:
       execution:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-global.yaml
-      name: prewxvx-global
+      name: global
       eagle-tools:
         <<: *prewxvx-common
-        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/global"
+        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}"
         model_type: nested-global
         anemoi_reference_dataset_kwargs:
           <<: *dataset-kwargs
@@ -95,19 +97,19 @@ prewxvx:
           regridder_kwargs:
             method: "conservative_normed"
           target_grid_path: "{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}"
-      rundir: '{{ prewxvx.common.rundir }}/prewxvx/global'
+      rundir: '{{ prewxvx.common.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
     platform: *platform
   lam:
     prewxvx:
       execution:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-lam.yaml
-      name: prewxvx-lam
+      name: lam
       eagle-tools:
         <<: *prewxvx-common
-        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/lam"
+        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}"
         model_type: nested-lam
-      rundir: '{{ prewxvx.common.rundir }}/prewxvx/lam'
+      rundir: '{{ prewxvx.common.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
     platform: *platform
 training:
   # Config for the Training driver.
@@ -552,9 +554,9 @@ vx:
     rundir: "{{ prewxvx.common.rundir }}"
     wxvx: &wxvx-common
       cycles:
-        start: !datetime "{{ inference.anemoi.start_date }}"
+        start: !datetime "{{ app.time.inference_start }}"
         step: 0
-        stop: !datetime "{{ inference.anemoi.end_date }}"
+        stop: !datetime "{{ app.time.inference_stop }}"
       forecast:
         coords:
           latitude: latitude
@@ -566,7 +568,7 @@ vx:
       leadtimes:
         start: 0
         step: "{{ app.time.step }}"
-        stop: "{{ app.leadtime }}"
+        stop: "{{ app.time.leadtime }}"
       meta:
         workdir: "{{ vx.common.rundir }}/TRUTH/EXTENT"
         grids: "{{ vx.common.rundir }}/TRUTH/EXTENT/grids"
