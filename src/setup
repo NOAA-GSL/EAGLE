@@ -44,11 +44,10 @@ EOF
     dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
     mkdir -pv $dir_deactivate
     cat <<EOF >$dir_deactivate/eagle.sh
+unset XDG_CACHE_HOME
 if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
   export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
   unset EAGLE_OLD_XDG_CACHE_HOME
-else
-  unset XDG_CACHE_HOME
 fi
 EOF
   )
@@ -92,6 +91,7 @@ fi
 export FI_PSM3_UUID=eagle
 EOF
     cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+unset FI_PSM3_UUID
 if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
   export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
   unset EAGLE_OLD_FI_PSM3_UUID
