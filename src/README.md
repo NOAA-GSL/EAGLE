@@ -154,7 +154,7 @@ make test     # all of the above except formatting
 
 ## Notes
 
-- For each `make` target that execute an EAGLE driver, the following files will be created in the appropriate run directory:
+- For each `make` target that executes an EAGLE driver, the following files will be created in the appropriate run directory:
     - `runscript.<target>`: The script to run the core component of the pipeline step. A runscripts that submits a batch job will contain batch-system directives. These scripts are self-contained and can also be manually executed (or passed to e.g. `sbatch` if they contain batch directives) to force re-execution, potentially after manual edits for debugging or experimentation purposes.
     - `runscript.<target>.out`: The captured `stdout` and `stderr` of the batch job.
     - `runscript.<target>.submit`: A file containing the job ID of the submitted batch job, if applicable.
