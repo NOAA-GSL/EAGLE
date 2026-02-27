@@ -14,23 +14,23 @@ Developers who will be modifying Python driver code should instead use `make dev
 
 The run directories from subsequent steps, along with the output of those steps, will be created in the `run/` subdirectory of `app.base`.
 
-### 3. Run `make config=eagle.yaml data`.
+### 3. Run `make data config=eagle.yaml`.
 
-This step provisions data required for training and inference. The `data` target delegates to targets `grids-and-meshes`, `zarr-gfs`, and `zarr-hrrr`, which can also be run individually (e.g. `make grids-and-meshes`), but note that `grids-and-meshes`, which runs locally, must be run first. The `zarr-gfs` and `zarr-hrrr` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully (see the files `run/data/*.out`).
+This step provisions data required for training and inference. The `data` target delegates to targets `grids-and-meshes`, `zarr-gfs`, and `zarr-hrrr`, which can also be run individually (e.g. `make grids-and-meshes config=eagle.yaml`), but note that `grids-and-meshes`, which runs locally, must be run first. The `zarr-gfs` and `zarr-hrrr` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully (see the files `run/data/*.out`).
 
-### 4. Run `make config=eagle.yaml training`.
+### 4. Run `make training config=eagle.yaml`.
 
 This step trains a model using data provisioned by the previous step. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/training/runscript.training.out`).
 
-### 5. Run `make config=eagle.yaml inference`.
+### 5. Run `make inference config=eagle.yaml`.
 
 This step performs inference, producing a forecast. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/inference/runscript.inference.out`.)
 
-### 6. Run `make config=eagle.yaml prewxvx-global` followed by `make config=eagle.yaml prewxvx-lam`.
+### 6. Run `make prewxvx-global config=eagle.yaml` followed by `make prewxvx-lam config=eagle.yaml`.
 
 These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, it is safe to proceed when the commands return. See the files `run/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out` for details.
 
-### 7. Run `make config=eagle.yaml` followed by any of the targets `vx-grid-global`, `vx-grid-lam`, `vx-obs-global`, `vs-obs-lam`.
+### 7. Run any or all of `make vx-grid-global config=eagle.yaml`, `make vx-grid-lam config=eagle.yaml`, `make vx-obs-global config=eagle.yaml`, `make vs-obs-lam config=eagle.yaml`.
 
 These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/vx/grid2{grid,obs}/{global,lam}/run/`. The files `run/vx/*.log` contain the logs from each verification run.
 
@@ -152,7 +152,7 @@ make typeheck # run the typechecker on Python code
 make test     # all of the above except formatting
 ```
 
-The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pair that, if provided, will restrict the tool to the code associated with a particular virtual environment. For example, `make env=data lint` will lint only the code associated with the `data` environment. If no `env` value is provided, all code will be tested.
+The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pair that, if provided, will restrict the tool to the code associated with a particular virtual environment. For example, `make lint env=data` will lint only the code associated with the `data` environment. If no `env` value is provided, all code will be tested.
 
 ## Notes
 

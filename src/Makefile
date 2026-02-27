@@ -5,9 +5,10 @@ STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx
 TOOLING = devenv env format lint test typecheck
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
-check    = @$(if $(1),,$(error $(2)= argument required))
-envloop  = @for env in $(ENVS); do $(MAKE) --no-print-directory env=$$env $(1); done
+check    = $(if $(1),,$(error $(2)= argument required))
+envloop  = @for env in $(ENVS); do $(make) env=$$env $(1); done
 exec     = uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
+make     = $(MAKE) --no-print-directory
 tasklist = uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
 
 .ONESHELL:
@@ -22,9 +23,9 @@ all:
 	false
 
 data:
-	$(MAKE) grids-and-meshes
-	$(MAKE) zarr-gfs
-	$(MAKE) zarr-hrrr
+	$(make) grids-and-meshes
+	$(make) zarr-gfs
+	$(make) zarr-hrrr
 
 devenv:
 	EAGLE_DEV=1 ./setup
@@ -74,10 +75,10 @@ else
 endif
 
 prewxvx-global:
-	$(MAKE) prewxvx extent=global
+	$(make) prewxvx extent=global
 
 prewxvx-lam:
-	$(MAKE) prewxvx extent=lam
+	$(make) prewxvx extent=lam
 
 test: lint typecheck
 
@@ -96,7 +97,7 @@ ifdef env
 	$(call activate,$(env))
 	mypy $(PACKAGE)/$(env)
 else
-	$(call envloop,lint)
+	$(call envloop,typecheck)
 endif
 
 vx:
@@ -111,16 +112,16 @@ else
 endif
 
 vx-grid-global:
-	$(MAKE) vx truth=grid2grid extent=global
+	$(make) vx truth=grid2grid extent=global
 
 vx-grid-lam:
-	$(MAKE) vx truth=grid2grid extent=lam
+	$(make) vx truth=grid2grid extent=lam
 
 vx-obs-global:
-	$(MAKE) vx truth=grid2obs extent=global
+	$(make) vx truth=grid2obs extent=global
 
 vx-obs-lam:
-	$(MAKE) vx truth=grid2obs extent=lam
+	$(make) vx truth=grid2obs extent=lam
 
 zarr:
 	$(call check,$(config),config)
@@ -133,7 +134,7 @@ else
 endif
 
 zarr-gfs:
-	$(MAKE) zarr source=gfs
+	$(make) zarr source=gfs
 
 zarr-hrrr:
-	$(MAKE) zarr source=hrrr
+	$(make) zarr source=hrrr
