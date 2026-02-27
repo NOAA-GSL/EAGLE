@@ -101,7 +101,7 @@ In the EAGLE base config, this `uwtools`-required parameter delegates to `app.pl
 Configuration for the `PreWXVX` driver.
 
 - This driver executes the [eagle-tools](https://pypi.org/project/eagle-tools/) component.
-- The `global:` and `lam:` blocks provide global and limited-area configurations, borrowing from `common:`. They each have `prewxvx:` sub-blocks which refine the configuration for each configurations.
+- The `global:` and `lam:` blocks provide configurations for global and limited-area extents, respectively, each borrowing from `common:`. Their `prewxvx:` sub-blocks are ultimately passed to the `PreWXVX` driver as its runtime configuration.
 
 ### training
 
