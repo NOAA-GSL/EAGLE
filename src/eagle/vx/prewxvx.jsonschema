@@ -1,9 +1,85 @@
 {
+  "$defs": {
+    "datetime": {
+      "anyOf": [
+        {
+          "type": "datetime"
+        },
+        {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$",
+          "type": "string"
+        }
+      ]
+    }
+  },
   "properties": {
     "prewxvx": {
       "additionalProperties": false,
       "properties": {
         "eagle-tools": {
+          "additionalProperties": true,
+          "properties": {
+            "end_date": {
+              "$ref": "#/$defs/datetime"
+            },
+            "forecast_path": {
+              "type": "string"
+            },
+            "freq": {
+              "type": "string"
+            },
+            "lam_index": {
+              "type": "integer"
+            },
+            "lcc_info": {
+              "properties": {
+                "n_x": {
+                  "type": "integer"
+                },
+                "n_y": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "n_x",
+                "n_y"
+              ],
+              "type": "object"
+            },
+            "lead_time": {
+              "type": "integer"
+            },
+            "levels": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "model_type": {
+              "type": "string"
+            },
+            "output_path": {
+              "type": "string"
+            },
+            "start_date": {
+              "$ref": "#/$defs/datetime"
+            },
+            "vars_of_interest": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "forecast_path",
+            "freq",
+            "lead_time",
+            "start_date",
+            "end_date",
+            "output_path",
+            "model_type"
+          ],
           "type": "object"
         },
         "execution": {
