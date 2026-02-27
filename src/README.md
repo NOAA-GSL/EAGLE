@@ -1,5 +1,14 @@
 # EAGLE
 
+This repository contains configuration and driver code for running an end-to-end machine learning pipeline for weather prediction. The pipeline is orchestrated with `make` targets and `uwtools`-based drivers, and it provisions a self-contained set of conda environments to support each step of the workflow. A typical run follows these steps:
+
+- **Environment setup:** Creates the runtime environments used by each stage of the pipeline.
+- **Prepare training and inference data:** Provisions required static assets (e.g., grids and meshes) and produces Zarr-formatted datasets via `ufs2arco`.
+- **Train an AI model:** Trains an Anemoi model using the provisioned datasets, producing checkpoints for inference.
+- **Generate a forecast:** Runs inference from training checkpoints using `anemoi-inference` to produce forecast output.
+- **Prepare output for verification:** Postprocesses forecast output into the formats and directory structure expected by `wxvx`.
+- **Verify model performance:** Runs `wxvx` verification against gridded analysis and/or observations, producing MET statistics and plots.
+
 ## Quickstart: Recipe for End-to-End Run of Nested EAGLE on Ursa
 
 In the `src/` directory:
@@ -54,8 +63,8 @@ A variety of `make` targets are available to execute pipeline steps:
 | zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
 | training         | Performs Anemoi training                      | data              | training         |
 | inference        | Performs Anemoi inference                     | training          | inference        |
-| prewxvx-global   | Performs postprocessing on inference          | inference         | vx               |
-| prewxvx-lam      | Performs postprocessing on inference          | inference         | vx               |
+| prewxvx-global   | Postprocesses global inference output         | inference         | vx               |
+| prewxvx-lam      | Postprocesses LAM inference output            | inference         | vx               |
 | vx-grid-global   | Verify global against grided analysis         | prewxvx-global    | vx               |
 | vx-grid-lam      | Verify LAM against grided analysis            | prewxvx-lam       | vx               |
 | vx-obs-global    | Verify global against obs                     | prewxvx-global    | vx               |
@@ -162,3 +171,22 @@ The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pai
     - `runscript.<target>.submit`: A file containing the job ID of the submitted batch job, if applicable.
     - `runscript.<target>.done`: Created if the core component completes successfully (i.e. exits with status code 0).
 - EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously created is removed. In general, removing `.done` (and, when present, `.submit`) files in the appropriate run directory should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or renaming the enite run directory also works.
+
+---------------------
+
+### Acknowledgments
+
+ufs2arco: Tim Smith (NOAA Physical Sciences Laboratory)
+- [Github](https://github.com/NOAA-PSL/ufs2arco)
+- [Documentation](https://ufs2arco.readthedocs.io/en/latest/)
+
+Anemoi: European Centre for Medium-Range Weather Forecasts
+- [anemoi-core github](https://github.com/ecmwf/anemoi-core)
+- [anemoi-inference github](https://github.com/ecmwf/anemoi-inference)
+- Documentation: [anemoi-models](https://anemoi.readthedocs.io/projects/models/en/latest/index.html), [anemoi-graphs](https://anemoi.readthedocs.io/projects/graphs/en/latest/), [anemoi-training](https://anemoi.readthedocs.io/projects/training/en/latest/), [anemoi-inference](https://anemoi.readthedocs.io/projects/inference/en/latest/)
+
+wxvx: Paul Madden (NOAA Global Systems Laboratory/Cooperative Institute for Research In Environmental Sciences)
+- [Github](https://github.com/maddenp-cu/wxvx)
+
+eagle-tools: Tim Smith (NOAA Physical Sciences Laboratory)
+- [Github](https://github.com/NOAA-PSL/eagle-tools)
