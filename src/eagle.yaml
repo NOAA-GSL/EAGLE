@@ -1,5 +1,4 @@
 app:
-  # Application values likely to require configuration by users.
   base: /path/to/eagle/src
   gpu:
     batchargs: &gpu-batchargs
@@ -23,7 +22,6 @@ app:
     step: !timedelta 6
     stop: !datetime 2022-02-05T12
 grids_and_meshes:
-  # Config for the GridsAndMeshes driver.
   filenames:
     combined_grids: '{{ val.filenames.combined_grids }}'
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
@@ -113,7 +111,6 @@ prewxvx:
       rundir: '{{ prewxvx.common.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
     platform: *platform
 training:
-  # Config for the Training driver.
   anemoi:
     defaults:
       - data: zarr
@@ -125,7 +122,7 @@ training:
       - model: transformer
       - training: stretched
       - _self_
-    # Block to customize default Anemoi training config.
+    # Blocks to customize default Anemoi training config.
     data:
       diagnostic:
         - accum_tp
@@ -435,7 +432,6 @@ training:
     - diagnostics.check_val_every_n_epoch
   rundir: '{{ app.rundir }}/training'
 ufs2arco:
-  # Global ufs2arco defaults, referenced from and refined in the zarrs.{gfs,hrrr} blocks.
   dirs:
     cache: cache/X
     logs: logs/X
@@ -493,7 +489,6 @@ ufs2arco:
       start: '{{ ufs2arco.source.analysis.t0.start }}'
       end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
 val:
-  # Computed or static values referenced elsewhere in the config.
   conda: '{{ app.base }}/conda'
   data:
     rundir: '{{ app.rundir }}/data'
@@ -720,9 +715,7 @@ vx:
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
           regrid: !dict "{{ vx.grid2obs.global.vx.wxvx.regrid }}"
 zarrs:
-  # Configs for the Zarr driver.
   common:
-    # Shared config for the gfs and hrrr configurations.
     execution: &zarrs-common-execution
       batchargs:
         cores: 15
@@ -738,7 +731,6 @@ zarrs:
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:
     zarr:
-      # Config for the Zarr driver parameterized for GFS.
       execution:
         <<: *zarrs-common-execution
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
@@ -758,7 +750,6 @@ zarrs:
     platform: *platform
   hrrr:
     zarr:
-      # Config for the Zarr driver parameterized for HRRR.
       execution:
         <<: *zarrs-common-execution
         executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
