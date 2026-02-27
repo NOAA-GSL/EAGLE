@@ -54,6 +54,10 @@ EOF
   )
 }
 
+conda_create_base() {
+  true
+}
+
 conda_create_inference() {
   local name=inference
   conda_env_exists $name && return || true
@@ -183,7 +187,7 @@ EOF
 environments=( data training inference vx )
 
 install_conda
-for name in ${environments[*]}; do
+for name in base ${environments[*]}; do
   conda_create_$name
   test -v EAGLE_DEV && conda_install_devpkgs $name
 done
