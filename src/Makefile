@@ -4,12 +4,12 @@ PACKAGE = eagle
 STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING = devenv env format lint test typecheck
 
-activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
+activate = @source conda/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
 envloop  = @for env in $(ENVS); do $(make) env=$$env $(1); done
 exec     = set -x && uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
-tasklist = set -x && uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
+tasklist = @(set -x && uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
 
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
