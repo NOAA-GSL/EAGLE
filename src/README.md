@@ -77,7 +77,7 @@ Additionally, many configuration blocks include a `common:` block, which provide
 
 ### app
 
-Various global configuration parameters for the application, especially those thought most likely to require configuration by users.
+This block provides various global configuration parameters for the application, especially those thought most likely to require configuration by users.
 
 ### grids_and_meshes
 
@@ -90,7 +90,7 @@ Configuration for the `GridsAndMeshes` driver.
 Configuration for the `Inference` driver.
 
 - The `anemoi:` block provides the YAML config for the [anemoi-inference](https://anemoi.readthedocs.io/projects/inference/en/latest/index.html#) component.
-- The `checkpoint_dir:` parameter specifies the location of the training checkpoints, to be used in by the training step.
+- The `checkpoint_dir:` parameter specifies the location of the training checkpoints, to be used by the training step.
 
 ### platform
 
@@ -116,7 +116,7 @@ This block provides general configuration parameters for the [ufs2arco](https://
 
 ### val
 
-This block contains both static and derived values that are referenced by other configuration blocks. It is the appropriate place to define values that need to be shared and kept in-sync across pipeline steps, but less likely to be manually modified by users like values in the `app:` block.
+This block provides both static and derived values that are referenced by other configuration blocks. It is the appropriate place to define values that need to be shared and kept in-sync across pipeline steps, but less likely to be manually modified by users like values in the `app:` block.
 
 ### vx
 
