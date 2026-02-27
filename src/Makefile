@@ -5,11 +5,11 @@ STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx
 TOOLING = devenv env format lint test typecheck
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
-check    = $(if $(1),,$(error $(2)= argument required))
+check    = @$(if $(1),,$(error $(2)= argument required))
 envloop  = @for env in $(ENVS); do $(make) env=$$env $(1); done
-exec     = uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
+exec     = set -x && uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
-tasklist = uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
+tasklist = set -x && uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
 
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
