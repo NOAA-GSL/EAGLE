@@ -172,6 +172,10 @@ The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pai
     - `runscript.<target>.done`: Created if the core component completes successfully (i.e. exits with status code 0).
 - EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously created is removed. In general, removing `.done` (and, when present, `.submit`) files in the appropriate run directory should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or renaming the enite run directory also works.
 
+## Further Reading 
+
+For more information about model configurations, please see our [documentation](https://epic-eagle.readthedocs.io/en/latest/). 
+
 ## Acknowledgments
 
 ufs2arco: Tim Smith (NOAA Physical Sciences Laboratory)
