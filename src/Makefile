@@ -5,7 +5,7 @@ STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx
 TOOLING = devenv env format lint test typecheck
 
 activate = source conda/etc/profile.d/conda.sh && conda activate $(1)
-checkcfg = @$(if $(config),,$(error config= argument required))
+check    = @$(if $(1),,$(error $(2)= argument required))
 envloop  = @for env in $(ENVS); do $(MAKE) --no-print-directory env=$$env $(1); done
 exec     = uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 tasklist = uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)
@@ -37,7 +37,7 @@ format:
 	./format $(PACKAGE)
 
 grids-and-meshes:
-	$(call checkcfg)
+	$(call check,$(config),config)
 	$(call activate,data)
 ifeq ($(task),?)
 	$(call tasklist,data,grids_and_meshes,GridsAndMeshes)
@@ -46,7 +46,7 @@ else
 endif
 
 inference:
-	$(call checkcfg)
+	$(call check,$(config),config)
 	$(call activate,inference)
 ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
@@ -64,11 +64,12 @@ else
 endif
 
 prewxvx:
-	$(call checkcfg) # PM FIXME take argument, also check extent=
+	$(call check,$(config),config)
 	$(call activate,vx)
 ifeq ($(task),?)
 	$(call tasklist,vx,prewxvx,PreWXVX)
 else
+	$(call check,$(extent),extent)
 	$(call exec,vx,prewxvx,PreWXVX,$(or $(task),run) --key-path prewxvx.$(extent))
 endif
 
@@ -81,7 +82,7 @@ prewxvx-lam:
 test: lint typecheck
 
 training:
-	$(call checkcfg)
+	$(call check,$(config),config)
 	$(call activate,training)
 ifeq ($(task),?)
 	$(call tasklist,training,training,Training)
@@ -99,11 +100,13 @@ else
 endif
 
 vx:
-	$(call checkcfg)
+	$(call check,$(config),config)
 	$(call activate,vx)
 ifeq ($(task),?)
 	$(call tasklist,vx,vx,VX)
 else
+	$(call check,$(truth),truth)
+	$(call check,$(extent),extent)
 	$(call exec,vx,vx,VX,$(or $(task),run) --key-path vx.$(truth).$(extent) --batch)
 endif
 
@@ -120,11 +123,12 @@ vx-obs-lam:
 	$(MAKE) vx truth=grid2obs extent=lam
 
 zarr:
-	$(call checkcfg)
+	$(call check,$(config),config)
 	$(call activate,data)
 ifeq ($(task),?)
 	$(call tasklist,data,zarr,Zarr)
 else
+	$(call check,$(source),source)
 	$(call exec,data,zarr,Zarr,$(or $(task),run) --key-path zarrs.$(source) --batch)
 endif
 
