@@ -28,7 +28,7 @@ class VX(DriverTimeInvariant):
         The wxvx config, provisioned to the rundir.
         """
         yield self.taskname(f"{self._name} config")
-        path = self.rundir / f"wxvx-{self._name}.yaml"
+        path = self.rundir / f"{self.driver_name()}-{self._name}.yaml"
         yield Asset(path, path.is_file)
         yield None
         get_yaml_config(self.config["wxvx"]).dump(path)
