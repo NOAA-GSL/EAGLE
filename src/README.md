@@ -90,7 +90,7 @@ Configuration for the `GridsAndMeshes` driver.
 Configuration for the `Inference` driver.
 
 - The `anemoi:` block provides the YAML config for the [anemoi-inference](https://anemoi.readthedocs.io/projects/inference/en/latest/index.html#) component.
-- The `checkpoint:` parameter specifies the location of the training checkpoints, to be used in by the training step.
+- The `checkpoint_dir:` parameter specifies the location of the training checkpoints, to be used in by the training step.
 
 ### platform
 
