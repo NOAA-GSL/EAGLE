@@ -153,20 +153,19 @@ For example:
 ``` bash
 $ make inference config=eagle.yaml task=?
 + uw execute --module eagle/inference/inference.py --classname Inference
-[2026-02-27T22:33:09]    ERROR Available tasks:
-[2026-02-27T22:33:09]    ERROR   anemoi_config
-[2026-02-27T22:33:09]    ERROR     Anemoi-inference config created with specified checkpoint path.
-[2026-02-27T22:33:09]    ERROR   provisioned_rundir
-[2026-02-27T22:33:09]    ERROR     Run directory provisioned with all required content.
-[2026-02-27T22:33:09]    ERROR   run
-[2026-02-27T22:33:09]    ERROR     A run.
-[2026-02-27T22:33:09]    ERROR   runscript
-[2026-02-27T22:33:09]    ERROR     The runscript.
-[2026-02-27T22:33:09]    ERROR   show_output
-[2026-02-27T22:33:09]    ERROR     Show the output to be created by this component.
-[2026-02-27T22:33:09]    ERROR   validate
-[2026-02-27T22:33:09]    ERROR     Validate the UW driver config.
-make: *** [Makefile:50: inference] Error 1
+[2026-02-27T23:58:43]    ERROR Available tasks:
+[2026-02-27T23:58:43]    ERROR   anemoi_config
+[2026-02-27T23:58:43]    ERROR     Anemoi-inference config created with specified checkpoint path.
+[2026-02-27T23:58:43]    ERROR   provisioned_rundir
+[2026-02-27T23:58:43]    ERROR     Run directory provisioned with all required content.
+[2026-02-27T23:58:43]    ERROR   run
+[2026-02-27T23:58:43]    ERROR     A run.
+[2026-02-27T23:58:43]    ERROR   runscript
+[2026-02-27T23:58:43]    ERROR     The runscript.
+[2026-02-27T23:58:43]    ERROR   show_output
+[2026-02-27T23:58:43]    ERROR     Show the output to be created by this component.
+[2026-02-27T23:58:43]    ERROR   validate
+[2026-02-27T23:58:43]    ERROR     Validate the UW driver config.
 ```
 
 For example, the `provisioned_rundir` task would provision the run directory with all its required content, but would not execute the `anemoi-inference` component. The `run` task would fully execute inference.
