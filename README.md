@@ -110,7 +110,7 @@ Additionally, many configuration blocks include a `common:` block, which provide
 
 ### Config Realization
 
-EAGLE YAML configs contain a variety of Jinja2 expressions that are normally resolved by the various pipeline steps at run time. Sometimes it can be helpful to resolve these references ("realize" the config in `uwtools` terms) in advance, to get a better unerstanding of the final configuration parameters. To do so, run:
+EAGLE YAML configs contain a variety of Jinja2 expressions that are normally resolved by the various pipeline steps at run time. Sometimes it can be helpful to resolve these references ("realize" the config in `uwtools` terms) in advance, to get a better understanding of the final configuration parameters. To do so, run:
 
 ``` bash
 make realize config=eagle.yaml
