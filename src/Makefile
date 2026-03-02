@@ -90,7 +90,7 @@ prewxvx-lam:
 realize:
 	$(call check,$(config),config)
 	$(call activate,base)
-	@(set -x && uw config realize -i $(config))
+	@(set -x && uw config realize --input-file $(config))
 
 test: lint typecheck
 
@@ -115,7 +115,7 @@ endif
 validate:
 	$(call check,$(config),config)
 	$(call activate,base)
-	@(set -x && uw config validate -i $(config) --schema-file eagle/eagle.jsonschema)
+	@(set -x && uw config validate --input-file $(config) --schema-file eagle/eagle.jsonschema)
 
 vx:
 	$(call activate,vx)
