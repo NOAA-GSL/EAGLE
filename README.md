@@ -13,11 +13,11 @@ This repository contains configuration and driver code for running an end-to-end
 
 In the `src/` directory:
 
-### 1. Run `make env`.
+### 1. Run `make env cudascript=ursa`.
 
-This step creates the runtime software environment, comprising conda virtual environments `data`, `training`, `inference`, and `vx` for data prep, training, inference, and verification, respectively. The `conda/` subdirectory it creates is self-contained and can be removed and recreated by running `make env` again, as long as pipeline steps are not currently running.
+This step creates the runtime software environment, comprising conda virtual environments `data`, `training`, `inference`, and `vx` for data prep, training, inference, and verification, respectively. The `conda/` subdirectory it creates is self-contained and can be removed and recreated by running the `make env` command again, as long as pipeline steps are not currently running.
 
-Developers who will be modifying Python driver code should instead use `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, typechecking, and unit testing.
+Developers who will be modifying Python driver code should replace `make env` with `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, typechecking, and unit testing.
  
 ### 2. Set the `app.base` value in `eagle.yaml` to the absolute path to the current (`src/`) directory.
 
@@ -39,7 +39,7 @@ This step performs inference, producing a forecast. It submits a batch job: Do n
 
 These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, it is safe to proceed when the commands return. See the files `run/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out` for details.
 
-### 7. Run any or all of `make vx-grid-global config=eagle.yaml`, `make vx-grid-lam config=eagle.yaml`, `make vx-obs-global config=eagle.yaml`, `make vs-obs-lam config=eagle.yaml`.
+### 7. Run any or all of `make vx-grid-global config=eagle.yaml`, `make vx-grid-lam config=eagle.yaml`, `make vx-obs-global config=eagle.yaml`, `make vx-obs-lam config=eagle.yaml`.
 
 These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/vx/grid2{grid,obs}/{global,lam}/run/`. The files `run/vx/*.log` contain the logs from each verification run.
 
@@ -48,10 +48,12 @@ These steps perform verification, either of the `global` or `lam` forecasts, and
 To build the EAGLE runtime virtual environments:
 
 ``` bash
-make env # alternatively: ./setup
+make env cudascript=<name-or-path> # alternatively: ./setup cudascript=<name-or-path>
 ```
 
 This will install Miniforge conda in the current directory and create the virtual environments `data`, `training`, `inference`, and `vx`.
+
+The value of the `cudascript=` argument should be either the name of a file under `src/cuda/` (e.g. `cudascript=ursa`), or an arbitrary path to a file (e.g. `cudascript=/path/to/file`). The file should contain a list of commands that need to be executed on the current system to make the CUDA `nvcc` program available on `PATH`. The `setup` script uses `nvcc` to determine the CUDA release number, used to select a matching `flash-attn` package. For systems needing no special setup to make `nvcc` available, `cudascript=none` may be specified.
 
 A variety of `make` targets are available to execute pipeline steps:
 
@@ -201,8 +203,10 @@ Since `uwtools` driver tasks are idempotent, now that `runscript.inference` exis
 To build the runtime virtual environments **and** install all required development packages in each environment:
 
 ``` bash
-make devenv # alternatively: EAGLE_DEV=1 ./setup
+make devenv cudascript=<name-or-path> # alternatively: EAGLE_DEV=1 ./setup cudascript=<name-or-path>
 ```
+
+See [Runtime Environment](#runtime-environment) for a description of the `cudascript=` argument.
 
 After successful completion, the following `make` targets will be available:
 

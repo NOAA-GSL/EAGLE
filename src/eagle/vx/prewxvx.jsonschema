@@ -16,7 +16,7 @@
     "prewxvx": {
       "additionalProperties": false,
       "properties": {
-        "eagle-tools": {
+        "eagle_tools": {
           "additionalProperties": true,
           "properties": {
             "anemoi_reference_dataset_kwargs": { "type": "object" },
@@ -109,7 +109,7 @@
         }
       },
       "required": [
-        "eagle-tools",
+        "eagle_tools",
         "execution",
         "name",
         "rundir"
