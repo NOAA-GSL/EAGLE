@@ -1,5 +1,5 @@
 app:
-  base: /scratch4/BMC/gsd-hpcs/Paul.Madden/EAGLE/src
+  base: /path/to/eagle/src
   gpu: # set by platform config
   partitions: # set by platform config
   platform: # set by platform config

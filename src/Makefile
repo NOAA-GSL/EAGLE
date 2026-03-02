@@ -2,7 +2,7 @@ ENVS    = data inference training vx
 HELPERS = prewxvx vx zarr
 PACKAGE = eagle
 STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
-TOOLING = devenv env format lint test typecheck
+TOOLING = config devenv env format lint realize test typecheck
 
 activate = @source conda/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
@@ -21,6 +21,11 @@ all:
 	@echo Tooling: $(TOOLING)
 	@echo
 	false
+
+config:
+	$(call check,$(compose),compose)
+	$(call activate,base)
+	uw config compose $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml)
 
 data:
 	@$(make) grids-and-meshes
@@ -81,6 +86,11 @@ prewxvx-global:
 
 prewxvx-lam:
 	@$(make) prewxvx extent=lam
+
+realize:
+	$(call check,$(config),config)
+	$(call activate,base)
+	uw config realize -i $(config)
 
 test: lint typecheck
 
