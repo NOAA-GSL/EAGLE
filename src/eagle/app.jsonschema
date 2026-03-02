@@ -76,13 +76,22 @@
               "$ref": "#/$defs/datetime"
             }
           },
+          "required": [
+            "inference_start",
+            "inference_stop",
+            "leadtime",
+            "start",
+            "step",
+            "stop"
+          ],
           "type": "object"
         }
       },
       "required": [
         "base",
-        "time",
-        "rundir"
+        "platform",
+        "rundir",
+        "time"
       ],
       "type": "object"
     }
