@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "datetime": {
+      "anyOf": [
+        {
+          "type": "datetime"
+        },
+        {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}(:[0-9]{2})?(:[0-9]{2})?$",
+          "type": "string"
+        }
+      ]
+    },
+    "timedelta": {
+      "anyOf": [
+        {
+          "type": "timedelta"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "pattern": "^[0-9]+(:[0-9]+(:[0-9]+)?)?$",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "additionalProperties": true,
+  "properties": {
+    "app": {
+      "additionalProperties": true,
+      "properties": {
+        "base": {
+          "type": "string"
+        },
+        "platform": {
+          "additionalProperties": true,
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "scheduler": {
+              "enum": [
+                "lsf",
+                "pbs",
+                "slurm"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "rundir": {
+          "type": "string"
+        },
+        "time": {
+          "additionalProperties": true,
+          "properties": {
+            "inference_start": {
+              "$ref": "#/$defs/datetime"
+            },
+            "inference_stop": {
+              "$ref": "#/$defs/datetime"
+            },
+            "leadtime": {
+              "type": "integer"
+            },
+            "start": {
+              "$ref": "#/$defs/datetime"
+            },
+            "step": {
+              "$ref": "#/$defs/timedelta"
+            },
+            "stop": {
+              "$ref": "#/$defs/datetime"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "base",
+        "time",
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "app"
+  ],
+  "type": "object"
+}

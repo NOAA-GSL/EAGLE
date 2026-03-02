@@ -13,49 +13,63 @@
           "type": "string"
         },
         "ufs2arco": {
-          "type": "object",
           "properties": {
-            "mover": {
+            "attrs": {
               "type": "object"
             },
             "directories": {
               "type": "object"
             },
-            "multisource": {
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "object",
-                "properties": {
-                  "source": {
-                    "type": "object",
-                    "properties": {
-                      "name": { "type": "string" }
-                    },
-                    "required": ["name"]
-                  },
-                  "transforms": { "type": "object" }
-                },
-                "required": ["source"]
-              }
-            },
-            "transforms": {
+            "mover": {
               "type": "object"
             },
+            "multisource": {
+              "items": {
+                "properties": {
+                  "source": {
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "type": "object"
+                  },
+                  "transforms": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "source"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
             "target": {
-              "type": "object",
               "properties": {
                 "name": {
                   "type": "string"
                 }
               },
-              "required": ["name"]
+              "required": [
+                "name"
+              ],
+              "type": "object"
             },
-            "attrs": {
+            "transforms": {
               "type": "object"
             }
           },
-          "required": ["mover", "directories", "multisource", "target"]
+          "required": [
+            "mover",
+            "directories",
+            "target"
+          ],
+          "type": "object"
         }
       },
       "required": [

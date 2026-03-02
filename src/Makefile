@@ -2,7 +2,7 @@ ENVS    = data inference training vx
 HELPERS = prewxvx vx zarr
 PACKAGE = eagle
 STEPS   = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
-TOOLING = devenv env format lint test typecheck
+TOOLING = devenv env format lint schema-check test typecheck
 
 activate = @source conda/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
@@ -81,6 +81,12 @@ prewxvx-global:
 
 prewxvx-lam:
 	@$(make) prewxvx extent=lam
+
+schema-check:
+	$(call check,$(config),config)
+	$(call check,$(schema),schema)
+	$(call activate,vx)
+	set -x && uw config validate --schema-file $(schema) --input-file $(config)
 
 test: lint typecheck
 
