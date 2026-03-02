@@ -33,6 +33,51 @@
         "base": {
           "type": "string"
         },
+        "gpu": {
+          "additionalProperties": true,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+              "properties": {
+                "--gres": {
+                  "type": "string"
+                },
+                "nodes": {
+                  "type": "integer"
+                },
+                "partition": {
+                  "type": "string"
+                },
+                "queue": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "--gres",
+                "nodes",
+                "partition",
+                "queue"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "batchargs"
+          ],
+          "type": "object"
+        },
+        "partitions": {
+          "additionalProperties": true,
+          "properties": {
+            "netaccess": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "netaccess"
+          ],
+          "type": "object"
+        },
         "platform": {
           "additionalProperties": true,
           "properties": {
@@ -88,6 +133,8 @@
       },
       "required": [
         "base",
+        "gpu",
+        "partitions",
         "platform",
         "rundir",
         "time"
