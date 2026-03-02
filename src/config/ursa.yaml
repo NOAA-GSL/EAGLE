@@ -1,3 +1,5 @@
+# Configuration for the NOAA RDHPCS Ursa platform.
+
 app:
   gpu:
     batchargs: &gpu-batchargs

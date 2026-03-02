@@ -25,7 +25,7 @@ all:
 config:
 	$(call check,$(compose),compose)
 	$(call activate,base)
-	uw config compose $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml)
+	@(set -x && uw config compose $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
 	@$(make) grids-and-meshes
@@ -90,7 +90,7 @@ prewxvx-lam:
 realize:
 	$(call check,$(config),config)
 	$(call activate,base)
-	uw config realize -i $(config)
+	@(set -x && uw config realize -i $(config))
 
 test: lint typecheck
 

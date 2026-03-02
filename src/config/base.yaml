@@ -1,3 +1,5 @@
+# This is the base EAGLE config. It currently configures the Nested EAGLE case.
+
 app:
   base: /path/to/eagle/src
   gpu: # set by platform config
