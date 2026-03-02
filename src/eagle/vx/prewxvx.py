@@ -23,7 +23,7 @@ class PreWXVX(DriverTimeInvariant):
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        get_yaml_config(self.config["eagle-tools"]).dump(path)
+        get_yaml_config(self.config["eagle_tools"]).dump(path)
 
     @collection
     def provisioned_rundir(self):

@@ -86,7 +86,7 @@ prewxvx:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-global.yaml
       name: global
-      eagle-tools:
+      eagle_tools:
         <<: *prewxvx-common
         output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}"
         model_type: nested-global
@@ -104,7 +104,7 @@ prewxvx:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-lam.yaml
       name: lam
-      eagle-tools:
+      eagle_tools:
         <<: *prewxvx-common
         output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}"
         model_type: nested-lam

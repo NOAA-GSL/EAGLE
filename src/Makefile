@@ -23,15 +23,17 @@ all:
 	false
 
 data:
-	$(make) grids-and-meshes
-	$(make) zarr-gfs
-	$(make) zarr-hrrr
+	@$(make) grids-and-meshes
+	@$(make) zarr-gfs
+	@$(make) zarr-hrrr
 
 devenv:
-	EAGLE_DEV=1 ./setup
+	$(call check,$(cudascript),cudascript)
+	EAGLE_DEV=1 ./setup cudascript=$(cudascript)
 
 env:
-	./setup
+	$(call check,$(cudascript),cudascript)
+	./setup cudascript=$(cudascript)
 
 format:
 	$(call activate,base)
@@ -75,10 +77,10 @@ else
 endif
 
 prewxvx-global:
-	$(make) prewxvx extent=global
+	@$(make) prewxvx extent=global
 
 prewxvx-lam:
-	$(make) prewxvx extent=lam
+	@$(make) prewxvx extent=lam
 
 test: lint typecheck
 
@@ -112,16 +114,16 @@ else
 endif
 
 vx-grid-global:
-	$(make) vx truth=grid2grid extent=global
+	@$(make) vx truth=grid2grid extent=global
 
 vx-grid-lam:
-	$(make) vx truth=grid2grid extent=lam
+	@$(make) vx truth=grid2grid extent=lam
 
 vx-obs-global:
-	$(make) vx truth=grid2obs extent=global
+	@$(make) vx truth=grid2obs extent=global
 
 vx-obs-lam:
-	$(make) vx truth=grid2obs extent=lam
+	@$(make) vx truth=grid2obs extent=lam
 
 zarr:
 	$(call activate,data)
@@ -134,7 +136,7 @@ else
 endif
 
 zarr-gfs:
-	$(make) zarr source=gfs
+	@$(make) zarr source=gfs
 
 zarr-hrrr:
-	$(make) zarr source=hrrr
+	@$(make) zarr source=hrrr

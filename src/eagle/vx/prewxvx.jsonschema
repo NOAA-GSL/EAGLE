@@ -16,7 +16,7 @@
     "prewxvx": {
       "additionalProperties": false,
       "properties": {
-        "eagle-tools": {
+        "eagle_tools": {
           "additionalProperties": true,
           "properties": {
             "end_date": {
@@ -93,7 +93,7 @@
         }
       },
       "required": [
-        "eagle-tools",
+        "eagle_tools",
         "execution",
         "name",
         "rundir"
