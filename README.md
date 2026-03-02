@@ -120,6 +120,16 @@ The resulting config could be used in place of the unrealized `eagle.yaml`, as t
 
 Note that the realized config may still contain some Jinja2 expressions that can only be realized at run time by the component using a particular config block.
 
+### Config Validation
+
+To validate the EAGLE YAML config:
+
+``` bash
+make validate config=eagle.yaml
+```
+
+This will perform validation of config blocks that are not owned by drivers; driver config blocks will be validated at run time by the drivers themselves.
+
 ### app
 
 This block provides various global configuration parameters for the application, especially those thought most likely to require configuration by users.
