@@ -84,7 +84,7 @@ Run `make` with no argument to list available targets.
 
 ### Config Creation
 
-The final EAGLE YAML config is created by composing a base config together with one or more fragments providing vales for specific platforms, use cases, etc. The command `make config compose=a:b:c` would compose together `config/a.yaml`, `config/b.yaml`, and `config/c.yaml`. In practice, composition should begin with the `base` config (i.e. `config/base.yaml`), which provides generally applicable settings for EAGLE runs (see the [Quickstart](#quickstart) for an example.) The composed config can then be manually edited for experiment-specific requirements.
+The final EAGLE YAML config is created by composing a base config together with one or more fragments providing values for specific platforms, use cases, etc. The command `make config compose=a:b:c` would compose together `config/a.yaml`, `config/b.yaml`, and `config/c.yaml`. In practice, composition should begin with the `base` config (i.e. `config/base.yaml`), which provides generally applicable settings for EAGLE runs (see the [Quickstart](#quickstart) for an example.) The composed config can then be manually edited for experiment-specific requirements.
 
 For advanced use cases, for example for composing configs in arbitrary locations, the underlying `uwtools` command can be used. In the `src/` directory:
 
