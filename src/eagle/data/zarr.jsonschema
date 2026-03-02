@@ -13,7 +13,49 @@
           "type": "string"
         },
         "ufs2arco": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "mover": {
+              "type": "object"
+            },
+            "directories": {
+              "type": "object"
+            },
+            "multisource": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" }
+                    },
+                    "required": ["name"]
+                  },
+                  "transforms": { "type": "object" }
+                },
+                "required": ["source"]
+              }
+            },
+            "transforms": {
+              "type": "object"
+            },
+            "target": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": ["name"]
+            },
+            "attrs": {
+              "type": "object"
+            }
+          },
+          "required": ["mover", "directories", "multisource", "target"]
         }
       },
       "required": [
