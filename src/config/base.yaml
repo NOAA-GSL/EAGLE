@@ -1,7 +1,7 @@
 # This is the base EAGLE config. It currently configures the Nested EAGLE case.
 
 app:
-  base: /scratch4/BMC/zrtrr/elcarpenter/eagle/src
+  base: /path/to/eagle/src
   gpu: # set by platform config
   partitions: # set by platform config
   platform: # set by platform config
