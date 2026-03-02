@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
