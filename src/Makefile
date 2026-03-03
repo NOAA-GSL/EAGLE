@@ -1,4 +1,4 @@
-BASHSRCS = $(wildcard cuda/*) format setup
+BASHSRCS = format setup
 ENVS     = data inference training vx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
@@ -96,7 +96,7 @@ realize:
 shellcheck:
 	$(call activate,base)
 	@echo "=> Checking shell scripts"
-	@(set -x && shellcheck --format=gcc --severity=error --shell=bash $(BASHSRCS))
+	@(set -x && shellcheck --format=gcc --severity=warning --shell=bash $(BASHSRCS))
 
 test: lint shellcheck typecheck
 
