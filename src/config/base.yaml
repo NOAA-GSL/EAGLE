@@ -184,7 +184,7 @@ training:
         validation: 1
       test:
         start: '{{ (app.time.start + app.time.step * 16).strftime("%Y-%m-%d") }}'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        end: '{{ (app.time.start + app.time.step * 20).strftime("%Y-%m-%d") }}'
       training:
         start: '{{ app.time.start.strftime("%Y-%m-%d") }}'
         end: '{{ (app.time.start + app.time.step * 4).strftime("%Y-%m-%d") }}'
