@@ -108,28 +108,6 @@ Some configuration parameters are common across `uwtools`-based component driver
 
 Additionally, many configuration blocks include a `common:` block, which provides parameters shared by several configurations, to avoid unnecessary repetition.
 
-### Config Realization
-
-EAGLE YAML configs contain a variety of Jinja2 expressions that are normally resolved by the various pipeline steps at run time. Sometimes it can be helpful to resolve these references ("realize" the config in `uwtools` terms) in advance, to get a better understanding of the final configuration parameters. To do so, run:
-
-``` bash
-make realize config=eagle.yaml
-```
-
-The resulting config could be used in place of the unrealized `eagle.yaml`, as the two should be equivalent -- though the realized config may be significantly longer due to, for example, repetition of common elements previously factored out using Jinja2.
-
-Note that the realized config may still contain some Jinja2 expressions that can only be realized at run time by the component using a particular config block.
-
-### Config Validation
-
-To validate the EAGLE YAML config:
-
-``` bash
-make validate config=eagle.yaml
-```
-
-This will perform validation of config blocks that are not owned by drivers; driver config blocks will be validated at run time by the drivers themselves.
-
 ### app
 
 This block provides various global configuration parameters for the application, especially those thought most likely to require configuration by users.
@@ -187,6 +165,28 @@ Configuration for the `Zarr` driver.
 
 - This driver executes the [ufs2arco](https://ufs2arco.readthedocs.io/en/latest/) component.
 - The `gfs:` and `hrrr:` sub-blocks provide refinements for ingesting GFS and HRRR data, respectively, for EAGLE.
+
+### Config Realization
+
+EAGLE YAML configs contain a variety of Jinja2 expressions that are normally resolved by the various pipeline steps at run time. Sometimes it can be helpful to resolve these references ("realize" the config in `uwtools` terms) in advance, to get a better understanding of the final configuration parameters. To do so, run:
+
+``` bash
+make realize config=eagle.yaml
+```
+
+The resulting config could be used in place of the unrealized `eagle.yaml`, as the two should be equivalent -- though the realized config may be significantly longer due to, for example, repetition of common elements previously factored out using Jinja2.
+
+Note that the realized config may still contain some Jinja2 expressions that can only be realized at run time by the component using a particular config block.
+
+### Config Validation
+
+To validate the EAGLE YAML config:
+
+``` bash
+make validate config=eagle.yaml
+```
+
+This will perform validation of config blocks that are not owned by drivers; driver config blocks will be validated at run time by the drivers themselves.
 
 ## Drivers
 
