@@ -2,10 +2,11 @@
 
 app:
   base: /path/to/eagle/src
+  experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config
   platform: # set by platform config
-  rundir: '{{ app.base }}/run'
+  rundir: '{{ app.base }}/run/{{ app.experiment_name }}'
   time:
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
     inference_start: !datetime 2022-02-03T12
