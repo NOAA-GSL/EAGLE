@@ -107,7 +107,7 @@ def _combined_global_and_conus_meshes(gmesh: Dataset, cmesh: Dataset) -> dict[st
     # Combine.
     lon = np.concatenate([glon.flatten()[mask], cmesh["lon"].values.flatten()])
     lat = np.concatenate([glat.flatten()[mask], cmesh["lat"].values.flatten()])
-    # Sort, following exactly what anemoi-graphs does for the dat.
+    # Sort, following exactly what anemoi-graphs does for the data.
     coords = np.stack([lon, lat], axis=-1)
     order = get_coordinates_ordering(coords)
     lon = coords[order, 0]
