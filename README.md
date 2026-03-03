@@ -11,7 +11,7 @@ This repository contains configuration and driver code for running an end-to-end
 
 ## Quickstart
 
-This sections provides a recipe for an end-to-end run of Nested EAGLE on Ursa.
+This section provides a recipe for an end-to-end run of Nested EAGLE on Ursa.
 
 In the `src/` directory:
 
