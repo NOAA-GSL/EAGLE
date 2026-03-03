@@ -1,4 +1,4 @@
-BASHSRCS = $(wildcard cuda/*) format setup
+BASHSRCS = format setup
 ENVS     = data inference training vx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
