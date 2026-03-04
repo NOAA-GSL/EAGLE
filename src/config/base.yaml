@@ -617,7 +617,7 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_global
-            # NB: Retain relative meta.post_files reference in path value!
+            # NB: Retain relative 'meta.post_files' reference in 'path' value!
             path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection:
               proj: latlon
@@ -647,7 +647,7 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_lam
-            # NB: Retain relative meta.post_files reference in path value!
+            # NB: Retain relative 'meta.post_files' reference in 'path' value!
             path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection:
               a: 6371229
@@ -682,7 +682,7 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.global.vx.wxvx.forecast.name }}'
-            # NB: Retain relative meta.post_files reference in path value!
+            # NB: Retain relative 'meta.post_files' reference in 'path' value!
             path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection: !dict '{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
@@ -707,7 +707,7 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.lam.vx.wxvx.forecast.name }}'
-            # NB: Retain relative meta.post_files reference in path value!
+            # NB: Retain relative 'meta.post_files' reference in 'path' value!
             path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection: !dict '{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
