@@ -31,7 +31,7 @@ inference:
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
       adjust: all
       min_distance_km: 0
-    end_date: !datetime "{{ app.time.inference_stop }}"
+    end_date: !datetime '{{ app.time.inference_stop }}'
     freq: '{{ app.time.freq }}'
     lead_time: !int '{{ app.time.leadtime }}'
     output_path: '{{ inference.rundir }}/output'
@@ -59,9 +59,9 @@ prewxvx:
         - conda activate vx
         - set -ex
     prewxvx: &prewxvx-common
-      forecast_path: "{{ inference.anemoi.output_path }}"
+      forecast_path: '{{ inference.anemoi.output_path }}'
       freq: '{{ app.time.freq }}'
-      lead_time: !int "{{ app.time.leadtime }}"
+      lead_time: !int '{{ app.time.leadtime }}'
       lam_index: 64220
       lcc_info:
         n_x: 338
@@ -70,10 +70,10 @@ prewxvx:
         - 250
         - 500
         - 850
-      start_date: !datetime "{{ app.time.inference_start }}"
-      end_date: !datetime "{{ app.time.inference_stop }}"
+      start_date: !datetime '{{ app.time.inference_start }}'
+      end_date: !datetime '{{ app.time.inference_stop }}'
       vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
-    rundir: "{{ val.vx.rundir }}"
+    rundir: '{{ val.vx.rundir }}'
   global:
     prewxvx:
       execution:
@@ -82,14 +82,14 @@ prewxvx:
       name: global
       eagle_tools:
         <<: *prewxvx-common
-        output_path: "{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}"
+        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}'
         model_type: nested-global
         anemoi_reference_dataset_kwargs:
           <<: *dataset-kwargs
         forecast_regrid_kwargs:
           regridder_kwargs:
-            method: "conservative_normed"
-          target_grid_path: "{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}"
+            method: 'conservative_normed'
+          target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
     platform: *platform
   lam:
@@ -100,7 +100,7 @@ prewxvx:
       name: lam
       eagle_tools:
         <<: *prewxvx-common
-        output_path: "{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}"
+        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
         model_type: nested-lam
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
     platform: *platform
@@ -535,19 +535,19 @@ vx:
         - set -ex
     paths_grid:
       grids:
-        forecast: "{{ val.vx.rundir }}/TRUTH/EXTENT/grids/forecast"
-        truth: "{{ val.vx.rundir }}/TRUTH/EXTENT/grids/truth"
-      run: "{{ val.vx.rundir }}/TRUTH/EXTENT/run"
+        forecast: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids/forecast'
+        truth: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids/truth'
+      run: '{{ val.vx.rundir }}/TRUTH/EXTENT/run'
     paths_obs:
       grids:
-        forecast: "{{ val.vx.rundir }}/TRUTH/EXTENT/forecast"
-      obs: "{{ val.vx.rundir }}/TRUTH/EXTENT/obs"
-      run: "{{ val.vx.rundir }}/TRUTH/EXTENT/run"
+        forecast: '{{ val.vx.rundir }}/TRUTH/EXTENT/forecast'
+      obs: '{{ val.vx.rundir }}/TRUTH/EXTENT/obs'
+      run: '{{ val.vx.rundir }}/TRUTH/EXTENT/run'
     wxvx: &wxvx-common
       cycles:
-        start: !datetime "{{ app.time.inference_start }}"
+        start: !datetime '{{ app.time.inference_start }}'
         step: 0
-        stop: !datetime "{{ app.time.inference_stop }}"
+        stop: !datetime '{{ app.time.inference_stop }}'
       forecast:
         coords:
           latitude: latitude
@@ -558,12 +558,12 @@ vx:
             validtime: time
       leadtimes:
         start: 0
-        step: "{{ app.time.step }}"
-        stop: "{{ app.time.leadtime }}"
+        step: '{{ app.time.step }}'
+        stop: '{{ app.time.leadtime }}'
       meta:
-        workdir: "{{ val.vx.rundir }}/TRUTH/EXTENT"
-        grids: "{{ val.vx.rundir }}/TRUTH/EXTENT/grids"
-        post_files: "{{ val.vx.rundir }}/postprocessed_files/EXTENT"
+        workdir: '{{ val.vx.rundir }}/TRUTH/EXTENT'
+        grids: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids'
+        post_files: '{{ val.vx.rundir }}/postprocessed_files/EXTENT'
       variables:
         t2m:
           level_type: heightAboveGround
@@ -603,11 +603,11 @@ vx:
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: "{{ vx.grid2grid.global.vx.rundir }}"
-          envcmds: !list "{{ vx.common.execution.envcmds }}"
+            rundir: '{{ vx.grid2grid.global.vx.rundir }}'
+          envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c vx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
-        rundir: "{{ val.vx.rundir }}/grid2grid/global"
+        rundir: '{{ val.vx.rundir }}/grid2grid/global'
         wxvx:
           <<: *wxvx-common
           truth:
@@ -615,9 +615,9 @@ vx:
             type: grid
             url: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{{ yyyymmdd }}/{{ hh }}/atmos/gfs.t{{ hh }}z.pgrb2.0p25.f{{ "%03d" % fh }}
           forecast:
-            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
+            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_global
-            path: "{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc" # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
             projection:
               proj: latlon
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
@@ -632,11 +632,11 @@ vx:
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: "{{ vx.grid2grid.lam.vx.rundir }}"
-          envcmds: !list "{{ vx.common.execution.envcmds }}"
+            rundir: '{{ vx.grid2grid.lam.vx.rundir }}'
+          envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c vx-grid2grid-lam.yaml -t plots -f
         name: grid2grid-lam
-        rundir: "{{ val.vx.rundir }}/grid2grid/lam"
+        rundir: '{{ val.vx.rundir }}/grid2grid/lam'
         wxvx:
           <<: *wxvx-common
           truth:
@@ -644,9 +644,9 @@ vx:
             type: grid
             url: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.{{ yyyymmdd }}/conus/hrrr.t{{ hh }}z.wrfprsf{{ "%02d" % fh }}.grib2
           forecast:
-            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
+            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_lam
-            path: "{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc" # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
             projection:
               a: 6371229
               b: 6371229
@@ -656,9 +656,9 @@ vx:
               lon_0: 262.5
               proj: lcc
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
-          ncdiffs: !bool "{{ vx.grid2grid.global.vx.wxvx.ncdiffs }}"
+          ncdiffs: !bool '{{ vx.grid2grid.global.vx.wxvx.ncdiffs }}'
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
-          regrid: !dict "{{ vx.grid2grid.global.vx.wxvx.regrid }}"
+          regrid: !dict '{{ vx.grid2grid.global.vx.wxvx.regrid }}'
   grid2obs:
     global:
       platform: *platform
@@ -666,11 +666,11 @@ vx:
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: "{{ vx.grid2obs.global.vx.rundir }}"
-          envcmds: !list "{{ vx.common.execution.envcmds }}"
+            rundir: '{{ vx.grid2obs.global.vx.rundir }}'
+          envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c vx-grid2obs-global.yaml -t plots -f
         name: grid2obs-global
-        rundir: "{{ val.vx.rundir }}/grid2obs/global"
+        rundir: '{{ val.vx.rundir }}/grid2obs/global'
         wxvx:
           <<: *wxvx-common
           truth:
@@ -678,10 +678,10 @@ vx:
             type: point
             url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
           forecast:
-            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
-            name: "{{ vx.grid2grid.global.vx.wxvx.forecast.name }}"
-            path: "{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc" # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
-            projection: !dict "{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}"
+            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
+            name: '{{ vx.grid2grid.global.vx.wxvx.forecast.name }}'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            projection: !dict '{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           regrid:
@@ -693,22 +693,22 @@ vx:
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: "{{ vx.grid2obs.lam.vx.rundir }}"
-          envcmds: !list "{{ vx.common.execution.envcmds }}"
+            rundir: '{{ vx.grid2obs.lam.vx.rundir }}'
+          envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c vx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
-        rundir: "{{ val.vx.rundir }}/grid2obs/lam"
+        rundir: '{{ val.vx.rundir }}/grid2obs/lam'
         wxvx:
           <<: *wxvx-common
-          truth: !dict "{{ vx.grid2obs.global.vx.wxvx.truth }}"
+          truth: !dict '{{ vx.grid2obs.global.vx.wxvx.truth }}'
           forecast:
-            coords: !dict "{{ vx.common.wxvx.forecast.coords }}"
-            name: "{{ vx.grid2grid.lam.vx.wxvx.forecast.name }}"
-            path: "{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc" # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
-            projection: !dict "{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}"
+            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
+            name: '{{ vx.grid2grid.lam.vx.wxvx.forecast.name }}'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            projection: !dict '{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
-          regrid: !dict "{{ vx.grid2obs.global.vx.wxvx.regrid }}"
+          regrid: !dict '{{ vx.grid2obs.global.vx.wxvx.regrid }}'
 zarrs:
   common:
     execution: &zarrs-common-execution
