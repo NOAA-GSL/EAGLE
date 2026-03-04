@@ -617,7 +617,8 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_global
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            # NB: Retain relative meta.post_files reference in path value!
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection:
               proj: latlon
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
@@ -646,7 +647,8 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_lam
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            # NB: Retain relative meta.post_files reference in path value!
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection:
               a: 6371229
               b: 6371229
@@ -680,7 +682,8 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.global.vx.wxvx.forecast.name }}'
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            # NB: Retain relative meta.post_files reference in path value!
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection: !dict '{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
@@ -704,7 +707,8 @@ vx:
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.lam.vx.wxvx.forecast.name }}'
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc' # NB: The reference to meta.post_files must remain locally-referenceable in order for wxvx to render the config.
+            # NB: Retain relative meta.post_files reference in path value!
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
             projection: !dict '{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
